@@ -1,0 +1,20 @@
+步骤 2: list
+步骤 4: command
+步骤 6: read
+步骤 9: read
+步骤 11: read
+步骤 16: write
+步骤 18: plan
+[done] 运行基线 pytest 并保留失败输出
+[done] 阅读 string_utils.py 与相关测试
+[doing] 实现 truncate_middle
+[todo] 运行完整 pytest 验证全部通过
+步骤 19: write
+步骤 20: command
+步骤 22: plan
+[done] 运行基线 pytest 并保留失败输出
+[done] 阅读 string_utils.py 与相关测试
+[done] 实现 truncate_middle
+[done] 运行完整 pytest 验证全部通过
+步骤 23: finish
+已在 string_utils.py 新增 truncate_middle(s, max_len)：max_len < 5 抛 ValueError（先于等长判断）；len(s) <= max_len 原样返回；否则头部取 (max_len-3+1)//2、尾部取剩余，用 '...' 连接，结果长度恰为 max_len，按 Unicode 字符处理。既有三个函数未改动，完整 pytest 23 passed。

@@ -1,0 +1,22 @@
+步骤 2: list
+步骤 4: read
+步骤 7: read
+步骤 8: read
+步骤 10: plan
+[todo] 修复 summarize 净额计算
+[todo] 新增 export_csv CSV 导出
+步骤 11: command
+步骤 12: write
+步骤 14: command
+步骤 15: plan
+[done] 修复 summarize 净额计算
+[doing] 新增 export_csv CSV 导出
+步骤 17: read
+步骤 18: read
+步骤 19: write
+步骤 20: command
+步骤 21: plan
+[done] 修复 summarize 净额计算
+[done] 新增 export_csv CSV 导出
+步骤 22: finish
+子任务一：修复 summarize 净额计算——原实现将支出（负数）单独汇总后加回，导致 net 计算错误；修正为 net = income + expense（即收入合计加支出负数合计），收入 8000、支出 -2800.5 时净额为 5199.5 正确。子任务二：新增 export_csv(db_path, csv_path)，使用 csv.writer 写出表头 desc,amount、按原顺序逐条写出两位小数金额、末尾输出 __net__,<净额> 汇总行，净额取自修正后的 summarize，逗号/引号/换行由 csv 模块自动转义；空库或库不存在时 load_records 返回空列表，仍输出表头与 __net__,0.00。最终运行完整 python -m pytest -q，10 passed，全部通过。

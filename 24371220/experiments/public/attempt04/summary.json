@@ -1,0 +1,15 @@
+{
+  "model": "deepseek-flash",
+  "cases": [
+    "case01_bug_fix",
+    "case02_feature_regression",
+    "case03_cross_file",
+    "case04_two_subtasks",
+    "case05_long_log"
+  ],
+  "evaluated_cases": 0,
+  "complete": false,
+  "total_score": null,
+  "max_score": 5,
+  "results": []
+}

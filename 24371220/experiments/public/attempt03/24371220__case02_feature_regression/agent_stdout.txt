@@ -1,0 +1,17 @@
+步骤 2: plan
+[doing] 运行基线 pytest 与诊断，完整阅读业务文件
+[todo] 实现 truncate_middle 最小必要修复
+[todo] 再次运行完整 pytest 与诊断验证
+步骤 3: list
+步骤 4: read
+步骤 5: read
+步骤 7: command
+步骤 8: read
+步骤 9: write
+步骤 11: command
+步骤 12: plan
+[done] 运行基线 pytest 与诊断，完整阅读业务文件
+[done] 实现 truncate_middle 最小必要修复
+[done] 再次运行完整 pytest 与诊断验证
+步骤 13: finish
+在 string_utils.py 新增 truncate_middle(s, max_len)：先校验 max_len < 5 抛 ValueError；len(s) <= max_len 原样返回；否则头部长度取 (max_len-3+1)//2，尾部保留剩余，返回中间以 '...' 连接、长度恰为 max_len 的串。既有函数未改动。基线完整 pytest 为 20 failed, 3 passed（因缺少 truncate_middle）；修改后完整 python -m pytest -q 结果为 23 passed，既有与新增测试全部通过。仓库中无 run_checks.py，故未运行诊断。

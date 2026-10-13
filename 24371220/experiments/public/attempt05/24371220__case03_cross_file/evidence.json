@@ -1,0 +1,12 @@
+{
+  "checks": {
+    "observable_write": true,
+    "baseline_test": true,
+    "post_tests": true,
+    "cross_file_reads": true
+  },
+  "passed": true,
+  "failed_checks": [],
+  "max_request_chars": 13170,
+  "manual_review": []
+}

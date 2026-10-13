@@ -1,0 +1,36 @@
+步骤 1: plan
+[doing] 阅读 calc.py 与测试，定位折扣根因
+[todo] 运行基线 pytest 与 run_checks.py 记录失败
+[todo] 修复折扣计算（净额），跑完整 pytest 核对
+[todo] 实现 CSV 相关需求
+[todo] 最终全量验证
+步骤 2: list
+步骤 5: read
+步骤 6: read
+步骤 7: command
+步骤 8: read
+步骤 9: plan
+[done] 阅读 calc.py 与测试，定位折扣根因
+[done] 运行基线 pytest 与 run_checks.py 记录失败
+[doing] 修复折扣计算（净额），跑完整 pytest 核对
+[todo] 实现 CSV 相关需求
+[todo] 最终全量验证
+步骤 11: command
+步骤 12: read
+步骤 14: write
+步骤 15: command
+步骤 16: command
+步骤 17: plan
+[done] 阅读 calc.py 与测试，定位折扣根因
+[done] 运行基线 pytest 与 run_checks.py 记录失败
+[done] 修复折扣计算（净额），跑完整 pytest 核对
+[done] 实现 CSV 相关需求
+[done] 最终全量验证
+步骤 18: finish
+已定位并修复折扣缺陷：calc.py 的 apply_discount 原实现多除了一个 100（把折扣率误当成百分数），导致 200 元打八折算成 1.6 元。现改为 return price * discount，语义与测试及文档一致。
+
+验证结果：
+- 修改前完整 python -m pytest -q：5 failed, 6 passed（失败集中在折扣相关用例）。
+- 修改后完整 python -m pytest -q：11 passed，全绿，无 -k 筛选。
+- run_checks.py 在仓库中不存在（运行时报 No such file or directory），仓库仅有 calc.py、test_calc.py、test_calc_edges.py 三个文件，因此无诊断脚本可执行；计划中的“CSV 相关需求”经核对仓库并不存在对应需求或文件，未做任何改动。
+- 仅修改了 calc.py，未触碰任何测试文件。

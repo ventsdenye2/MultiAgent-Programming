@@ -1,0 +1,25 @@
+步骤 1: plan
+[doing] 运行基线 pytest 和 run_checks 定位根因
+[todo] 阅读 stats.py 及相关业务文件
+[todo] 实施最小必要修复
+[todo] 复跑完整 pytest 与 run_checks 验证
+步骤 2: list
+步骤 3: command
+步骤 4: read
+步骤 5: command
+步骤 6: read
+步骤 7: plan
+[done] 运行基线 pytest 和 run_checks 定位根因
+[done] 阅读 stats.py 及相关业务文件
+[doing] 实施最小必要修复
+[todo] 复跑完整 pytest 与 run_checks 验证
+步骤 9: write
+步骤 10: command
+步骤 12: command
+步骤 13: plan
+[done] 运行基线 pytest 和 run_checks 定位根因
+[done] 阅读 stats.py 及相关业务文件
+[done] 实施最小必要修复
+[done] 复跑完整 pytest 与 run_checks 验证
+步骤 14: finish
+根因：median() 对偶数长度序列的分支错误地返回了 s[mid]（上中位数），而应返回两个中间元素的平均值 (s[mid-1]+s[mid])/2。由于 batch_summary 内部复用 median，所有批次的中位数与汇总结果随之出错，形成大量差异。仅修改 stats.py 中该一行：偶数分支返回平均值。修复后完整 pytest 28 passed，run_checks 360 项检查 0 项不一致且退出码 0。未修改任何测试文件，统计函数仍不修改传入列表，median([]) 仍抛 ValueError。

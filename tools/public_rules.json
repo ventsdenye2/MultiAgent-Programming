@@ -1,0 +1,63 @@
+{
+  "case01_bug_fix": {
+    "editable": [
+      "calc.py"
+    ],
+    "process": {
+      "baseline_test": true,
+      "post_tests": true
+    }
+  },
+  "case02_feature_regression": {
+    "editable": [
+      "string_utils.py"
+    ],
+    "process": {
+      "baseline_test": true,
+      "post_tests": true
+    }
+  },
+  "case03_cross_file": {
+    "editable": [
+      "cart.py",
+      "models.py",
+      "pricing.py"
+    ],
+    "process": {
+      "baseline_test": true,
+      "post_tests": true,
+      "min_read_files": 2
+    }
+  },
+  "case04_two_subtasks": {
+    "editable": [
+      "ledger.py"
+    ],
+    "process": {
+      "baseline_test": true,
+      "post_tests": true,
+      "min_plan_items": 2,
+      "subtask_order": {
+        "file": "ledger.py",
+        "second_symbol": "export_csv",
+        "first_tests": [
+          "test_ledger.py::test_summarize_net",
+          "test_ledger.py::test_summarize_empty"
+        ],
+        "test_count": 10
+      }
+    }
+  },
+  "case05_long_log": {
+    "editable": [
+      "stats.py"
+    ],
+    "process": {
+      "baseline_test": true,
+      "post_tests": true,
+      "diagnostic": "run_checks.py",
+      "min_diagnostic_chars": 12000,
+      "context_chars": 16000
+    }
+  }
+}

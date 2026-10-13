@@ -1,0 +1,24 @@
+步骤 1: plan
+[doing] 阅读仓库文件与 calc.py 定位缺陷
+[todo] 运行基线 pytest 保留失败输出
+[todo] 最小化修复 calc.py 折扣计算
+[todo] 再次运行完整 pytest 确认全绿
+步骤 2: list
+步骤 3: read
+步骤 4: read
+步骤 5: read
+步骤 6: command
+步骤 7: plan
+[done] 阅读仓库文件与 calc.py 定位缺陷
+[done] 运行基线 pytest 保留失败输出
+[doing] 最小化修复 calc.py 折扣计算
+[todo] 再次运行完整 pytest 确认全绿
+步骤 8: write
+步骤 9: command
+步骤 10: plan
+[done] 阅读仓库文件与 calc.py 定位缺陷
+[done] 运行基线 pytest 保留失败输出
+[done] 最小化修复 calc.py 折扣计算
+[done] 再次运行完整 pytest 确认全绿
+步骤 11: finish
+已定位 calc.py 中 apply_discount 的错误：多余地除以 100。修复后 apply_discount(200, 0.8) 正确返回 160.0。修改前基线 pytest 为 5 failed, 6 passed；修改后完整运行 python -m pytest -q 为 11 passed，全部通过。仅修改了 calc.py，未改动任何测试文件。

@@ -1,0 +1,27 @@
+步骤 2: plan
+[doing] 阅读业务文件与测试，定位缺陷
+[todo] 运行基线 pytest 记录失败
+[todo] 修复定价/模型/结算代码
+[todo] 运行完整 pytest 验证
+步骤 3: list
+步骤 4: read
+步骤 5: read
+步骤 6: read
+步骤 7: read
+步骤 8: command
+步骤 9: read
+步骤 10: plan
+[done] 阅读业务文件与测试，定位缺陷
+[done] 运行基线 pytest 记录失败
+[doing] 修复定价/模型/结算代码
+[todo] 运行完整 pytest 验证
+步骤 12: read
+步骤 13: write
+步骤 14: command
+步骤 15: plan
+[done] 阅读业务文件与测试，定位缺陷
+[done] 运行基线 pytest 记录失败
+[done] 修复定价/模型/结算代码
+[done] 运行完整 pytest 验证
+步骤 16: finish
+缺陷位于 pricing.py 的 apply_vip：该函数未判断用户是否 VIP，直接原价返回，导致 VIP 折扣完全失效，进而使运费门槛判断也基于未打折金额。修复为 VIP 用户返回 subtotal * VIP_DISCOUNT(0.9)，普通用户返回原价。cart.py 中运费和应付总额口径本就正确（运费基于折后金额、总额为折后商品金额加运费），无需改动。基线 7 失败 7 通过，修复后完整 pytest 14 全部通过。

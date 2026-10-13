@@ -1,0 +1,17 @@
+# 本地环境与下载缓存
+**/.venv/
+**/__pycache__/
+**/.pytest_cache/
+24371220/wheels/
+
+# 运行临时目录；保留正式实验、日志与补丁
+24371220/experiments/tmp/
+24371220/experiments/linux_tmp/
+24371220/experiments/linux_unit_tmp/
+24371220/experiments/unit_tmp*/
+
+# 本机 WSL 配置备份与密钥文件
+24371220/wslconfig.original
+.env
+.env.*
+!.env.example

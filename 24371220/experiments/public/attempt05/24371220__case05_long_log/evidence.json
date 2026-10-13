@@ -1,0 +1,15 @@
+{
+  "checks": {
+    "observable_write": true,
+    "baseline_test": true,
+    "post_tests": true,
+    "long_diagnostic_before_write": true,
+    "diagnostic_after_write": true,
+    "context_strategy_event": true,
+    "context_budget": true
+  },
+  "passed": true,
+  "failed_checks": [],
+  "max_request_chars": 14777,
+  "manual_review": []
+}
