@@ -1,4 +1,4 @@
-"""根据真实实验结果生成三页报告和预览，不依赖手填实验数字。"""
+"""真实结果驱动的三页报告：基础设计、诊断流程、实验结论。"""
 import json
 from pathlib import Path
 import statistics
@@ -9,98 +9,200 @@ root = Path(__file__).resolve().parent
 sys.path.insert(0, str(root / 'report_tools'))
 from reportlab.pdfgen import canvas
 from reportlab.pdfbase import pdfmetrics
-from reportlab.pdfbase.cidfonts import UnicodeCIDFont
+from reportlab.pdfbase.ttfonts import TTFont
 from reportlab.lib.styles import ParagraphStyle
 from reportlab.platypus import Paragraph, Table, TableStyle
 from reportlab.lib import colors
+import fitz
 
-results = json.loads((root / 'experiments/feature/comparison01/results.json').read_text(encoding='utf-8'))
-pdfmetrics.registerFont(UnicodeCIDFont('STSong-Light'))
+rows = json.loads((root / 'experiments/feature/comparison01/results.json').read_text(encoding='utf-8'))
+assert len(rows) == 16, '实验未完整，停止生成最终报告'
+for name, filename in [('Body', 'msyh.ttc'), ('Bold', 'msyhbd.ttc')]:
+    pdfmetrics.registerFont(TTFont(name, 'C:/Windows/Fonts/' + filename, subfontIndex=0))
+INK, MUTED, TEAL, LINE, PAPER = map(colors.HexColor, ['#182E3A', '#60747D', '#177D83', '#D9E3E5', '#F0F5F5'])
 out = root / '报告.pdf'
 c = canvas.Canvas(str(out), pagesize=(595, 842))
-c.setTitle('迷你编码智能体实践报告 - 24371220')
-style = ParagraphStyle('body', fontName='STSong-Light', fontSize=10.5, leading=17, textColor=colors.HexColor('#263445'))
-y = 0
-source = []
+c.setTitle('迷你编码智能体实践报告 | 24371220')
+base = ParagraphStyle('body', fontName='Body', fontSize=9.5, leading=16, textColor=INK, wordWrap='CJK')
+small = ParagraphStyle('small', parent=base, fontSize=8.2, leading=13)
+source, y = [], 0
 
-def start(page, title):
+
+def pbox(text, x, top, width, style=base):
+    p = Paragraph(escape(str(text)).replace('\n', '<br/>'), style)
+    _, height = p.wrap(width, 800)
+    p.drawOn(c, x, top-height)
+    return height
+
+
+def start(page, title, subtitle):
     global y
-    c.setFillColor(colors.HexColor('#17334A'))
-    c.rect(0, 788, 595, 54, fill=1, stroke=0)
-    c.setFillColor(colors.white)
-    c.setFont('STSong-Light', 16)
-    c.drawString(42, 808, title)
-    c.setFillColor(colors.HexColor('#65788A'))
-    c.setFont('STSong-Light', 9)
-    c.drawString(42, 24, '第四课实践1 | 学号 24371220 | 2026-10-15')
-    c.drawRightString(553, 24, f'{page} / 3')
-    y = 762
-    source.append('# ' + title)
+    c.setFillColor(TEAL)
+    c.rect(38, 782, 25, 4, fill=1, stroke=0)
+    c.setFont('Body', 8)
+    c.setFillColor(MUTED)
+    c.drawString(72, 781, 'CODING AGENT  /  实践报告')
+    c.setFont('Bold', 21)
+    c.setFillColor(INK)
+    c.drawString(38, 744, title)
+    pbox(subtitle, 38, 727, 519, small)
+    c.setStrokeColor(LINE)
+    c.line(38, 694, 557, 694)
+    c.line(38, 42, 557, 42)
+    c.setFillColor(MUTED)
+    c.setFont('Body', 8)
+    c.drawString(38, 26, '学号 24371220  ·  第四课实践1  ·  2026-10-15')
+    c.drawRightString(557, 26, f'{page} / 3')
+    y = 677
+    source.extend(['# ' + title, subtitle, ''])
 
-def para(text, heading=False):
+
+def heading(number, title):
     global y
-    st = ParagraphStyle('h', parent=style, fontSize=12, leading=20, spaceAfter=4) if heading else style
-    p = Paragraph(escape(text), st)
-    _, height = p.wrap(511, 750)
-    if y-height < 48:
-        raise ValueError('报告单页内容超出，请精简正文')
-    p.drawOn(c, 42, y-height)
-    y -= height + (10 if heading else 9)
-    source.append(text + '\n')
+    c.setFillColor(TEAL)
+    c.setFont('Bold', 10)
+    c.drawString(38, y-11, number)
+    c.setFillColor(INK)
+    c.setFont('Bold', 11)
+    c.drawString(64, y-11, title)
+    y -= 29
+    source.append('## ' + title)
 
-def table(data, widths):
+
+def para(text, compact=False):
     global y
-    t = Table([[Paragraph(escape(str(v)), style) for v in row] for row in data], colWidths=widths)
-    t.setStyle(TableStyle([('BACKGROUND',(0,0),(-1,0),colors.HexColor('#E9F0F5')),
-                          ('VALIGN',(0,0),(-1,-1),'TOP'),('LINEBELOW',(0,0),(-1,-1),0.4,colors.HexColor('#CED9E2')),
-                          ('TOPPADDING',(0,0),(-1,-1),6),('BOTTOMPADDING',(0,0),(-1,-1),6)]))
-    _, h = t.wrap(511, 700)
-    if y-h < 48:
-        raise ValueError('表格超出页面')
-    t.drawOn(c,42,y-h)
-    y -= h+12
-    source.extend(' | '.join(map(str,row)) for row in data)
+    h = pbox(text, 38, y, 519, small if compact else base)
+    y -= h + 12
+    if y < 52:
+        raise ValueError('正文溢出页面')
+    source.extend([text, ''])
 
-start(1, '从任务到补丁：基础智能体')
-para('这次实践实现了一个命令行编码智能体：读取题目后，由 DeepSeek 决定下一步工具动作，程序执行并把结果送回模型，直到修改后的测试通过。代码直接调用官方 Chat Completions 接口，没有使用现成 Agent 框架。')
-para('四项基础功能的取舍', True)
-para('交互模式在写文件和执行命令前展示动作并请求确认；用户可以追加要求、查看计划或中断。--auto 跳过键盘输入，供评测使用。计划采用 todo、doing、done，更新时不允许改变标题和顺序，避免执行过程中丢失原目标。')
-para('读、写、命令是三项基本工具，另提供文件列表与计划更新。写入限定为题面列出的业务文件；命令只允许完整 pytest 和题目诊断脚本。工具权限较窄，牺牲了通用性，但能减少误改测试或操作项目外文件的机会。')
-para('基线模式保留完整任务、追加指令和当前计划。单条结果超过 4500 字符时保留头尾，总上下文超过 15000 字符时删除最早的动作和结果。这个方法容易实现，但中段错误或较早读过的关键代码可能被丢掉。')
-para('运行轨迹与验收', True)
-para('run.log 按操作实时写入完整请求、返回、文件内容和命令输出。上下文裁剪只影响下一次模型调用，不删原日志。patch.diff 由运行开始时的快照和最终代码生成，失败或中断也保存已有改动。完成动作要求修改后的完整测试通过、诊断通过且计划全部完成。')
-para('核心代码合计 288 个非空非纯注释物理行，范围为 agent.py 的 SYSTEM、Agent 和整个 context_selection.py。API 传输、底层工具、CLI、日志及补丁属于辅助代码。运行环境为 Ubuntu WSL 2、Python 3.12.3、pytest 8.4.2 和 GNU patch 2.7.6。')
-para('本次只在项目内新增依赖与实验文件，未再修改 WSL 全局配置。挂载盘的临时文件兼容问题通过项目路径内的 tmpfs 处理，运行脚本退出时卸载。')
+
+def table(data, widths, compact=False):
+    global y
+    cell = small if compact else base
+    header = ParagraphStyle('head', parent=cell, fontName='Bold')
+    t = Table([[Paragraph(escape(str(v)).replace('\n', '<br/>'), header if i == 0 else cell)
+                for v in row] for i, row in enumerate(data)], colWidths=widths)
+    t.setStyle(TableStyle([('BACKGROUND', (0,0), (-1,0), PAPER),
+        ('VALIGN', (0,0), (-1,-1), 'TOP'), ('LINEBELOW', (0,0), (-1,-1), .45, LINE),
+        ('LEFTPADDING', (0,0), (-1,-1), 9), ('RIGHTPADDING', (0,0), (-1,-1), 9),
+        ('TOPPADDING', (0,0), (-1,-1), 8), ('BOTTOMPADDING', (0,0), (-1,-1), 8)]))
+    _, h = t.wrap(519, 800)
+    t.drawOn(c, 38, y-h)
+    y -= h+16
+    if y < 52:
+        raise ValueError('表格溢出页面')
+    source.append('| ' + ' | '.join(data[0]) + ' |')
+    source.append('| ' + ' | '.join('---' for _ in data[0]) + ' |')
+    source.extend('| ' + ' | '.join(map(str, r)) + ' |' for r in data[1:])
+    source.append('')
+
+
+def flow(labels, descriptions):
+    global y
+    count = len(labels)
+    gap = 15
+    width = (519-gap*(count-1))/count
+    height = 79
+    for i, (label, description) in enumerate(zip(labels, descriptions)):
+        x = 38+i*(width+gap)
+        c.setFillColor(PAPER)
+        c.roundRect(x, y-height, width, height, 5, fill=1, stroke=0)
+        pbox(label, x+9, y-10, width-18, ParagraphStyle('label', parent=base, fontName='Bold', fontSize=10))
+        pbox(description, x+9, y-35, width-18, small)
+        if i < count-1:
+            c.setStrokeColor(TEAL)
+            c.line(x+width+3, y-height/2, x+width+12, y-height/2)
+            c.line(x+width+9, y-height/2+3, x+width+12, y-height/2)
+            c.line(x+width+9, y-height/2-3, x+width+12, y-height/2)
+    y -= height+17
+    source.append(' → '.join(labels))
+    source.extend(f'- {a}：{b}' for a,b in zip(labels, descriptions))
+    source.append('')
+
+
+def note(title, text):
+    global y
+    h = 36 + Paragraph(escape(text), small).wrap(495,800)[1]
+    c.setFillColor(PAPER)
+    c.rect(38,y-h,519,h,fill=1,stroke=0)
+    c.setFillColor(TEAL)
+    c.rect(38,y-h,3,h,fill=1,stroke=0)
+    pbox(title,50,y-9,495,ParagraphStyle('note',parent=base,fontName='Bold'))
+    pbox(text,50,y-31,495,small)
+    y -= h+16
+    source.extend(['**'+title+'**',text,''])
+
+
+start(1, '迷你编码智能体：从任务到补丁', '自行实现模型、工具与执行器的最小闭环；不使用现成 Agent 框架。')
+heading('01', '整体执行闭环')
+flow(['读取任务', '模型决策', '执行工具', '验证交付'],
+     ['保留题面与约束', '每轮一个 JSON 动作', '读写文件、运行测试', '真实日志与代码补丁'])
+para('模型决定下一步做什么，程序负责参数检查、工具执行和状态更新。写入后重新验证；测试、诊断及计划全部完成，才允许正常结束。')
+heading('02', '四项基础能力与取舍')
+table([['能力','实现方式','边界 / 取舍'],
+    ['用户交互','追加指令、查看计划、随时中断；\n写入和命令默认确认，--auto 自动执行。','人工可干预，评测不等待输入。'],
+    ['上下文管理','固定保留题面和状态；基线对单条结果\n保留头尾，超预算删除最早动作与结果。','4500 字符单条阈值；\n15000 字符请求预算。'],
+    ['任务管理','子目标跟踪 todo / doing / done；\n更新时固定标题和顺序。','执行先后仍依赖模型遵守，\n最终由课程过程检查核验。'],
+    ['基础工具','完整读文件、写业务文件、执行命令；\n另提供文件列表与计划更新。','只写允许文件，只运行完整\npytest 或题目诊断脚本。']], [78,278,163], True)
+heading('03', '轨迹与代码规模')
+para('run.log 实时记录完整请求、响应、文件内容和命令输出；上下文压缩不会删除原日志。patch.diff 根据初始快照生成，失败或中断也保存已有改动。')
+note('288 行核心代码 · 12 项机制测试通过',
+     '核心包含 agent.py 的 SYSTEM、Agent 和全部 context_selection.py，按非空、非纯注释物理行计数；CLI、API 传输、日志和底层工具另计。环境：WSL 2 / Python 3.12.3 / pytest 8.4.2 / GNU patch 2.7.6。')
 c.showPage()
-start(2, '特色功能：按诊断选择上下文')
-para('Diagnostic-Driven Context Selection and Compression 的出发点是：先判断当前要解决什么，再决定给模型什么。第一版使用确定性规则，不增加摘要模型或检索服务，便于与原来的滑动窗口比较。')
-para('选择和压缩如何进行', True)
-para('每次工具执行后保存结构化观察，同一路径的重复读取和同一命令的旧结果由新结果替代。成功写入后移除该文件的旧读取版本。根据最近写入及后续验证结果，把当前状态区分为探索、修复、待验证和收尾；写入之前的失败不再作为当前诊断锚点。')
-para('从当前失败输出提取 Python 文件名、测试名和异常类型。候选记录按当前验证、失败、诊断路径匹配、写入代码、读取源码和时间新近程度加分。相关记录优先进入剩余预算，不直接压缩所有历史。')
-para('命令输出过长时，抽取失败项、断言、异常位置和汇总附近的原文，去掉完全重复的行，再对超长摘录保留头尾。无法识别的长文本回退到头尾截取。短文件尽量完整保留；第一版对长代码仍使用头尾截取，尚未实现函数级切片或跨文件依赖分析。')
-para('固定上下文仍保留系统提示、完整题面、追加要求和计划状态。context_summary 记录候选分数、原因、入选情况及实际发出的内容；原始输出另存于 command_result。实验开关为 --context-mode baseline|diagnostic，评测脚本通过 MINI_CONTEXT_MODE 传入同一选项。')
-para('实验设置', True)
-para('主实验固定第五题，两种模式交替各运行 3 次；每轮从新副本开始。固定 deepseek-flash、温度 0、15000 字符上下文上限、4096 输出 token、60 步、600 秒智能体上限和 120 秒验证上限。两组使用同一代码、提示词和工具，仅上下文策略不同。所有运行结果均保留。')
-para('首先看题目和过程检查是否通过，再比较 API 上报的输入 token、调用次数与时间。token 统计包含重复发送的上下文，不等同于费用；缓存命中和服务延迟也会影响实际成本。温度为 0 仍不能保证输出完全一致，三轮结果只用于小样本观察。')
+
+start(2, '特色功能：先选信息，再压缩', 'Diagnostic-Driven Context Selection and Compression  /  确定性规则，无额外模型调用。')
+heading('01', '一次模型请求前，做四步处理')
+flow(['观察去重','诊断定位','相关性排序','预算内组装'],
+     ['更新命令结果；\n写入使旧源码失效', '识别当前阶段；\n提取文件、测试、异常', '验证、失败、路径\n匹配与近期代码优先', '摘录诊断行、去重；\n超长内容再保留头尾'])
+heading('02', '当前状态决定优先保留什么')
+table([['状态','判断依据','优先信息'],
+    ['探索定位','尚未形成有效诊断','题面、文件列表、已读业务代码'],
+    ['修复失败','当前 pytest 或诊断返回失败','失败测试、异常位置、相关代码'],
+    ['修改后验证','已写入，尚未完成测试验证','最近改动、待验证项、历史失败参考'],
+    ['收尾','最近完整测试已通过','验证结果、计划完成状态']], [88,176,255])
+para('状态用于信息排序，不代替完成检查。收尾时仍须满足诊断通过、计划全部 done；写入前的失败不再作为当前诊断锚点。', True)
+heading('03', '预算和证据保持一致')
+table([['固定保留','按相关性填入','始终保留在日志中'],
+    ['系统提示、完整题面、\n追加要求、计划与验证状态','当前诊断摘录、相关源码、\n最近修改和必要工具结果','完整原输出；候选分数、\n选择原因与实际请求内容']], [173,173,173], True)
+para('长命令输出抽取失败、断言及汇总附近原文，合并重复行。识别失败时退回头尾裁剪；长代码暂未实现函数级切片。baseline 与 diagnostic 共享提示词、工具和字符预算，仅改变上下文构造方式。')
+note('同题、同模型、同预算，交替各跑 3 次',
+     '主实验固定第五题，每轮使用新副本；再分别跑五题回归。deepseek-flash，温度 0，上下文 15000 字符，输出 4096 token，最多 60 步；智能体 600 秒、最终验证 120 秒。开关：--context-mode baseline|diagnostic。')
 c.showPage()
-start(3, '实验结果与限制')
-repeat = [r for r in results if r['experiment'].startswith('repeat')]
-table([['轮次 / 模式','结果','输入 token','调用 / 秒']] + [[r['experiment'].replace('baseline','基线').replace('diagnostic','诊断'),r['status'],str(r['prompt_tokens']),f"{r['model_requests']} / {r['elapsed_s']:.1f}"] for r in repeat], [165,75,115,156])
+
+start(3, '实验结果：通过了，成本未下降', '16 次真实运行全部保留；功能测试与过程检查分别报告，避免把代码正确等同于整题通过。')
+repeat = [r for r in rows if r['experiment'].startswith('repeat')]
 means = {mode: statistics.mean(r['prompt_tokens'] for r in repeat if r['context_mode']==mode) for mode in ('baseline','diagnostic')}
 delta = (means['diagnostic']/means['baseline']-1)*100
-para(f"基线平均输入 {means['baseline']:.0f} token，诊断模式 {means['diagnostic']:.0f} token，变化 {delta:+.1f}%。" + ('这组数据未体现输入成本收益。' if delta >= 0 else '这组数据中输入量有所下降，但不能据此推断其他仓库也会受益。'))
-reg = [r for r in results if r['experiment'].startswith('regression')]
-para('本轮回归按整题口径：基线 4/5 分，诊断模式 5/5 分。基线第四题虽有 10 个测试通过，但合并写入两个子任务，缺少中间净额验证，过程检查失败。一次回归的差异不足以证明稳定优势。')
-table([['公开题','基线：测试 / 过程','诊断：测试 / 过程']] + [[case, *[f"{r['passed']}/{r['tests']} / {r['process_status']}" for mode in ('baseline','diagnostic') for r in reg if r['case']==case and r['context_mode']==mode]] for case in ['case01_bug_fix','case02_feature_regression','case03_cross_file','case04_two_subtasks','case05_long_log']], [175,168,168])
-para('课程仓库小、修复点集中，基线可能已保住足够线索，因此不能据此否定诊断选择在复杂任务中的价值。但当前模式确有重复调用，重组历史也可能破坏动作与结果的连贯性。后续应预先设计无关日志、中段关键错误和多文件依赖压力任务，以相同预算验证；本次不追加有利样本来改变结论。')
-para('验证与证据：12 项机制测试通过。主实验和回归原始记录在 experiments/feature/comparison01/；各子目录含配置、完整日志、补丁与 result.json，汇总为 results.json。参考课程 README、题目、日志格式及公开评测器；实现与报告由 AI 编程助手协助完成，实验数字来自实际 API 运行。')
+heading('01', '第五题对照：两组均为 3 / 3 通过')
+data = [['轮次','输入 token：基线 / 诊断','调用次数：基线 / 诊断','耗时秒：基线 / 诊断']]
+for i in range(1,4):
+    pair = [next(r for r in repeat if r['experiment']==f'repeat{i}_{mode}') for mode in ('baseline','diagnostic')]
+    data.append([str(i),' / '.join(f"{r['prompt_tokens']:,}" for r in pair),
+                 ' / '.join(str(r['model_requests']) for r in pair),
+                 ' / '.join(f"{r['elapsed_s']:.1f}" for r in pair)])
+table(data,[42,169,151,157],True)
+para(f"平均输入量：基线 {means['baseline']:,.0f} token，诊断 {means['diagnostic']:,.0f} token（{delta:+.1f}%）。诊断模式三轮调用均更多，本次未观察到稳定的成本收益。输入 token 包含重复上下文，并不等于实际费用。")
+heading('02', '五题回归：功能全过，过程仍有波动')
+reg = [r for r in rows if r['experiment'].startswith('regression')]
+labels = ['折扣修复','新增功能与回归','跨文件定位','净额修复 + CSV','长日志定位']
+data = [['公开题','基线：测试 / 过程','诊断：测试 / 过程']]
+for case,label in zip(['case01_bug_fix','case02_feature_regression','case03_cross_file','case04_two_subtasks','case05_long_log'],labels):
+    pair = [next(r for r in reg if r['case']==case and r['context_mode']==mode) for mode in ('baseline','diagnostic')]
+    data.append([label,*[f"{r['passed']}/{r['tests']}  /  {'通过' if r['process_status']=='passed' else '未通过'}" for r in pair]])
+table(data,[173,173,173],True)
+para('整题得分为基线 4/5、诊断 5/5。基线第四题合并写入两个子任务，跳过净额修复后的中间验证；最终 10 个功能测试虽通过，过程仍不合格。一次回归的差异不足以说明诊断模式更稳定。', True)
+heading('03', '如何理解这组结果')
+para('课程仓库小、修复点集中，基线可能已经保住足够线索，任务难度未必能体现智能选择的优势。但当前诊断模式确有重复调用，重组历史也可能削弱动作与结果的连贯性。这两种可能需要分开验证。', True)
+para('下一步可预先设计无关日志、中段关键错误和多文件依赖压力任务，再按相同预算比较；本次不追加有利样本。温度 0 也不保证完全复现，三轮仅支持小样本观察。', True)
+para('证据：experiments/feature/comparison01/ 下的 protocol.json、results.json 及各轮配置、完整日志、补丁。参考：课程 README、题目、日志规范和公开评测器。实现与报告由 AI 编程助手协助完成，数字来自真实 API 运行。', True)
 c.save()
 (root / '报告.md').write_text('\n\n'.join(source), encoding='utf-8')
-import fitz
 preview = root / 'output/pdf'
 preview.mkdir(parents=True, exist_ok=True)
 doc = fitz.open(out)
 assert len(doc) == 3
-for i, page in enumerate(doc):
-    page.get_pixmap(matrix=fitz.Matrix(1.4,1.4)).save(preview / f'report-{i+1}.png')
+for i,page in enumerate(doc):
+    page.get_pixmap(matrix=fitz.Matrix(1.5,1.5)).save(preview / f'report-{i+1}.png')
 print(out, 'pages=',len(doc))
