@@ -5,6 +5,8 @@ from pathlib import Path
 import re
 import sys
 from runtime import Runtime
+from context_selection import DiagnosticContext
+import os
 
 SYSTEM = '''你是编码智能体。理解任务并通过工具修改业务文件，禁止修改测试、诊断和任务。
 每轮只返回一个 JSON 对象，不要 markdown，不要一次多个动作。
@@ -33,6 +35,7 @@ class Agent:
         self.auto = auto
         self.plan = []
         self.history = []
+        self.selector = DiagnosticContext(runtime.log) if runtime.config.get('context_mode', 'baseline') == 'diagnostic' else None
         self.task = task
         self.reads = set()
         self.writes = 0
@@ -70,6 +73,8 @@ class Agent:
             'read_files': sorted(self.reads), 'latest_test': self.last_test,
             'diagnostic': self.last_diagnostic}, ensure_ascii=False)}
         prefix = self.fixed + [state]
+        if self.selector:
+            return self.selector.build(prefix, self.limit, {'latest_test': self.last_test})
         while self.history and self.size(prefix + self.history) > self.limit:
             removed = self.history[:2]
             self.history = self.history[2:]
@@ -204,6 +209,8 @@ class Agent:
             except (ValueError, KeyError, OSError, TypeError) as exc:
                 result = {'error': str(exc)}
                 self.rt.log('tool_error', action=action, error=str(exc))
+            if self.selector:
+                self.selector.observe(action, result)
             self.history.append({'role': 'user', 'content': self.clip(
                 json.dumps({'tool_result': result}, ensure_ascii=False))})
             if result.get('finished'):
@@ -218,9 +225,13 @@ def main():
     parser.add_argument('--repo', required=True)
     parser.add_argument('--model', required=True)
     parser.add_argument('--auto', action='store_true')
+    parser.add_argument('--context-mode', choices=['baseline', 'diagnostic'], default=None)
     parser.add_argument('--allow', nargs='+', help='题面无法提取时，明确指定允许修改的相对文件')
     args = parser.parse_args()
     config = json.loads(Path(__file__).with_name('config.json').read_text(encoding='utf-8'))
+    config['context_mode'] = args.context_mode or os.environ.get('MINI_CONTEXT_MODE', 'baseline')
+    if config['context_mode'] not in ('baseline', 'diagnostic'):
+        parser.error('无效的上下文模式')
     if args.model != config['model']:
         parser.error('--model 必须与 config.json 一致')
     task = Path(args.task).read_text(encoding='utf-8')

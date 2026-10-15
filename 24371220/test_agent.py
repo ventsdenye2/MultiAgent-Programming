@@ -114,3 +114,34 @@ def test_model_loop_invalid_action_then_finish(sample, monkeypatch):
     replies = iter(['not json', '{"tool":"finish","summary":"unit test"}'])
     monkeypatch.setattr(sample.rt, 'request', lambda _: next(replies))
     assert sample.run() == 0
+
+
+def test_diagnostic_preserves_middle_failure_within_budget():
+    from context_selection import DiagnosticContext
+    events = []
+    selector = DiagnosticContext(lambda event, **kw: events.append((event, kw)))
+    output = 'noise\n' * 4000 + 'stats.py:42: AssertionError UNIQUE_ROOT_CAUSE\n' + 'noise\n' * 4000
+    selector.observe({'tool': 'command', 'argv': ['python', '-m', 'pytest', '-q']},
+                     {'rc': 1, 'stdout': output, 'stderr': ''})
+    messages = selector.build([{'role': 'system', 'content': 'task'}], 8000, {'latest_test': 1})
+    assert sum(len(m['content']) for m in messages) <= 8000
+    assert 'UNIQUE_ROOT_CAUSE' in messages[-1]['content']
+    assert events[-1][1]['phase'] == 'repair'
+
+
+def test_diagnostic_drops_stale_source_and_resets_failure():
+    from context_selection import DiagnosticContext
+    events = []
+    selector = DiagnosticContext(lambda event, **kw: events.append(kw))
+    selector.observe({'tool': 'read', 'path': 'calc.py'}, {'content': 'OLD_CODE'})
+    selector.observe({'tool': 'command', 'argv': ['python', '-m', 'pytest', '-q']},
+                     {'rc': 1, 'stdout': 'calc.py:4: AssertionError', 'stderr': ''})
+    selector.observe({'tool': 'write', 'path': 'calc.py', 'content': 'NEW_CODE'}, {'written': 'calc.py'})
+    messages = selector.build([], 2000, {'latest_test': None})
+    assert events[-1]['phase'] == 'verify'
+    assert 'OLD_CODE' not in str(messages) and 'NEW_CODE' in str(messages)
+    assert 'anchors\": []' in messages[-1]['content']
+    selector.observe({'tool': 'command', 'argv': ['python', '-m', 'pytest', '-q']},
+                     {'rc': 0, 'stdout': '11 passed', 'stderr': ''})
+    selector.build([], 2000, {'latest_test': 0})
+    assert events[-1]['phase'] == 'finish'

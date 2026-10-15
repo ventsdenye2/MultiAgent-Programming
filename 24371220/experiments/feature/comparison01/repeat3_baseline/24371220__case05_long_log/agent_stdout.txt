@@ -1,0 +1,26 @@
+步骤 1: list
+步骤 2: plan
+[doing] 运行基线 pytest 与 run_checks.py 并记录失败
+[todo] 阅读 stats.py 与测试，定位共同根因
+[todo] 最小修复 stats.py
+[todo] 重新运行完整 pytest 与 run_checks.py 验证全绿
+步骤 3: read
+步骤 4: command
+步骤 5: command
+步骤 6: read
+步骤 7: plan
+[done] 运行基线 pytest 与 run_checks.py 并记录失败
+[doing] 阅读 stats.py 与测试，定位共同根因
+[todo] 最小修复 stats.py
+[todo] 重新运行完整 pytest 与 run_checks.py 验证全绿
+步骤 9: read
+步骤 11: write
+步骤 12: command
+步骤 13: command
+步骤 14: plan
+[done] 运行基线 pytest 与 run_checks.py 并记录失败
+[done] 阅读 stats.py 与测试，定位共同根因
+[done] 最小修复 stats.py
+[done] 重新运行完整 pytest 与 run_checks.py 验证全绿
+步骤 15: finish
+唯一根因：median 对偶数长度序列错误地返回了 s[mid]，未取中间两数的平均。所有失败（核心统计、批处理汇总、run_checks 大量 median 不一致）均由该单点缺陷派生。修复：在 stats.py 的 median 中，奇数长度返回 s[mid]，偶数长度返回 (s[mid-1]+s[mid])/2。仅修改 stats.py，未触碰测试文件；空序列仍抛 ValueError，其他函数保持原样、不修改传入列表。验证：python -m pytest -q → 28 passed（rc=0）；python run_checks.py → 360 项检查 0 项不一致（rc=0）。

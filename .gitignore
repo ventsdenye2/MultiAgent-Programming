@@ -9,6 +9,8 @@
 24371220/experiments/linux_tmp/
 24371220/experiments/linux_unit_tmp/
 24371220/experiments/unit_tmp*/
+24371220/experiments/feature_tmp/
+24371220/report_tools/
 
 # 本机 WSL 配置备份与密钥文件
 24371220/wslconfig.original

@@ -1,0 +1,23 @@
+{
+  "config": {
+    "model": "deepseek-flash",
+    "base_url": "https://api.deepseek.com",
+    "key_env": "DEEPSEEK_API_KEY",
+    "max_steps": 60,
+    "context_chars": 15000,
+    "max_tokens": 4096,
+    "temperature": 0
+  },
+  "source_sha256": {
+    "agent.py": "a12874675f3ab8e0c114f1d87519a605b54b696446b69f7fcdb1f1905fe88632",
+    "context_selection.py": "e9e84a0027872c55519f24fdbea2e59915819095bca1298d6c6d3ec7a4d9f953",
+    "experiment.py": "7cb4b56fd59ab93a6a6cfae274bd723d0fea797b142f78d8807fd81279cb1755",
+    "runtime.py": "9d42154f636e399d4f1cd7626bc2b35d83f4f9658af90bde861cc195355266a3",
+    "setup_wsl.py": "727bb87901369ca961b7bbcc66c0f6e661181e4c018826e15669cf0d8233c691",
+    "test_agent.py": "77eb5f33b3dba7698508816bab32b9bbbbf12341d42cbd4f301f1b32397226f3"
+  },
+  "agent_timeout": 600,
+  "pytest_timeout": 120,
+  "design": "case05 off/on alternating 3 repetitions; all five once per mode",
+  "changing_variable": "MINI_CONTEXT_MODE"
+}

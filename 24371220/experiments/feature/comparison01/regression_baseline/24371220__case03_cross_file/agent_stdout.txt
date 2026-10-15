@@ -1,0 +1,31 @@
+步骤 1: plan
+[doing] 运行基线 pytest 并保留失败输出
+[todo] 完整阅读业务 Python 文件定位缺陷
+[todo] 写入最小必要修复
+[todo] 运行完整 pytest 验证全部通过
+步骤 2: list
+步骤 3: command
+步骤 4: plan
+[done] 运行基线 pytest 并保留失败输出
+[doing] 完整阅读业务 Python 文件定位缺陷
+[todo] 写入最小必要修复
+[todo] 运行完整 pytest 验证全部通过
+步骤 6: read
+步骤 7: read
+步骤 8: read
+步骤 9: plan
+[done] 运行基线 pytest 并保留失败输出
+[done] 完整阅读业务 Python 文件定位缺陷
+[doing] 写入最小必要修复
+[todo] 运行完整 pytest 验证全部通过
+步骤 11: command
+步骤 12: read
+步骤 13: write
+步骤 14: command
+步骤 15: plan
+[done] 运行基线 pytest 并保留失败输出
+[done] 完整阅读业务 Python 文件定位缺陷
+[done] 写入最小必要修复
+[done] 运行完整 pytest 验证全部通过
+步骤 16: finish
+缺陷位于 pricing.py 的 apply_vip：它忽略 user.is_vip，无论是否 VIP 都直接返回原价小计，导致 VIP 折扣从未生效。修复为当 user.is_vip 为真时返回 subtotal * VIP_DISCOUNT(0.9)，普通用户仍返回原价。cart.py 中已正确先用折后金额计算运费并返回 (商品金额, 运费, 应付总额)，无需改动。修改后完整 pytest 全部通过：14 passed。

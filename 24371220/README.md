@@ -1,6 +1,6 @@
 # 24371220：迷你编码智能体（基础版本）
 
-仅实现四项基础能力，特色功能、特色对照实验和最终报告待后续阶段完成。
+实现四项基础能力，以及 Diagnostic-Driven Context Selection and Compression 特色功能。报告和对照实验位于本目录及 experiments/feature/comparison01/。
 使用标准库直接调用 Chat Completions，自行实现消息组织、JSON 动作解析、计划和执行循环，不使用 Agent 框架。
 
 基础版本已在 WSL 正式评测 `experiments/public/attempt05/` 中全部通过：5/5 分，86/86 个公开测试通过，五题过程、真实日志和补丁还原检查全部合格。另有 10/10 项基础机制单元测试通过。
@@ -65,7 +65,7 @@ python ../../../../agent.py --task ../work/task.md --repo ../work/repo --model d
 追加指令、工具错误、中断和预算耗尽使用附加事件。日志保存在启动目录，不写入业务仓库。
 `patch.diff` 基于运行开始快照生成统一 diff，支持 GNU patch `-p1`，失败和中断也保存已有改动。
 
-核心范围：`agent.py` 的 `SYSTEM` 和 `Agent`（初始化、消息组织、上下文处理、动作解析、计划调度、交互和循环），194 个非空非纯注释物理行。`main` 的参数/配置解析和 `runtime.py` 底层传输、日志、文件、命令及补丁为辅助代码。
+核心范围：`agent.py` 的 `SYSTEM` 和 `Agent`，以及整个 `context_selection.py`，合计 288 个非空非纯注释物理行。`main` 的参数/配置解析和 `runtime.py` 底层传输、日志、文件、命令及补丁为辅助代码。
 
 ## 验证
 
@@ -85,4 +85,14 @@ bash 24371220/run_public.sh new_attempt
 
 `--out` 必须不存在。成绩和每题过程证据见相应轮次的 `summary.md`、`result.json`、`evidence.json`；完整模型日志和补丁随该轮保留。`attempt01` 是 Windows 尝试，课程评测器因 POSIX `os.killpg` 不兼容 Windows 中断，不能视为五题成绩；`attempt02` 至 `attempt04` 均因挂载盘临时文件兼容问题或挂载命名空间问题中断，保留原记录；`attempt05` 开始使用同一进程环境内的 tmpfs 正式运行。
 
-实现依据：课程题目、README、日志格式说明和公开工具协议。尚未完成的特色功能及报告不宣称已完成。
+实现依据：课程题目、README、日志格式说明和公开工具协议。实现及报告由 AI 编程助手协助完成，模型轨迹与评分来自真实运行。
+
+## 诊断驱动上下文与实验
+
+默认保持 baseline。入口增加 `--context-mode baseline|diagnostic`；课程评测器可通过环境变量 `MINI_CONTEXT_MODE=diagnostic` 开启，CLI 优先。两种模式共享提示词、工具和预算。
+
+诊断模式按实际工具观察建立候选池：重复命令结果覆盖旧结果，成功写入使旧读取版本失效。根据写入和验证状态划分 explore/repair/verify/finish，从当前失败提取文件路径、测试名及异常类型，以失败、当前验证、路径匹配、代码和新近程度排序。命令长输出抽取诊断行和相邻行、去除完全重复行，再按头尾限长；未识别内容回退到头尾裁剪，长代码暂不做函数级切片。
+
+`context_summary` 包含候选 id、分数、理由、是否选中、处理前后长度和实际发送消息；被覆盖的观察仍在原始工具日志中。任务及当前状态固定保留，实际请求 content 总和不超过 15000 字符。
+
+运行实验：在 WSL 设置密钥后，以有项目内挂载权限的用户执行 `bash run_experiment.sh`。脚本在项目内临时挂载 tmpfs，退出自动卸载。每次须修改实验输出轮次为新目录，禁止覆盖历史。实验使用课程原始评测器，长日志题交替各跑三次，再各跑全部五题；protocol.json 保存固定配置和源码哈希。报告 PDF/Markdown 及构建脚本均保留。

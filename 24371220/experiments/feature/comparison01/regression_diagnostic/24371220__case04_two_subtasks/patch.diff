@@ -1,0 +1,31 @@
+--- a/ledger.py
++++ b/ledger.py
+@@ -1,5 +1,6 @@
+ """命令行记账本：记录收支、查看列表、输出汇总。"""
+ import argparse
++import csv
+ import json
+ import os
+ 
+@@ -29,8 +30,20 @@
+     """汇总：返回收入合计、支出合计（负数）、净额。"""
+     income = sum(r["amount"] for r in records if r["amount"] > 0)
+     expense = sum(r["amount"] for r in records if r["amount"] < 0)
+-    net = income + abs(expense)
++    net = income + expense
+     return {"income": income, "expense": expense, "net": net}
++
++
++def export_csv(db_path, csv_path):
++    """把全部记录导出为 CSV，末行为 __net__ 汇总行。"""
++    records = load_records(db_path)
++    net = summarize(records)["net"]
++    with open(csv_path, "w", encoding="utf-8", newline="") as f:
++        writer = csv.writer(f)
++        writer.writerow(["desc", "amount"])
++        for r in records:
++            writer.writerow([r["desc"], f"{r['amount']:.2f}"])
++        writer.writerow(["__net__", f"{net:.2f}"])
+ 
+ 
+ def main():

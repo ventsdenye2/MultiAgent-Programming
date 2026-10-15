@@ -1,0 +1,35 @@
+步骤 2: plan
+[todo] 阅读 string_utils.py 与测试文件，确认既有实现与规格
+[todo] 运行基线 python -m pytest -q 并保留输出
+[todo] 在 string_utils.py 中实现 truncate_middle
+[todo] 再次运行完整 python -m pytest -q 验证全部通过
+步骤 3: list
+步骤 4: plan
+[doing] 阅读 string_utils.py 与测试文件，确认既有实现与规格
+[todo] 运行基线 python -m pytest -q 并保留输出
+[todo] 在 string_utils.py 中实现 truncate_middle
+[todo] 再次运行完整 python -m pytest -q 验证全部通过
+步骤 26: read
+步骤 36: read
+步骤 37: read
+步骤 38: plan
+步骤 39: plan
+[done] 阅读 string_utils.py 与测试文件，确认既有实现与规格
+[doing] 运行基线 python -m pytest -q 并保留输出
+[todo] 在 string_utils.py 中实现 truncate_middle
+[todo] 再次运行完整 python -m pytest -q 验证全部通过
+步骤 40: command
+步骤 41: plan
+[done] 阅读 string_utils.py 与测试文件，确认既有实现与规格
+[done] 运行基线 python -m pytest -q 并保留输出
+[doing] 在 string_utils.py 中实现 truncate_middle
+[todo] 再次运行完整 python -m pytest -q 验证全部通过
+步骤 42: write
+步骤 43: command
+步骤 44: plan
+[done] 阅读 string_utils.py 与测试文件，确认既有实现与规格
+[done] 运行基线 python -m pytest -q 并保留输出
+[done] 在 string_utils.py 中实现 truncate_middle
+[done] 再次运行完整 python -m pytest -q 验证全部通过
+步骤 45: finish
+已在 string_utils.py 新增 truncate_middle(s, max_len)：max_len < 5 抛 ValueError；len(s) <= max_len 原样返回；否则按 (max_len-3+1)//2 保留头部、其余保留尾部，中间以 '...' 连接，长度恰为 max_len，按 Python 字符数处理 Unicode。既有三个函数未改动。修改后完整运行 python -m pytest -q，结果 23 passed，新增规格测试与既有回归测试全部通过。

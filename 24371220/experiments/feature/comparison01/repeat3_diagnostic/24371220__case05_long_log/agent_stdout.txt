@@ -1,0 +1,26 @@
+步骤 1: plan
+[doing] 运行基线 pytest 和 run_checks.py 记录失败
+[todo] 阅读 stats.py 与相关业务/测试文件定位根因
+[todo] 最小修复 stats.py
+[todo] 复跑完整 pytest 与 run_checks.py 验证全绿
+步骤 7: list
+步骤 8: command
+步骤 9: command
+步骤 10: read
+步骤 12: plan
+[done] 运行基线 pytest 和 run_checks.py 记录失败
+[doing] 阅读 stats.py 与相关业务/测试文件定位根因
+[todo] 最小修复 stats.py
+[todo] 复跑完整 pytest 与 run_checks.py 验证全绿
+步骤 13: write
+步骤 15: read
+步骤 16: command
+步骤 17: command
+步骤 18: read
+步骤 19: plan
+[done] 运行基线 pytest 和 run_checks.py 记录失败
+[done] 阅读 stats.py 与相关业务/测试文件定位根因
+[done] 最小修复 stats.py
+[done] 复跑完整 pytest 与 run_checks.py 验证全绿
+步骤 20: finish
+根因是 stats.py 中 median 对偶数长度序列只取了下中位数 s[mid]（实现成了奇数逻辑外的错误分支）。修复为偶数时返回中间两数均值 (s[mid-1]+s[mid])/2，并补齐空序列校验。该根因同时影响 median、robust_center、batch_summary 以及 run_checks 中所有含偶数长度批次的比对。修改仅限业务文件 stats.py，保留统计函数不修改传入列表；median([]) 仍抛 ValueError。验证：`python -m pytest -q` 输出 28 passed；`python run_checks.py` 输出“共 360 项检查，0 项不一致”，退出码 0。

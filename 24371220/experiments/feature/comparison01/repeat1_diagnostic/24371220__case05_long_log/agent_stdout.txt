@@ -1,0 +1,37 @@
+步骤 1: plan
+[doing] 探索仓库并读取关键业务文件
+[todo] 运行基线 pytest 与 run_checks.py 保存失败输出
+[todo] 定位唯一根因并最小修复 stats.py
+[todo] 回归验证 pytest 与 run_checks.py 全绿
+步骤 2: list
+步骤 11: read
+步骤 12: read
+步骤 13: plan
+[done] 探索仓库并读取关键业务文件
+[doing] 运行基线 pytest 与 run_checks.py 保存失败输出
+[todo] 定位唯一根因并最小修复 stats.py
+[todo] 回归验证 pytest 与 run_checks.py 全绿
+步骤 19: command
+步骤 20: command
+步骤 21: write
+步骤 22: read
+步骤 23: command
+步骤 26: command
+步骤 27: plan
+[done] 探索仓库并读取关键业务文件
+[done] 运行基线 pytest 与 run_checks.py 保存失败输出
+[done] 定位唯一根因并最小修复 stats.py
+[done] 回归验证 pytest 与 run_checks.py 全绿
+步骤 28: finish
+已定位唯一根因并修复，全部测试与对拍脚本通过。
+
+根因：stats.py 的中位数实现存在共同缺陷（偶数长度时取中间元素而非中间两元素的平均），该缺陷同时影响 median 本身、batch_summary 的中位数输出，进而波及依赖中位数/标准分数的管线逻辑，导致 pytest 与 run_checks.py 大面积不一致。
+
+修复：在 stats.py 中修正偶数长度中位数计算为中间两元素的平均值，并保持空序列抛 ValueError、不修改传入列表、其余统计函数语义不变（仅改 stats.py）。
+
+验证：
+- 修改前基线：python -m pytest -q 存在大量失败；python run_checks.py 打印长差异报告（已保留在日志）。
+- 修改后：python -m pytest -q → 28 passed；python run_checks.py → 共 360 项检查，0 项不一致，退出码 0。
+
+证据：pytest rc=0（28 passed），run_checks rc=0（0 不一致）。
+日志裁剪：对超长差异输出采用摘要与裁剪呈现，完整原输出仍保留在仓库日志中；单条消息 content 未超 16000 字符。

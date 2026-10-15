@@ -1,0 +1,37 @@
+步骤 2: list
+步骤 3: read
+步骤 6: read
+步骤 8: read
+步骤 9: plan
+[todo] 修复净额计算
+[todo] 新增 CSV 导出
+[todo] 回归验证全部测试
+步骤 10: command
+步骤 13: write
+步骤 14: write
+步骤 15: read
+步骤 16: plan
+[doing] 修复净额计算
+[todo] 新增 CSV 导出
+[todo] 回归验证全部测试
+步骤 18: read
+步骤 19: read
+步骤 20: command
+步骤 21: plan
+[done] 修复净额计算
+[doing] 新增 CSV 导出
+[todo] 回归验证全部测试
+步骤 22: write
+步骤 23: command
+步骤 24: plan
+[done] 修复净额计算
+[done] 新增 CSV 导出
+[done] 回归验证全部测试
+步骤 25: finish
+两个子任务均已完成，全部 10 项测试通过。
+
+1. 净额修复：summarize 原先将支出计入净额时符号错误，现改为 net = income + expense（expense 为负数），收入 100、支出 -30 时净额为 70。同时保持 income、expense 字段符合测试预期。
+
+2. CSV 导出：新增 export_csv(db_path, csv_path)，写出表头 desc,amount，按原顺序逐条写出记录（amount 保留两位小数），末行写出 __net__,<净额>，净额取自修正后的 summarize。使用 csv.writer 自动处理逗号、引号、换行转义；数据库不存在或为空时仍输出表头和 __net__,0.00。
+
+验证：修改前基线 pytest 为 8 failed / 2 passed（CSV 未实现导致），修复净额后 CSV 相关失败为预期；最终 python -m pytest -q 输出 10 passed。

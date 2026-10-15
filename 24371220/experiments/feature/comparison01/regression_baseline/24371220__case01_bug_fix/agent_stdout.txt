@@ -1,0 +1,21 @@
+步骤 2: list
+步骤 3: plan
+[doing] 阅读 calc.py 与测试，定位折扣缺陷
+[todo] 修复 calc.py 中的折扣计算
+[todo] 运行完整 pytest 确认全绿
+步骤 5: read
+步骤 7: read
+步骤 9: read
+步骤 11: command
+步骤 13: plan
+[done] 阅读 calc.py 与测试，定位折扣缺陷
+[doing] 修复 calc.py 中的折扣计算
+[todo] 运行完整 pytest 确认全绿
+步骤 15: write
+步骤 16: command
+步骤 17: plan
+[done] 阅读 calc.py 与测试，定位折扣缺陷
+[done] 修复 calc.py 中的折扣计算
+[done] 运行完整 pytest 确认全绿
+步骤 18: finish
+修复了 calc.py 中 apply_discount 的错误逻辑：原实现 `price * discount / 100` 把折扣率当作百分数而错误地除以 100，导致 200 打八折得 1.6。现改为 `price * discount`（0.8 表示八折）。修改前完整 pytest 为 5 failed, 6 passed；修改后完整 pytest 为 11 passed，全部测试通过。仅修改了 calc.py。

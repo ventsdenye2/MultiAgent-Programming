@@ -1,0 +1,18 @@
+{
+  "checks": {
+    "observable_write": true,
+    "baseline_test": true,
+    "post_tests": true,
+    "plan_before_write": true,
+    "final_plan_done": true,
+    "separate_subtask_writes": true,
+    "net_verified_before_csv": true,
+    "plan_updated_before_csv": true
+  },
+  "passed": true,
+  "failed_checks": [],
+  "max_request_chars": 14633,
+  "manual_review": [
+    "核对计划内容、状态和可见记录是否与真实执行一致"
+  ]
+}

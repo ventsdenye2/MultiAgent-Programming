@@ -1,0 +1,21 @@
+步骤 2: list
+步骤 3: plan
+[doing] 阅读业务文件定位 VIP 折扣缺陷
+[todo] 运行基线 pytest 保留失败输出
+[todo] 修复定价逻辑并验证测试全通过
+步骤 14: command
+步骤 28: read
+步骤 29: read
+步骤 30: read
+步骤 31: plan
+[done] 阅读业务文件定位 VIP 折扣缺陷
+[done] 运行基线 pytest 保留失败输出
+[doing] 修复定价逻辑并验证测试全通过
+步骤 38: write
+步骤 39: command
+步骤 40: plan
+[done] 阅读业务文件定位 VIP 折扣缺陷
+[done] 运行基线 pytest 保留失败输出
+[done] 修复定价逻辑并验证测试全通过
+步骤 41: finish
+已定位并修复 VIP 折扣缺陷。根因：定价逻辑未对 VIP 用户应用九折。修复内容：在 pricing.py 中新增 apply_vip（VIP 九折、普通用户原价），并明确 items_subtotal/apply_vip/shipping_fee 三者口径；cart.py 的 checkout 先算商品小计，再对折后金额判定运费（折后满 200 免运费否则 10 元），返回 (商品金额折后, 运费, 应付总额)。修改后运行 python -m pytest -q，14 passed，全部测试通过。仅修改了 pricing.py（cart.py、models.py 无需改动），未修改测试或新增文件。

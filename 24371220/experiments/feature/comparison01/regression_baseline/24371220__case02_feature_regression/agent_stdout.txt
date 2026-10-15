@@ -1,0 +1,21 @@
+步骤 1: plan
+[doing] 运行基线完整 pytest 并阅读业务文件
+[todo] 实现 truncate_middle 函数
+[todo] 运行完整 pytest 验证全部通过
+步骤 2: list
+步骤 3: read
+步骤 4: command
+步骤 6: read
+步骤 7: read
+步骤 8: plan
+[done] 运行基线完整 pytest 并阅读业务文件
+[doing] 实现 truncate_middle 函数
+[todo] 运行完整 pytest 验证全部通过
+步骤 9: write
+步骤 10: command
+步骤 11: plan
+[done] 运行基线完整 pytest 并阅读业务文件
+[done] 实现 truncate_middle 函数
+[done] 运行完整 pytest 验证全部通过
+步骤 12: finish
+在 string_utils.py 中新增 truncate_middle(s, max_len)：max_len<5 抛 ValueError；len(s)<=max_len 原样返回；否则按 head_len=(max_len-3+1)//2 计算头尾保留长度并用 ... 连接，保证结果长度恰为 max_len，Unicode 按字符处理。修改前基线 20 failed/3 passed，修改后完整 pytest 23 passed，既有功能未退化。

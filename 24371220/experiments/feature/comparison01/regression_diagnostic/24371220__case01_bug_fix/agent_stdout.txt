@@ -1,0 +1,27 @@
+步骤 2: list
+步骤 3: plan
+[doing] 建立计划并运行基线测试
+[todo] 阅读 calc.py 及相关测试定位根因
+[todo] 最小修复 calc.py 折扣缺陷
+[todo] 运行完整 pytest 验证全绿
+步骤 9: command
+步骤 12: read
+步骤 13: plan
+[done] 建立计划并运行基线测试
+[doing] 阅读 calc.py 及相关测试定位根因
+[todo] 最小修复 calc.py 折扣缺陷
+[todo] 运行完整 pytest 验证全绿
+步骤 17: plan
+[done] 建立计划并运行基线测试
+[done] 阅读 calc.py 及相关测试定位根因
+[doing] 最小修复 calc.py 折扣缺陷
+[todo] 运行完整 pytest 验证全绿
+步骤 20: write
+步骤 21: command
+步骤 22: plan
+[done] 建立计划并运行基线测试
+[done] 阅读 calc.py 及相关测试定位根因
+[done] 最小修复 calc.py 折扣缺陷
+[done] 运行完整 pytest 验证全绿
+步骤 23: finish
+已定位并修复 calc.py 的折扣缺陷：apply_discount 原实现为 price * discount / 100（导致 200 元打八折算成 200*0.8/100=1.6 元），改为 price * discount，符合折扣率语义。修改前基线测试保留失败输出，修改后运行完整 python -m pytest -q 得到 11 passed，全部测试通过。仅修改了 calc.py，未改动任何测试文件。

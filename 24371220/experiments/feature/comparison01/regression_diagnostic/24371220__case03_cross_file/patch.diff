@@ -1,0 +1,11 @@
+--- a/pricing.py
++++ b/pricing.py
+@@ -13,6 +13,8 @@
+ 
+ def apply_vip(subtotal, user):
+     """VIP 用户全场九折，普通用户原价。"""
++    if getattr(user, "is_vip", False):
++        return subtotal * VIP_DISCOUNT
+     return subtotal
+ 
+ 

@@ -1,0 +1,25 @@
+步骤 1: plan
+[doing] 运行基线 pytest 与 run_checks.py 并保留失败输出
+[todo] 阅读 stats.py 与测试文件，定位唯一根因
+[todo] 在 stats.py 做最小必要修复
+[todo] 重跑完整 pytest 与 run_checks.py 确认全绿
+步骤 2: list
+步骤 4: command
+步骤 5: command
+步骤 6: read
+步骤 7: read
+步骤 10: plan
+[done] 运行基线 pytest 与 run_checks.py 并保留失败输出
+[done] 阅读 stats.py 与测试文件，定位唯一根因
+[doing] 在 stats.py 做最小必要修复
+[todo] 重跑完整 pytest 与 run_checks.py 确认全绿
+步骤 12: write
+步骤 13: command
+步骤 14: command
+步骤 15: plan
+[done] 运行基线 pytest 与 run_checks.py 并保留失败输出
+[done] 阅读 stats.py 与测试文件，定位唯一根因
+[done] 在 stats.py 做最小必要修复
+[done] 重跑完整 pytest 与 run_checks.py 确认全绿
+步骤 16: finish
+根因：stats.py 的 median() 在偶数长度时只返回 s[mid]（较大的中间值），未取中间两数平均。修复：偶数分支改为 (s[mid-1]+s[mid])/2，并保留空列表抛 ValueError。验证：python -m pytest -q → 28 passed；python run_checks.py → 360 项检查 0 不一致，退出码 0。仅修改了 stats.py，未改测试。
