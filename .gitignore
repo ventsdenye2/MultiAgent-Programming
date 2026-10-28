@@ -17,3 +17,8 @@
 .env
 .env.*
 !.env.example
+
+# Rebuild development environments and disposable test outputs
+**/.venv-win/
+**/.pytest-smol*/
+24371220/experiments/offline-tmp*/
