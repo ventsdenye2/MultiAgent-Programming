@@ -33,7 +33,7 @@ class EvidenceContext:
         return (model.estimate(messages) <= min(spec.soft_chars, spec.hard_chars - 128)
                 and (not spec.content_chars or content <= spec.content_chars - 128))
 
-    def _recent(self, memory):
+    def _recent(self, memory, limits=(1800, 2200, 4000)):
         actions = [step for step in memory.steps if isinstance(step, ActionStep)]
         if not actions:
             return []
@@ -47,13 +47,19 @@ class EvidenceContext:
             for form in (original, json.dumps(original, ensure_ascii=False)[1:-1],
                          json.dumps(original)[1:-1]):
                 text = text.replace(form, '[versioned evidence retained separately]')
-        result = [message('Latest action:\n' + clip(step.code_action or step.model_output or '', 1800),
+        feedback = 'Executor output:\n' + clip(text, limits[1] // 2)
+        if self.store.recent_results:
+            feedback += '\nRecent project tool results:\n' + clip(
+                json.dumps(self.store.recent_results[-4:], ensure_ascii=False), limits[1] // 2)
+        result = [message('Latest action:\n' + clip(step.code_action or step.model_output or '', limits[0]),
                           MessageRole.ASSISTANT),
-                  message('Latest execution feedback:\n' + clip(text, 2200))]
-        if step.error:
+                  message('Latest execution feedback:\n' + feedback)]
+        error_step = next((s for s in reversed(actions) if s.error), None)
+        if error_step:
             # Errors are reserved before document selection. Never drop the
             # entire failing step to make room for another source excerpt.
-            result.append(message('Unresolved error from latest action:\n' + clip(str(step.error), 4000)))
+            result.append(message('Most recent error (check whether subsequent work resolved it):\n' +
+                                  clip(str(error_step.error), limits[2])))
         return result
 
     def build(self, memory, model):
@@ -75,9 +81,15 @@ class EvidenceContext:
             status['delivery_reserve'] = 'Reserve remaining requests for required notes, changes, verification and final_answer.'
         messages.append(message('Course progress before this request (new evidence below can satisfy missing items):\n'
                                 + json.dumps(status, ensure_ascii=False)))
-        messages += self._recent(memory)
-        if not self.fits(messages, model):
+        recent = None
+        for limits in ((1800, 2200, 4000), (800, 900, 2000), (250, 500, 1200), (120, 200, 500)):
+            candidate = self._recent(memory, limits)
+            if self.fits(messages + candidate, model):
+                recent = candidate
+                break
+        if recent is None:
             raise ValueError('CONTEXT_FIXED_OVERFLOW: task, tools and recent feedback exceed budget')
+        messages += recent
         selected_notes = []
         read_pages = {self.store.items[eid].page for eid in self.store.exposed if self.store.items[eid].valid}
         paper_reading = (self.session.contract.profile == 'paper' and

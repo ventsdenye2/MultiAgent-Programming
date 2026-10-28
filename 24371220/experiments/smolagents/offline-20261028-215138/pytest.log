@@ -1,0 +1,65 @@
+...F........F..                                                          [100%]
+=================================== FAILURES ===================================
+__________ test_empty_truncated_response_has_distinct_classification ___________
+
+tmp_path = PosixPath('/tmp/smolagents-offline-6xkj_qiw/pytest/test_empty_truncated_response_0')
+
+    def test_empty_truncated_response_has_distinct_classification(tmp_path):
+        rc, result, calls, events = run_script(tmp_path, [response('', 'length'), DONE + "\nfinal_answer('ok')"])
+        assert rc == 0, result
+        assert any(e.get('classification') == 'truncated_empty' for e in events)
+>       assert any(e.get('error_type') == 'AgentParsingError' for e in events)
+E       assert False
+E        +  where False = any(<generator object test_empty_truncated_response_has_distinct_classification.<locals>.<genexpr> at 0x7f071d9a93c0>)
+
+test_smolagents.py:94: AssertionError
+____________ test_real_three_file_preedit_coverage_and_source_notes ____________
+
+tmp_path = PosixPath('/tmp/smolagents-offline-6xkj_qiw/pytest/test_real_three_file_preedit_c0')
+build_session = <function build_session.<locals>.build at 0x7f071f1d5080>
+
+    def test_real_three_file_preedit_coverage_and_source_notes(tmp_path, build_session):
+        source = MATERIALS / '公开任务/题目2'
+        repo = tmp_path / 'repo'
+        repo.mkdir()
+        targets = ['deepinfer/environ.py', 'deepinfer/logger.py', 'deepinfer/engine/stats_logger.py']
+        with tarfile.open(source / 'DeepInfer-774ce244.tar.gz') as archive:
+            for rel in targets:
+                member = next(m for m in archive.getmembers() if m.name.endswith('/' + rel))
+                target = repo / rel
+                target.parent.mkdir(parents=True, exist_ok=True)
+                target.write_bytes(archive.extractfile(member).read())
+        task = (source / 'task.md').read_text(encoding='utf-8')
+        session, context, agent, model = build_session('source', repo, task)
+        for rel in targets:
+            session.invoke('read_file', {'path': rel})
+        assert sum(len((repo / rel).read_text()) for rel in targets) > 30000
+        with pytest.raises(ValueError, match='Edit prerequisites'):
+            session._before_write({'path': targets[0]})
+        all_ids = set(session.evidence.items)
+        for number in range(1, 15):
+            messages = context.build(agent.memory, model)
+            assert model.estimate(messages) <= 32000
+            body = {'messages': [m.dict() for m in messages]}
+            session.evidence.mark_exposed(body, response(code('print(1)')), number)
+            for rel in targets:
+                ids = sorted(session.evidence.required[rel])
+                if set(ids).issubset(session.evidence.exposed) and rel not in session.evidence.notes:
+                    content = 'Model note describing the complete mechanisms in ' + rel + ' and their cross-module interfaces.'
+                    session.evidence.last_response = response(code(f'write_note(title={rel!r}, content={content!r}, evidence_ids={ids!r})'))
+                    session.invoke('write_note', {'title': rel, 'content': content, 'evidence_ids': ids})
+            if not session.evidence.missing():
+                break
+        assert all_ids.issubset(session.evidence.exposed)
+        assert not session.evidence.missing()
+        session._before_write({'path': targets[0]})
+>       assert all(contains(body, note['content']) for note in session.evidence.notes.values())
+E       assert False
+E        +  where False = all(<generator object test_real_three_file_preedit_coverage_and_source_notes.<locals>.<genexpr> at 0x7f071db063e0>)
+
+test_smolagents_materials.py:91: AssertionError
+- generated xml file: /mnt/d/Muiti-Agent Programing/experiments/code-agent-smolagents/24371220/experiments/smolagents/offline-20261028-215138/junit.xml -
+=========================== short test summary info ============================
+FAILED test_smolagents.py::test_empty_truncated_response_has_distinct_classification
+FAILED test_smolagents_materials.py::test_real_three_file_preedit_coverage_and_source_notes
+2 failed, 13 passed in 105.34s (0:01:45)

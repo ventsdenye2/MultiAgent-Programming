@@ -25,6 +25,7 @@ class TaskContract:
     topics: tuple = ()
     require_write: bool = True
     strict_plan: bool = True
+    task_path: str = 'task.md'
 
     def view(self):
         return {"profile": self.profile, "editable": sorted(self.editable),

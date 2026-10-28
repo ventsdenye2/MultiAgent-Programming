@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="0" failures="2" skipped="0" tests="15" time="105.224" timestamp="2026-10-28T21:51:42.253575+08:00" hostname="VENTSDENYE5"><testcase classname="test_smolagents" name="test_vendor_and_no_forked_kernel" time="0.384" /><testcase classname="test_smolagents" name="test_upstream_variable_persistence_and_error_recovery" time="38.554" /><testcase classname="test_smolagents" name="test_official_parser_recovers_and_records_error" time="0.050" /><testcase classname="test_smolagents" name="test_empty_truncated_response_has_distinct_classification" time="0.056"><failure message="assert False&#10; +  where False = any(&lt;generator object test_empty_truncated_response_has_distinct_classification.&lt;locals&gt;.&lt;genexpr&gt; at 0x7f071d9a93c0&gt;)">tmp_path = PosixPath('/tmp/smolagents-offline-6xkj_qiw/pytest/test_empty_truncated_response_0')
+
+    def test_empty_truncated_response_has_distinct_classification(tmp_path):
+        rc, result, calls, events = run_script(tmp_path, [response('', 'length'), DONE + "\nfinal_answer('ok')"])
+        assert rc == 0, result
+        assert any(e.get('classification') == 'truncated_empty' for e in events)
+&gt;       assert any(e.get('error_type') == 'AgentParsingError' for e in events)
+E       assert False
+E        +  where False = any(&lt;generator object test_empty_truncated_response_has_distinct_classification.&lt;locals&gt;.&lt;genexpr&gt; at 0x7f071d9a93c0&gt;)
+
+test_smolagents.py:94: AssertionError</failure></testcase><testcase classname="test_smolagents" name="test_budget_has_no_extra_final_answer_request" time="0.053" /><testcase classname="test_smolagents" name="test_no_sdk_or_framework_network_retry" time="0.042" /><testcase classname="test_smolagents" name="test_actual_body_has_protocol_and_balanced_raw_audit" time="0.041" /><testcase classname="test_smolagents" name="test_real_file_tools_pytest_and_final_checks" time="11.628" /><testcase classname="test_smolagents" name="test_final_answer_check_is_upstream_recoverable" time="0.071" /><testcase classname="test_smolagents" name="test_context_guard_prevents_wire_request" time="0.041" /><testcase classname="test_smolagents" name="test_dedup_repeated_full_reads_and_version_invalidation" time="0.035" /><testcase classname="test_smolagents" name="test_eight_evidence_items_recalled_in_bounded_batches" time="0.059" /><testcase classname="test_smolagents_materials" name="test_real_three_file_preedit_coverage_and_source_notes" time="0.167"><failure message="assert False&#10; +  where False = all(&lt;generator object test_real_three_file_preedit_coverage_and_source_notes.&lt;locals&gt;.&lt;genexpr&gt; at 0x7f071db063e0&gt;)">tmp_path = PosixPath('/tmp/smolagents-offline-6xkj_qiw/pytest/test_real_three_file_preedit_c0')
+build_session = &lt;function build_session.&lt;locals&gt;.build at 0x7f071f1d5080&gt;
+
+    def test_real_three_file_preedit_coverage_and_source_notes(tmp_path, build_session):
+        source = MATERIALS / '公开任务/题目2'
+        repo = tmp_path / 'repo'
+        repo.mkdir()
+        targets = ['deepinfer/environ.py', 'deepinfer/logger.py', 'deepinfer/engine/stats_logger.py']
+        with tarfile.open(source / 'DeepInfer-774ce244.tar.gz') as archive:
+            for rel in targets:
+                member = next(m for m in archive.getmembers() if m.name.endswith('/' + rel))
+                target = repo / rel
+                target.parent.mkdir(parents=True, exist_ok=True)
+                target.write_bytes(archive.extractfile(member).read())
+        task = (source / 'task.md').read_text(encoding='utf-8')
+        session, context, agent, model = build_session('source', repo, task)
+        for rel in targets:
+            session.invoke('read_file', {'path': rel})
+        assert sum(len((repo / rel).read_text()) for rel in targets) &gt; 30000
+        with pytest.raises(ValueError, match='Edit prerequisites'):
+            session._before_write({'path': targets[0]})
+        all_ids = set(session.evidence.items)
+        for number in range(1, 15):
+            messages = context.build(agent.memory, model)
+            assert model.estimate(messages) &lt;= 32000
+            body = {'messages': [m.dict() for m in messages]}
+            session.evidence.mark_exposed(body, response(code('print(1)')), number)
+            for rel in targets:
+                ids = sorted(session.evidence.required[rel])
+                if set(ids).issubset(session.evidence.exposed) and rel not in session.evidence.notes:
+                    content = 'Model note describing the complete mechanisms in ' + rel + ' and their cross-module interfaces.'
+                    session.evidence.last_response = response(code(f'write_note(title={rel!r}, content={content!r}, evidence_ids={ids!r})'))
+                    session.invoke('write_note', {'title': rel, 'content': content, 'evidence_ids': ids})
+            if not session.evidence.missing():
+                break
+        assert all_ids.issubset(session.evidence.exposed)
+        assert not session.evidence.missing()
+        session._before_write({'path': targets[0]})
+&gt;       assert all(contains(body, note['content']) for note in session.evidence.notes.values())
+E       assert False
+E        +  where False = all(&lt;generator object test_real_three_file_preedit_coverage_and_source_notes.&lt;locals&gt;.&lt;genexpr&gt; at 0x7f071db063e0&gt;)
+
+test_smolagents_materials.py:91: AssertionError</failure></testcase><testcase classname="test_smolagents_materials" name="test_real_pdf_52_pages_fit_batched_and_five_notes_reused" time="1.881" /><testcase classname="test_smolagents_materials" name="test_large_source_cannot_evict_latest_error" time="0.135" /></testsuite></testsuites>

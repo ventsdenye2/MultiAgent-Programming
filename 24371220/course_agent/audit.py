@@ -40,6 +40,7 @@ class RequestAudit:
         self.usage = []
         self.last_response = None
         self.stop_reason = None
+        self.last_classification = None
 
     def guard(self):
         if self.calls >= self.contract.max_calls:
@@ -84,6 +85,7 @@ class RequestAudit:
         reason = choice.get("finish_reason")
         category = ("truncated_empty" if not content else "truncated") if reason == "length" else (
             "empty" if not content else "ok")
+        self.last_classification = category
         usage = payload.get("usage") or {}
         complete = (all(type(usage.get(k)) is int and usage[k] >= 0
                         for k in ("prompt_tokens", "completion_tokens", "total_tokens"))

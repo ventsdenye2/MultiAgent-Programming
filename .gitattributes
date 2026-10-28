@@ -11,3 +11,4 @@
 24371220/experiments/feature/** -text -whitespace
 # Preserve the exact upstream bytes, including upstream whitespace.
 24371220/vendor/smolagents/** -text -whitespace
+24371220/experiments/smolagents/** -text -whitespace

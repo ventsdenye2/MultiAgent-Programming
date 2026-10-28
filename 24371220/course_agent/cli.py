@@ -26,7 +26,7 @@ def execute(contract, config, output, auto=True, context_mode='evidence', transp
               'context_mode': context_mode, 'reason': None, 'usage': None}
     log('run_start', engine='smolagents', context_mode=context_mode, contract=contract.view(),
         model=config['model'], upstream_commit='12c1bc820eca50ace6f80a21d90426d41d74f845')
-    log('file_read', path='task.md', content=contract.text)
+    log('file_read', path=contract.task_path, content=contract.text)
     code = 1
     try:
         answer = agent.run(session.task_prompt())
@@ -78,6 +78,7 @@ def main(argv=None):
             parser.error('Configured API key environment variable is missing')
         task = Path(args.task).read_text(encoding='utf-8')
         contract = load_task(task, args.repo, config, args.profile, args.allow)
+        contract.task_path = str(Path(args.task).resolve())
         code, result = execute(contract, config, Path.cwd(), args.auto, args.context_mode)
         print(json.dumps(result, ensure_ascii=False))
         return code

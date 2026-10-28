@@ -1,5 +1,7 @@
 """Task requirements and business tools exposed through the official Tool API."""
 import json
+import ast
+import re
 
 from smolagents import Tool
 
@@ -92,6 +94,9 @@ class CourseSession:
                 'repeated_action_count': self.evidence.repeats,
                 'next_step': 'write notes after each batch; then complete changes and verification' if self.contract.profile == 'paper'
                 else 'read full files once; summarize complete mechanisms; edit; verify'}
+        if self.audit and self.audit.last_classification not in {None, 'ok'}:
+            data['last_response_classification'] = self.audit.last_classification
+            data['response_recovery'] = 'Previous body was empty or truncated; produce a complete valid code action within 4096 output tokens.'
         if self.evidence.repeats >= 2:
             data['stalled'] = 'Repeated unchanged action. Use the missing items above; inspect recent error and pending evidence.'
         if not compact:
@@ -122,6 +127,8 @@ class CourseSession:
     def _plan(self, items):
         if not isinstance(items, list) or not 1 <= len(items) <= 10:
             raise ValueError('Plan must contain 1..10 items')
+        if self.two_stage and len(items) < 2:
+            raise ValueError('This task requires net calculation and CSV export as two ordered plan items')
         if any(not isinstance(i, dict) or not isinstance(i.get('title'), str) or not i['title'].strip()
                or i.get('status') not in {'todo', 'doing', 'done'} for i in items):
             raise ValueError('Each plan item requires a nonempty title and todo/doing/done status')
@@ -147,6 +154,18 @@ class CourseSession:
             missing = self.evidence.missing(first_write=not self.writes)
             if missing:
                 raise ValueError('Edit prerequisites: ' + '; '.join(missing))
+        if self.two_stage and not self.stage_one_verified:
+            proposed = args.get('content')
+            if proposed is None and 'old_text' in args:
+                _, current, _ = self.workspace._read(args['path'])
+                proposed = current.replace(args['old_text'], args['new_text'])
+            try:
+                tree = ast.parse(proposed or '')
+            except SyntaxError:
+                tree = ast.Module(body=[], type_ignores=[])
+            if any(isinstance(n, (ast.FunctionDef, ast.AsyncFunctionDef)) and n.name == 'export_csv'
+                   for n in ast.walk(tree)):
+                raise ValueError('Verify the net-only change with full pytest and mark the first plan item done before CSV export')
         self._confirm('write', args)
 
     def _record_command(self, args, result):
@@ -159,12 +178,18 @@ class CourseSession:
             if result['rc'] == 0:
                 self.verified[command] = self.versions()
         if list(command) == PYTEST:
-            output = result['stdout'] + result['stderr']
-            failures = [line for line in output.splitlines() if line.startswith('FAILED ')]
+            output = re.sub(r'\x1b\[[0-?]*[ -/]*[@-~]', '', result['stdout'] + result['stderr'])
+            failures = re.findall(r'^FAILED (.+?)(?: - |$)', output, re.M)
+            summaries = re.findall(r'^(?:=+\s*)?(\d+ \w+(?:, \d+ \w+)*) in [\d.]+s\b.*$', output, re.M)
+            counts = {name: int(n) for n, name in re.findall(r'(\d+) (\w+)', summaries[-1])} if summaries else {}
             self.last_test = {'rc': result['rc'], 'stage_one_passed': bool(self.writes) and
-                              not result.get('timed_out') and result['rc'] in (0, 1) and
-                              (result['rc'] == 0 or bool(failures)) and
-                              all('csv' in line.lower() for line in failures)}
+                              not result.get('timed_out') and result['rc'] == 1 and
+                              set(counts) <= {'passed', 'failed', 'warning', 'warnings'} and
+                              counts.get('passed', 0) >= 2 and
+                              counts.get('passed', 0) + counts.get('failed', 0) == 10 and
+                              len(set(failures)) == counts.get('failed', 0) and
+                              not any(test in line for line in failures
+                                      for test in ('test_summarize_net', 'test_summarize_empty'))}
 
     def invoke(self, name, args):
         self.log('tool_call', tool=name, arguments=args)

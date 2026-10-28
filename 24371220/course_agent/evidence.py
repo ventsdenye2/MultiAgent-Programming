@@ -45,7 +45,7 @@ class EvidenceStore:
         self.request_number = 0
 
     def _add(self, source, version, locator, text, required=False, page=None):
-        key = hashlib.sha256((source + '\0' + version + '\0' + locator + '\0' + text).encode()).hexdigest()[:20]
+        key = hashlib.sha256((source + '\0' + version + '\0' + locator).encode()).hexdigest()[:20]
         eid = 'ev-' + key
         if eid not in self.items:
             item = Evidence(eid, source, version, locator, text, required, page)
