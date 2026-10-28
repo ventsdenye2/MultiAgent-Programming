@@ -1,2 +1,13 @@
+* text=auto eol=lf
+*.py text eol=lf
+*.sh text eol=lf
+*.md text eol=lf
+*.json text eol=lf
+*.jsonl text eol=lf
+*.log text eol=lf
+*.diff text eol=lf
+# 实验原始证据按字节保存，避免自动转换历史日志和补丁
+24371220/experiments/public/** -text -whitespace
+24371220/experiments/feature/** -text -whitespace
 # Preserve the exact upstream bytes, including upstream whitespace.
 24371220/vendor/smolagents/** -text -whitespace

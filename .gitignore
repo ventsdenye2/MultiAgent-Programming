@@ -20,5 +20,6 @@
 
 # Rebuild development environments and disposable test outputs
 **/.venv-win/
+**/.wheel-cache/
 **/.pytest-smol*/
 24371220/experiments/offline-tmp*/
