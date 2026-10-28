@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="0" failures="1" skipped="0" tests="18" time="134.663" timestamp="2026-10-28T23:48:52.199238+08:00" hostname="VENTSDENYE5"><testcase classname="test_smolagents" name="test_vendor_and_no_forked_kernel" time="0.662" /><testcase classname="test_smolagents" name="test_upstream_variable_persistence_and_error_recovery" time="67.307" /><testcase classname="test_smolagents" name="test_official_parser_recovers_and_records_error" time="0.061" /><testcase classname="test_smolagents" name="test_empty_truncated_response_has_distinct_classification" time="0.051" /><testcase classname="test_smolagents" name="test_budget_has_no_extra_final_answer_request" time="0.162" /><testcase classname="test_smolagents" name="test_no_sdk_or_framework_network_retry" time="0.082" /><testcase classname="test_smolagents" name="test_actual_body_has_protocol_and_balanced_raw_audit" time="0.054" /><testcase classname="test_smolagents" name="test_real_file_tools_pytest_and_final_checks" time="14.662" /><testcase classname="test_smolagents" name="test_final_answer_check_is_upstream_recoverable" time="0.041" /><testcase classname="test_smolagents" name="test_context_guard_prevents_wire_request" time="0.089" /><testcase classname="test_smolagents" name="test_actual_http_guard_in_upstream_context_mode" time="0.031" /><testcase classname="test_smolagents" name="test_official_upstream_context_mode_runs" time="0.039" /><testcase classname="test_smolagents" name="test_workspace_boundaries_and_stale_hash" time="0.002" /><testcase classname="test_smolagents" name="test_dedup_repeated_full_reads_and_version_invalidation" time="0.030" /><testcase classname="test_smolagents" name="test_eight_evidence_items_recalled_in_bounded_batches" time="0.070"><failure message="AssertionError: assert {'ev-886f0e69...816934c', ...} == {'ev-7664741d...78dc7cc', ...}&#10;  &#10;  Extra items in the right set:&#10;  'ev-7664741dc6cb7ab35ed3'&#10;  Use -v to get more diff">tmp_path = PosixPath('/tmp/smolagents-offline-ye8dgle1/pytest/test_eight_evidence_items_reca0')
+
+    def test_eight_evidence_items_recalled_in_bounded_batches(tmp_path):
+        session, context, agent, model, log = make_session(tmp_path)
+        try:
+            from smolagents.memory import TaskStep
+            agent.memory.steps.append(TaskStep('Read eight documents.'))
+            ids = []
+            for i in range(8):
+                path = session.contract.repo / f'doc{i}.txt'
+                path.write_text(f'DOC_{i}_' + str(i) * 4000)
+                ids += session.invoke('read_file', {'path': path.name})['evidence_ids']
+            accepted = session.evidence.recall(ids, 8000)
+            assert accepted['scheduled'] and accepted['pending']
+            seen = set()
+            for number in range(1, 9):
+                messages = context.build(agent.memory, model)
+                assert model.estimate(messages) &lt;= 32000
+                body = {'messages': [m.dict() for m in messages]}
+                session.evidence.mark_exposed(body, response(code('print(1)')), number)
+                seen |= session.evidence.current
+                if not session.evidence.pending:
+                    break
+&gt;           assert seen == set(ids)
+E           AssertionError: assert {'ev-886f0e69...816934c', ...} == {'ev-7664741d...78dc7cc', ...}
+E             
+E             Extra items in the right set:
+E             'ev-7664741dc6cb7ab35ed3'
+E             Use -v to get more diff
+
+test_smolagents.py:254: AssertionError</failure></testcase><testcase classname="test_smolagents_materials" name="test_real_three_file_preedit_coverage_and_source_notes" time="0.175" /><testcase classname="test_smolagents_materials" name="test_real_pdf_52_pages_fit_batched_and_five_notes_reused" time="2.152" /><testcase classname="test_smolagents_materials" name="test_large_source_cannot_evict_latest_error" time="0.061" /></testsuite></testsuites>

@@ -24,6 +24,7 @@ class Evidence:
     required: bool = False
     page: int | None = None
     valid: bool = True
+    atomic: bool = False
 
 
 class EvidenceStore:
@@ -31,6 +32,7 @@ class EvidenceStore:
         self.contract, self.workspace, self.log = contract, workspace, log
         self.items = {}
         self.full_reads = {}
+        self.full_read_ids = {}
         self.required = {}
         self.exposed = set()
         self.current = set()
@@ -43,12 +45,15 @@ class EvidenceStore:
         self.repeats = 0
         self._signature = None
         self.request_number = 0
+        self.received_ranges = {}
+        self.recall_ranges = {}
+        self.offered = []
 
-    def _add(self, source, version, locator, text, required=False, page=None):
+    def _add(self, source, version, locator, text, required=False, page=None, atomic=False):
         key = hashlib.sha256((source + '\0' + version + '\0' + locator).encode()).hexdigest()[:20]
         eid = 'ev-' + key
         if eid not in self.items:
-            item = Evidence(eid, source, version, locator, text, required, page)
+            item = Evidence(eid, source, version, locator, text, required, page, atomic=atomic)
             self.items[eid] = item
             self.log('evidence', **asdict(item))
         self.raw_texts.add(text)
@@ -75,9 +80,10 @@ class EvidenceStore:
             if not nodes:
                 raise ValueError('Required source mechanisms not found: ' + source)
             return [self._add(source, version, f'lines:{n.lineno}-{n.end_lineno}',
-                              ast.get_source_segment(text, n), required=True) for n in nodes]
+                              ast.get_source_segment(text, n), required=True, atomic=True) for n in nodes]
         if 'start_line' in result:
-            return [self._add(source, version, f"lines:{result['start_line']}-{result['end_line']}", text)]
+            return [self._add(source, version, f"lines:{result['start_line']}-{result['end_line']}", text,
+                              atomic=self.contract.profile == 'source')]
         # Ordinary files may be paged; required source mechanisms above stay whole.
         lines = text.splitlines(keepends=True)
         ids, chunk, start = [], '', 1
@@ -88,6 +94,8 @@ class EvidenceStore:
             chunk += line
         if chunk or not ids:
             ids.append(self._add(source, version, f'lines:{start}-{len(lines)}', chunk))
+        if full:
+            self.full_read_ids[source] = ids
         return ids
 
     def observe(self, name, arguments, result):
@@ -106,7 +114,7 @@ class EvidenceStore:
                 version = self.workspace.current_hash('paper.pdf')
                 self.invalidate('paper.pdf', version)
                 ids = [self._add('paper.pdf', version, f"page:{p['page']}", p['text'],
-                                 required=p['page'] in self.contract.paper_pages, page=p['page'])
+                                 required=p['page'] in self.contract.paper_pages, page=p['page'], atomic=True)
                        for p in data['pages']]
             elif 'ranges' in data:
                 source = str(data.get('path', ''))
@@ -137,11 +145,14 @@ class EvidenceStore:
             return
         for eid in invalid:
             self.items[eid].valid = False
+            self.received_ranges.pop(eid, None)
+            self.recall_ranges.pop(eid, None)
         self.exposed -= invalid
         self.current -= invalid
         self.required.get(source, set()).difference_update(invalid)
         if self.full_reads.get(source) != current_version:
             self.full_reads.pop(source, None)
+            self.full_read_ids.pop(source, None)
         self.pending = [eid for eid in self.pending if eid not in invalid]
         for note in self.notes.values():
             if invalid.intersection(note['evidence_ids']):
@@ -153,16 +164,69 @@ class EvidenceStore:
         for source in sources:
             self.invalidate(source, self.workspace.current_hash(source))
 
+    @staticmethod
+    def merge_ranges(ranges):
+        merged = []
+        for start, end in sorted(ranges):
+            if merged and start <= merged[-1][1]:
+                merged[-1][1] = max(merged[-1][1], end)
+            else:
+                merged.append([start, end])
+        return merged
+
+    def delivery_range(self, eid):
+        """Next contiguous gap, with explicit recalls tracked independently."""
+        item = self.items[eid]
+        ranges = self.recall_ranges.get(eid, []) if eid in self.pending else self.received_ranges.get(eid, [])
+        if eid in self.exposed and eid not in self.pending:
+            return 0, len(item.text)  # Optional reuse of a previously exposed item.
+        start = 0
+        for left, right in self.merge_ranges(ranges):
+            if left > start:
+                return start, left
+            start = max(start, right)
+        return start, len(item.text)
+
+    def render(self, eid, start=0, end=None):
+        item = self.items[eid]
+        end = len(item.text) if end is None else end
+        span = '' if start == 0 and end == len(item.text) else f' | characters:{start}:{end}/{len(item.text)}'
+        return (f'Evidence {eid} | {item.source} | {item.locator} | sha256={item.version}{span}\n'
+                + item.text[start:end])
+
+    def file_exposed(self, source):
+        ids = self.full_read_ids.get(source, [])
+        return bool(ids) and set(ids).issubset(self.exposed)
+
     def mark_exposed(self, body, response, number):
         self.refresh()
-        self.current = {eid for eid, item in self.items.items() if item.valid and item.text and contains(body, item.text)}
+        self.current = {eid for eid, item in self.items.items() if item.valid and item.text
+                        and contains(body, item.text) and (len(item.text) >= 80 or contains(body, item.version))}
+        delivered = []
+        for eid, start, end in self.offered:
+            item = self.items[eid]
+            if not item.valid or not contains(body, self.render(eid, start, end)):
+                continue
+            delivered.append({'id': eid, 'start': start, 'end': end, 'length': len(item.text)})
+            self.received_ranges[eid] = self.merge_ranges(self.received_ranges.get(eid, []) + [[start, end]])
+            if eid in self.pending:
+                self.recall_ranges[eid] = self.merge_ranges(self.recall_ranges.get(eid, []) + [[start, end]])
+            if self.received_ranges[eid] == [[0, len(item.text)]]:
+                self.exposed.add(eid)
+            if start == 0 and end == len(item.text):
+                self.current.add(eid)
         self.exposed |= self.current
+        for eid in self.current:
+            self.received_ranges[eid] = [[0, len(self.items[eid].text)]]
         self.current_notes = {key for key, note in self.notes.items()
                               if note['valid'] and contains(body, note['content'])}
-        self.pending = [eid for eid in self.pending if eid not in self.current]
+        self.pending = [eid for eid in self.pending if eid not in self.current
+                        and self.recall_ranges.get(eid) != [[0, len(self.items[eid].text)]]]
         self.last_response, self.request_number = response, number
         self.log('context_exposure', request=number, evidence_ids=sorted(self.current),
-                 note_ids=sorted(self.current_notes))
+                 note_ids=sorted(self.current_notes), delivered_ranges=delivered,
+                 fully_exposed_ids=sorted(self.exposed))
+        self.offered = []
 
     def write_note(self, title, content, evidence_ids, section=None):
         if not isinstance(content, str) or not 20 <= len(content) <= (1500 if section else 3000):
@@ -208,6 +272,7 @@ class EvidenceStore:
                 used += cost
             if eid not in self.pending:
                 self.pending.append(eid)
+                self.recall_ranges[eid] = []
         return {'scheduled': ready, 'pending': queued, 'capacity_chars': capacity,
                 'message': 'The selector confirms each actual batch; remaining items stay queued.'}
 
@@ -236,6 +301,8 @@ class EvidenceStore:
             for source in sorted(self.contract.required_reads):
                 if source not in self.full_reads:
                     issues.append('read_file: ' + source)
+                elif self.contract.profile in {'basic', 'generic'} and not self.file_exposed(source):
+                    issues.append('source read but not yet fully sent: ' + source)
         if self.contract.profile == 'source' and first_write:
             for source in sorted(self.contract.required_reads):
                 if not self.source_reused(source):
@@ -256,5 +323,7 @@ class EvidenceStore:
 
     def save(self, path):
         path.write_text(json.dumps({'evidence': [asdict(x) for x in self.items.values()],
-                                   'notes': self.notes, 'exposed': sorted(self.exposed)},
+                                   'notes': self.notes, 'exposed': sorted(self.exposed),
+                                   'received_ranges': self.received_ranges,
+                                   'full_read_ids': self.full_read_ids},
                                   ensure_ascii=False, indent=2), encoding='utf-8')

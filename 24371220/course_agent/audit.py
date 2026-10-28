@@ -10,6 +10,20 @@ def compact(value):
     return json.dumps(value, ensure_ascii=False, separators=(",", ":"))
 
 
+def request_size(body):
+    """Measure the wire body and the basic evaluator's content serialization."""
+    messages = body.get('messages', [])
+    return {
+        'chars': len(compact(body)),
+        # Preserve the original diagnostic field; the course meter below is
+        # intentionally different for structured multimodal/text content.
+        'content_chars': sum(len(t) for m in messages for t in strings(m.get('content', ''))),
+        'course_content_chars': sum(len(m.get('content', '')) if isinstance(m.get('content'), str)
+                                    else len(json.dumps(m.get('content'), ensure_ascii=False))
+                                    for m in messages),
+    }
+
+
 def strings(value):
     if isinstance(value, str):
         yield value
@@ -53,19 +67,16 @@ class RequestAudit:
     def request(self, request):
         self.guard()
         body = json.loads(request.content)
-        chars = len(compact(body))
-        content_chars = sum(len(t) for message in body.get("messages", [])
-                            for t in strings(message.get("content", "")))
-        if chars > self.contract.hard_chars or (
-            self.contract.content_chars and content_chars > self.contract.content_chars
+        size = request_size(body)
+        if size['chars'] > self.contract.hard_chars or (
+            self.contract.content_chars and size['course_content_chars'] > self.contract.content_chars
         ):
             self.stop_reason = "REQUEST_CHAR_BUDGET"
-            self.log("request_blocked", chars=chars, content_chars=content_chars)
+            self.log("request_blocked", **size)
             raise BudgetExceeded(self.stop_reason)
         self.calls += 1
         self.bodies.append(body)
-        self.log("model_request", number=self.calls, body=body, chars=chars,
-                 content_chars=content_chars)
+        self.log("model_request", number=self.calls, body=body, **size)
 
     def response(self, response):
         response.read()
@@ -129,13 +140,16 @@ class AuditedOpenAIModel(OpenAIModel):
             self.audit.error("NETWORK_OR_RESPONSE_ERROR", error_type=type(exc).__name__)
             raise
 
-    def estimate(self, messages):
+    def measure(self, messages):
         body = self._prepare_completion_kwargs(messages, model=self.model_id,
                                               stop_sequences=["Observation:", "Calling tools:", "</code>"],
                                               custom_role_conversions=self.custom_role_conversions,
                                               convert_images_to_image_urls=True)
         body.update(body.pop("extra_body", {}))
-        return len(compact(body))
+        return request_size(body)
+
+    def estimate(self, messages):
+        return self.measure(messages)['chars']
 
     def close(self):
         self.client.close()

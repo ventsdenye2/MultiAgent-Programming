@@ -248,7 +248,9 @@ def test_eight_evidence_items_recalled_in_bounded_batches(tmp_path):
             assert model.estimate(messages) <= 32000
             body = {'messages': [m.dict() for m in messages]}
             session.evidence.mark_exposed(body, response(code('print(1)')), number)
-            seen |= session.evidence.current
+            # Ordinary documents may now span requests. Only fully delivered
+            # ranges enter exposed; current still means complete text here.
+            seen |= session.evidence.exposed
             if not session.evidence.pending:
                 break
         assert seen == set(ids)

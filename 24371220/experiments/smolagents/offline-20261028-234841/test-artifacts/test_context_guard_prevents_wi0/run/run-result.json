@@ -1,0 +1,16 @@
+{
+  "status": "failed",
+  "engine": "smolagents",
+  "upstream_version": "1.26.0",
+  "context_mode": "evidence",
+  "reason": "ValueError: CONTEXT_FIXED_OVERFLOW: minimum sending view exceeds budget: {\"chars\": 13199, \"content_chars\": 12511, \"course_content_chars\": 13010}",
+  "usage": {
+    "requests": 0,
+    "complete": true,
+    "prompt_tokens": 0,
+    "completion_tokens": 0
+  },
+  "remaining": [
+    "finish all plan items after their work and checks"
+  ]
+}

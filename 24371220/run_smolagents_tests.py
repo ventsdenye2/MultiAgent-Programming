@@ -23,6 +23,7 @@ def main():
     env = os.environ.copy()
     env.update(TMPDIR=str(native), PYTHONDONTWRITEBYTECODE='1')
     cmd = [sys.executable, '-m', 'pytest', '-q', 'test_smolagents.py', 'test_smolagents_materials.py',
+           'test_context_delivery.py',
            '--basetemp', str(native / 'pytest'), '--junitxml', str(out / 'junit.xml')]
     with (out / 'pytest.log').open('w', encoding='utf-8') as log:
         rc = subprocess.call(cmd, cwd=root, env=env, stdout=log, stderr=subprocess.STDOUT)

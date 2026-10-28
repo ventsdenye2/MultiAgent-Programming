@@ -1,0 +1,39 @@
+..............F...                                                       [100%]
+=================================== FAILURES ===================================
+____________ test_eight_evidence_items_recalled_in_bounded_batches _____________
+
+tmp_path = PosixPath('/tmp/smolagents-offline-ye8dgle1/pytest/test_eight_evidence_items_reca0')
+
+    def test_eight_evidence_items_recalled_in_bounded_batches(tmp_path):
+        session, context, agent, model, log = make_session(tmp_path)
+        try:
+            from smolagents.memory import TaskStep
+            agent.memory.steps.append(TaskStep('Read eight documents.'))
+            ids = []
+            for i in range(8):
+                path = session.contract.repo / f'doc{i}.txt'
+                path.write_text(f'DOC_{i}_' + str(i) * 4000)
+                ids += session.invoke('read_file', {'path': path.name})['evidence_ids']
+            accepted = session.evidence.recall(ids, 8000)
+            assert accepted['scheduled'] and accepted['pending']
+            seen = set()
+            for number in range(1, 9):
+                messages = context.build(agent.memory, model)
+                assert model.estimate(messages) <= 32000
+                body = {'messages': [m.dict() for m in messages]}
+                session.evidence.mark_exposed(body, response(code('print(1)')), number)
+                seen |= session.evidence.current
+                if not session.evidence.pending:
+                    break
+>           assert seen == set(ids)
+E           AssertionError: assert {'ev-886f0e69...816934c', ...} == {'ev-7664741d...78dc7cc', ...}
+E             
+E             Extra items in the right set:
+E             'ev-7664741dc6cb7ab35ed3'
+E             Use -v to get more diff
+
+test_smolagents.py:254: AssertionError
+- generated xml file: /mnt/d/Muiti-Agent Programing/experiments/code-agent-smolagents/24371220/experiments/smolagents/offline-20261028-234841/junit.xml -
+=========================== short test summary info ============================
+FAILED test_smolagents.py::test_eight_evidence_items_recalled_in_bounded_batches
+1 failed, 17 passed in 134.83s (0:02:14)

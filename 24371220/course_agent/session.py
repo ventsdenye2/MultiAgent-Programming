@@ -54,6 +54,7 @@ class CourseSession:
         self.baselines = set()
         self.verified = {}
         self.writes = set()
+        self.written_versions = {}
         self.agent = None
         self.context = None
         self.audit = None
@@ -154,6 +155,14 @@ class CourseSession:
             missing = self.evidence.missing(first_write=not self.writes)
             if missing:
                 raise ValueError('Edit prerequisites: ' + '; '.join(missing))
+        if self.contract.profile in {'basic', 'generic'}:
+            target = args['path']
+            current = self.workspace.current_hash(target)
+            if current != 'missing' and self.written_versions.get(target) != current:
+                if self.evidence.full_reads.get(target) != current:
+                    raise ValueError('Read the current target file before editing: ' + target)
+                if not self.evidence.file_exposed(target):
+                    raise ValueError('Target source is waiting to be sent; continue pending evidence: ' + target)
         if self.two_stage and not self.stage_one_verified:
             proposed = args.get('content')
             if proposed is None and 'old_text' in args:
@@ -213,6 +222,7 @@ class CourseSession:
                 result = self.workspace.invoke(name, args)
                 if name in {'write_file', 'replace_text'} and result.get('changed'):
                     self.writes.add(result['path'])
+                    self.written_versions[result['path']] = result['file_hash']
                     self.verified.clear()
                     self.last_test = None
                     self.evidence.invalidate(result['path'], result['file_hash'])
