@@ -134,6 +134,10 @@ class EvidenceStore:
         summary = {k: v for k, v in result.items() if k not in {'content', 'stdout', 'pages'}}
         if 'stdout' in result and not ids:
             summary['stdout'] = result['stdout'][-2400:]
+            if len(result['stdout']) > len(summary['stdout']):
+                self.log('context_clip', scope='recent_tool_summary', tool=name,
+                         original_chars=len(result['stdout']), sent_chars=len(summary['stdout']),
+                         retained=True)
         self.recent_results.append({'tool': name, 'result': summary})
         self.recent_results = self.recent_results[-8:]
         return result

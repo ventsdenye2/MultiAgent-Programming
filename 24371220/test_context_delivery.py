@@ -143,3 +143,20 @@ def test_repeated_large_feedback_never_grows_fixed_status(tmp_path):
     finally:
         model.close()
         log.close()
+
+
+def test_long_command_summary_is_observable_without_model_print(tmp_path):
+    session, context, agent, model, log = make_session(tmp_path)
+    try:
+        (session.contract.repo / 'run_checks.py').write_text("print('diagnostic ' * 1300)\n")
+        result = session.invoke('run_command', {'argv': ['python', 'run_checks.py']})
+        assert len(result['stdout']) >= 12000
+        trace = [json.loads(line) for line in (tmp_path / 'run/run.log').read_text().splitlines()]
+        recorded = next(e for e in trace if e['event'] == 'command_result')
+        assert recorded['stdout'] == result['stdout']
+        event = next(e for e in trace if e['event'] == 'context_clip')
+        assert event['original_chars'] == len(recorded['stdout'])
+        assert event['sent_chars'] == 2400 and event['retained']
+    finally:
+        model.close()
+        log.close()
