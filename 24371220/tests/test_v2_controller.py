@@ -249,3 +249,63 @@ def test_timed_out_verification_cannot_count_as_baseline_or_finish(tmp_path):
             agent._finish("must not accept timeout")
     finally:
         close(log)
+
+
+def test_recalled_pdf_namespace_can_continue_on_next_model_turn(tmp_path):
+    # Reproduce the real paper run: r32 = get_evidence(...) then a new code block.
+    # Extraction is simulated here; the binary source, hash validation, worker,
+    # context assembly and completion checks are real and run without an API.
+    first = code("r32 = get_evidence(evidence_id='ev-000001')\nprint(r32['content'])")
+    second = code(
+        "print(r32['content'])\n"
+        "update_plan(items=[{'title':'Read evidence','status':'done'}])\n"
+        "finish(summary='PDF evidence survives the next action')"
+    )
+    agent, log, bodies, repo, out = make_agent(
+        tmp_path, [first, second], require_write=False, verify_commands=[])
+    agent.spec.max_calls = agent.model.max_calls = 2
+    (repo / 'paper.pdf').write_bytes(b'%PDF-1.7\n\x00\xffsynthetic source\n%%EOF')
+    ids = agent.evidence.observe('read_pdf', {'pdf': 'paper.pdf'},
+        {'pdf': 'paper.pdf', 'pages': [{'page': 1, 'text': 'Page evidence for the next action.'}]}, 0)
+    assert ids == ['ev-000001']
+    try:
+        result = agent.run()
+        assert result['status'] == 'succeeded', result
+        assert result['usage']['requests'] == len(bodies) == 2
+        records = [json.loads(line) for line in (out / 'run.log').read_text(encoding='utf-8').splitlines()]
+        executions = [r for r in records if r['event'] == 'code_execution']
+        assert len(executions) == 2 and all(r['error'] is None for r in executions)
+        assert 'Page evidence for the next action.' in executions[1]['stdout']
+        assert executions[0]['sources']['r32'][0]['path'] == 'paper.pdf'
+        assert not any(r['event'] == 'action_error' for r in records)
+    finally:
+        close(log)
+
+
+def test_pdf_changed_during_model_request_blocks_stale_namespace_use(tmp_path):
+    first = code("r32 = get_evidence(evidence_id='ev-000001')")
+    second = code("print(r32['content'])\nfinish(summary='must not use old PDF')")
+    agent, log, _, repo, out = make_agent(
+        tmp_path, [first, second], require_write=False, verify_commands=[])
+    agent.spec.max_calls = agent.model.max_calls = 2
+    pdf = repo / 'paper.pdf'
+    pdf.write_bytes(b'%PDF-1.7\x00original bytes')
+    agent.evidence.observe('read_pdf', {'pdf': 'paper.pdf'},
+        {'pdf': 'paper.pdf', 'pages': [{'page': 1, 'text': 'Old page text'}]}, 0)
+    transport = agent.model.transport
+    def change_before_second_response(body):
+        if agent.model.calls == 2:
+            pdf.write_bytes(b'%PDF-1.7\x00changed bytes')
+        return transport(body)
+    agent.model.transport = change_before_second_response
+    try:
+        result = agent.run()
+        assert result['status'] == 'incomplete'
+        records = [json.loads(line) for line in (out / 'run.log').read_text(encoding='utf-8').splitlines()]
+        executions = [r for r in records if r['event'] == 'code_execution']
+        assert len(executions) == 2
+        assert executions[1]['error']['code'] == 'stale_source'
+        assert executions[1]['stdout'] == ''
+        assert not any(r['event'] == 'finish' for r in records)
+    finally:
+        close(log)

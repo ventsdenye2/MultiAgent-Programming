@@ -68,11 +68,15 @@ def _validate(tree: ast.Module, tool_names=_DEFAULT_TOOLS) -> None:
         if isinstance(n,ast.Name) and isinstance(n.ctx,ast.Store) and (n.id in _BUILTINS or n.id in tool_names or n.id=="print"):
             raise ExecutionError("invalid_ast",f"reserved name: {n.id}")
         if isinstance(n,ast.Call):
+            if isinstance(n.func,ast.Attribute) and n.func.attr=="get":
+                raise ExecutionError("invalid_ast","method calls are not supported; use result['key'] instead of result.get('key'); for optional keys, use if 'key' in result")
             if not isinstance(n.func,ast.Name) or (n.func.id not in _BUILTINS and n.func.id not in tool_names and n.func.id!="print"):
                 raise ExecutionError("invalid_ast","only registered tools and approved builtins may be called")
             if n.func.id in _BUILTINS or n.func.id=="print":
                 if n.keywords: raise ExecutionError("invalid_ast","keyword arguments are not supported for builtins")
-            elif n.args: raise ExecutionError("invalid_ast","tool calls require keyword arguments")
+            elif n.args:
+                example = "get_evidence(evidence_id='...')" if n.func.id=="get_evidence" else f"{n.func.id}(argument_name=value)"
+                raise ExecutionError("invalid_ast",f"tool calls require keyword arguments; use {example} with the documented parameter names")
 
 
 class _Interpreter:
@@ -81,6 +85,17 @@ class _Interpreter:
     def tick(self):
         self.ops+=1
         if self.ops>self.maxops: raise ExecutionError("quota","operation quota exceeded")
+    def apply_binop(self,op,a,b):
+        if isinstance(op,ast.Pow) and (abs(b)>1000 or abs(a)>1e6):
+            raise ExecutionError("quota","power operation too large")
+        if isinstance(op,ast.Mult) and (
+            isinstance(a,(str,list,tuple)) and isinstance(b,int) and len(a)*max(0,b)>_MAX_VALUE
+            or isinstance(b,(str,list,tuple)) and isinstance(a,int) and len(b)*max(0,a)>_MAX_VALUE
+        ):
+            raise ExecutionError("quota","repeated value too large")
+        value=_BIN[type(op)](a,b)
+        self.bound(value)
+        return value
     def ev(self,n):
         self.tick()
         if isinstance(n,ast.Constant): return n.value
@@ -97,9 +112,7 @@ class _Interpreter:
         if isinstance(n,ast.UnaryOp): return not self.ev(n.operand) if isinstance(n.op,ast.Not) else (-self.ev(n.operand) if isinstance(n.op,ast.USub) else +self.ev(n.operand))
         if isinstance(n,ast.BinOp):
             a,b=self.ev(n.left),self.ev(n.right)
-            if isinstance(n.op,ast.Pow) and (abs(b)>1000 or abs(a)>1e6): raise ExecutionError("quota","power operation too large")
-            if isinstance(n.op,ast.Mult) and ((isinstance(a,(str,list,tuple)) and isinstance(b,int) and len(a)*max(0,b)>_MAX_VALUE) or (isinstance(b,(str,list,tuple)) and isinstance(a,int) and len(b)*max(0,a)>_MAX_VALUE)): raise ExecutionError("quota","repeated value too large")
-            v=_BIN[type(n.op)](a,b); self.bound(v); return v
+            return self.apply_binop(n.op,a,b)
         if isinstance(n,ast.BoolOp):
             v=self.ev(n.values[0])
             for x in n.values[1:]:
@@ -168,9 +181,9 @@ class _Interpreter:
                         self.stale.discard(n.id)
         elif isinstance(s,ast.AugAssign):
             refs=[]
-            for n in ast.walk(s.target)+ast.walk(s.value):
+            for n in list(ast.walk(s.target))+list(ast.walk(s.value)):
                 if isinstance(n,ast.Name):refs.extend(self.deps.get(n.id,[]))
-            a=self.ev(s.target); b=self.ev(s.value); self.target(s.target,_BIN[type(s.op)](a,b))
+            a=self.ev(s.target); b=self.ev(s.value); self.target(s.target,self.apply_binop(s.op,a,b))
             for n in ast.walk(s.target):
                 if isinstance(n,ast.Name):self.deps[n.id]=_unique_sources(refs)
         elif isinstance(s,ast.Expr): self.ev(s.value)
@@ -207,7 +220,7 @@ def _worker(inq,outq,maxops,tool_names):
         msg=_json_get(inq)
         if msg[0]=="close":return
         if msg[0]=="reset":it=_Interpreter(maxops,tool_names);it.rpc=rpc;continue
-        _,code,stale=msg; it.ops=0; it.out=[];it.tool_calls=[];it.stale=set(stale)
+        _,code,stale=msg; it.ops=0; it.out=[];it.output_len=0;it.output_truncated=False;it.tool_calls=[];it.stale=set(stale)
         try:
             tree=ast.parse(code,mode="exec");_validate(tree,tool_names)
             for s in tree.body:it.stmt(s)

@@ -1,6 +1,6 @@
 # 24371220：迷你编码智能体（基础版本）
 
-> **版本说明：**现有课程正式评测记录对应 legacy。v2 是并行实现，尚无真实 API 或公开课程验收结论；使用 v2 不应解读为已通过课程任务。
+> **版本说明：**已有通过记录对应 legacy。v2 首轮实践02真实自测为 0/6，已定位并修复部分运行时缺陷，尚待真实复测；使用 v2 不应解读为已通过课程任务。见[首轮复盘](experiments/long-context/v2-20261028-173033/REVIEW.md)及[修复验证](docs/runtime-fixes.md)。
 
 实现四项基础能力，以及 Diagnostic-Driven Context Selection and Compression 特色功能。报告和对照实验位于本目录及 experiments/feature/comparison01/。
 使用标准库直接调用 Chat Completions，自行实现消息组织、JSON 动作解析、计划和执行循环，不使用 Agent 框架。

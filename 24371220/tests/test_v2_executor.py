@@ -99,6 +99,66 @@ class ExecutorTests(unittest.TestCase):
         self.assertTrue(r["output_truncated"])
         self.assertEqual(len(r["stdout"]),20000)
 
+    def test_print_budget_resets_between_rounds_but_namespace_persists(self):
+        ex=PythonExecutor(timeout_seconds=4)
+        try:
+            first=ex.execute("x=41\nprint('a' * 20001)",lambda n,a:{})
+            second=ex.execute("print(x + 1)",lambda n,a:{})
+            self.assertTrue(first["output_truncated"])
+            self.assertEqual(len(first["stdout"]),20000)
+            self.assertFalse(second["output_truncated"])
+            self.assertEqual(second["stdout"],"42")
+            self.assertEqual([item["name"] for item in second["namespace"]],["x"])
+        finally:ex.close()
+
+    def test_print_budget_still_accumulates_within_one_round(self):
+        r=self.run_exec("print('a' * 15000)\nprint('b' * 7000)")
+        self.assertTrue(r["output_truncated"])
+        self.assertEqual(len(r["stdout"]),20000)
+        self.assertTrue(r["stdout"].startswith("a" * 15000))
+        self.assertTrue(r["stdout"].endswith("b" * 5000))
+
+    def test_augassign_numeric_and_source_dependencies(self):
+        ex=PythonExecutor(timeout_seconds=4)
+        try:
+            first=ex.execute("r=read_file(path='p')\nx=1\nx += r['value']\nprint(x)",
+                lambda n,a:{"value":4,"path":"p","file_hash":"h"})
+            self.assertIsNone(first["error"],first)
+            self.assertEqual(first["stdout"],"5")
+            self.assertIn({"path":"p","file_hash":"h"},first["sources"]["x"])
+            second=ex.execute("print(x)",lambda n,a:{},lambda sources:False)
+            self.assertEqual(second["error"]["code"],"stale_source")
+        finally:ex.close()
+
+    def test_augassign_obeys_binop_resource_quotas(self):
+        repeated=self.run_exec("s='x'\ns *= 1000001")
+        power=self.run_exec("x=2\nx **= 1001")
+        self.assertEqual(repeated["error"]["code"],"quota")
+        self.assertEqual(power["error"]["code"],"quota")
+
+    def test_real_run_syntax_errors_offer_executable_recovery(self):
+        cases = [
+            ("r=read_file(path='a')\nprint(r.get('content'))",
+             "result['key']", "r=read_file(path='a')\nprint(r['content'])"),
+            ("r=get_evidence('ev-1')", "get_evidence(evidence_id=",
+             "r=get_evidence(evidence_id='ev-1')\nprint(r['content'])"),
+        ]
+        for bad, hint, good in cases:
+            with self.subTest(code=bad):
+                calls=[]
+                ex=PythonExecutor(timeout_seconds=4)
+                invoke=lambda name,args:(calls.append(name) or {'content':'recovered'})
+                try:
+                    failed=ex.execute(bad,invoke)
+                    self.assertEqual(failed['error']['code'],'invalid_ast')
+                    self.assertIn(hint,failed['error']['message'])
+                    self.assertEqual(calls,[]) # validation cannot partially execute tools
+                    recovered=ex.execute(good,invoke)
+                    self.assertIsNone(recovered['error'])
+                    self.assertEqual(recovered['stdout'],'recovered')
+                    self.assertEqual(len(calls),1)
+                finally:ex.close()
+
     def test_successful_finish_stops_remaining_statements(self):
         calls=[]
         ex=PythonExecutor(timeout_seconds=4)

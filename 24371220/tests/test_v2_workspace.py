@@ -124,6 +124,43 @@ def test_command_rule_and_hash_missing(ws):
     with pytest.raises(ValueError): fresh.invoke("read_pdf", {"start_page": True})
 
 
+def test_current_hash_handles_binary_and_large_files_without_relaxing_text_reads(ws, monkeypatch):
+    obj, repo, _ = ws
+    binary_path = repo / "sample.pdf"
+    binary = b"%PDF-1.7\x00\xffbinary payload"
+    binary_path.write_bytes(binary)
+    first = hashlib.sha256(binary).hexdigest()
+    assert obj.current_hash("sample.pdf") == first
+    with pytest.raises(ValueError):
+        obj.invoke("read_file", {"path": "sample.pdf"})
+    changed = binary + b"changed"
+    binary_path.write_bytes(changed)
+    assert obj.current_hash("sample.pdf") == hashlib.sha256(changed).hexdigest()
+
+    large_path = repo / "large.pdf"
+    large = b"%PDF-1.7\x00" + (b"x" * (2 * 1024 * 1024))
+    large_path.write_bytes(large)
+    assert obj.current_hash("large.pdf") == hashlib.sha256(large).hexdigest()
+    with pytest.raises(ValueError):
+        obj.invoke("read_file", {"path": "large.pdf"})
+
+    assert obj.current_hash("not-there.pdf") == "missing"
+    with pytest.raises(OSError):
+        obj.current_hash(".")
+    with pytest.raises(ValueError):
+        obj.current_hash("../outside.pdf")
+
+    real_open = Path.open
+    def denied_open(path, *args, **kwargs):
+        if path == binary_path:
+            raise PermissionError("access denied")
+        return real_open(path, *args, **kwargs)
+    with monkeypatch.context() as patcher:
+        patcher.setattr(Path, "open", denied_open)
+        with pytest.raises(PermissionError):
+            obj.current_hash("sample.pdf")
+
+
 def test_diff_marks_eof_without_newline_and_applies(ws):
     obj, repo, _ = ws
     (repo / "note.txt").write_text("old", encoding="utf-8", newline="")

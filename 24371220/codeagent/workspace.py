@@ -36,6 +36,7 @@ _SECRET_NAMES = {".env", "credentials", "credentials.json", "secrets.json", "id_
 _SKIP_DIRS = {"node_modules", ".venv", "venv", "__pycache__", ".git", ".pytest_cache"}
 _MAX_FILE_BYTES = 1_000_000
 _MAX_SCAN_FILES = 20_000
+_HASH_CHUNK_BYTES = 1024 * 1024
 
 
 class WorkspaceTools:
@@ -100,12 +101,17 @@ class WorkspaceTools:
         return data
 
     def current_hash(self, path):
-        try: data = self._read_bytes(self._resolve(str(path)))
-        except FileNotFoundError: return "missing"
-        except OSError as exc:
-            if not Path(self.repo / str(path)).exists(): return "missing"
-            raise exc
-        return hashlib.sha256(data).hexdigest()
+        digest = hashlib.sha256()
+        try:
+            resolved = self._resolve(str(path))
+            with resolved.open("rb") as stream:
+                while True:
+                    block = stream.read(_HASH_CHUNK_BYTES)
+                    if not block: break
+                    digest.update(block)
+        except FileNotFoundError:
+            return "missing"
+        return digest.hexdigest()
 
     def _read(self, rel):
         path = self._resolve(rel)
