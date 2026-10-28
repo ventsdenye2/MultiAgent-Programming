@@ -1,0 +1,15 @@
+命令：["/mnt/d/Muiti-Agent Programing/agents/code-agent/24371220/.venv/bin/python", "/mnt/d/Muiti-Agent Programing/agents/code-agent/24371220/experiments/long-context/v2-20261028-173033/paper/submission/agent.py", "--task", "/mnt/d/Muiti-Agent Programing/materials/long-context/公开任务/题目1/task.md", "--repo", "/mnt/d/Muiti-Agent Programing/agents/code-agent/24371220/experiments/long-context/v2-20261028-173033/paper/repo", "--model", "deepseek-flash", "--auto"]
+{
+  "status": "incomplete",
+  "reason": "MODEL_BUDGET_EXHAUSTED",
+  "summary": null,
+  "usage": {
+    "complete": true,
+    "requests": 40,
+    "input_tokens": 341253,
+    "output_tokens": 50326,
+    "total_tokens": 391579,
+    "attempted_requests": 40
+  },
+  "evaluation_status": "not_run"
+}

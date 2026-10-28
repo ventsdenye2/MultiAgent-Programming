@@ -1,5 +1,7 @@
 # 24371220：迷你编码智能体（基础版本）
 
+> **版本说明：**现有课程正式评测记录对应 legacy。v2 是并行实现，尚无真实 API 或公开课程验收结论；使用 v2 不应解读为已通过课程任务。
+
 实现四项基础能力，以及 Diagnostic-Driven Context Selection and Compression 特色功能。报告和对照实验位于本目录及 experiments/feature/comparison01/。
 使用标准库直接调用 Chat Completions，自行实现消息组织、JSON 动作解析、计划和执行循环，不使用 Agent 框架。
 
@@ -66,6 +68,30 @@ python ../../../../agent.py --task ../work/task.md --repo ../work/repo --model d
 `patch.diff` 基于运行开始快照生成统一 diff，支持 GNU patch `-p1`，失败和中断也保存已有改动。
 
 核心范围：`agent.py` 的 `SYSTEM` 和 `Agent`，以及整个 `context_selection.py`，合计 288 个非空非纯注释物理行。`main` 的参数/配置解析和 `runtime.py` 底层传输、日志、文件、命令及补丁为辅助代码。
+
+## v2 使用指南（显式启用）
+
+入口默认仍运行 legacy。可在命令中添加 `--engine v2`，或在运行目录设置 `CODE_AGENT_ENGINE=v2`；两者都未设置时会保持 legacy。沿用上方创建的全新课程启动目录和 repo，运行：
+
+```bash
+python ../../../../agent.py --engine v2 --task ../work/task.md --repo ../work/repo --model deepseek-flash --auto --profile auto
+```
+
+若希望该终端后续默认选 v2，可先执行 `export CODE_AGENT_ENGINE=v2`；命令行 `--engine` 仍可显式指定单次运行的引擎。
+
+v2 提供独立的 `codeagent/` 控制器、证据工作集、全请求预算和受限工具执行器。常用选项：`--profile auto|basic|generic|paper|source`、`--action-mode code|json`、`--context-mode baseline|diagnostic|evidence`。code mode 使用受限 Python 子集；json mode 每轮输出一个工具动作。`--efficiency` 只适用于 source profile 的实验模式。API 密钥仍由 `config.json` 的 `DEEPSEEK_API_KEY` 环境变量名读取，不要放入命令行或配置文件。
+
+v2 输出目录也必须在 repo 外且是全新的目录。`succeeded` 仅表示本地计划、当前文件指纹上的配置验证命令和 profile 门禁通过；`evaluation_status` 仍为 `not_run`。测试可注入模拟 transport，因此实现或单元测试不能证明真实 API 行为、公开课程评测成绩或人工验收。详见 [docs/architecture.md](docs/architecture.md)。
+
+在本目录运行 v2 与 legacy 的离线回归（Windows 使用 UTF-8 模式，避免旧测试按系统 GBK 读取 UTF-8 日志）：
+
+```bash
+python -X utf8 -m pytest -q test_agent.py tests
+```
+
+上述回归不需要模型密钥，也不会调用付费 API。
+
+实践02正式自测可在 Windows 双击 `run_long_context_v2.cmd`（当前工作区路径），或在 WSL 执行 `bash run_long_context_v2.sh`。脚本在本机终端隐蔽读取配置指定的密钥，不保存密钥；显式启用 v2/evidence，先跑一次源码题，再跑一次论文题，分别最多 20/40 次模型请求。配置/API等导致源码题未完成时停止，不自动重试，不启动可选效率排名。每次结果保存在新的 `experiments/long-context/v2-时间戳/`，含源码哈希协议及原始课程产物。需要 WSL Python 3.12、pytest、GNU patch、pdftotext 和项目临时目录的 tmpfs 挂载权限。
 
 ## 验证
 

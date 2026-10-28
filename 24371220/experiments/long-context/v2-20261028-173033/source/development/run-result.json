@@ -1,0 +1,82 @@
+{
+  "status": "incomplete",
+  "reason": "MODEL_BUDGET_EXHAUSTED",
+  "summary": null,
+  "evaluation_status": "not_run",
+  "steps": 20,
+  "usage": {
+    "complete": true,
+    "requests": 20,
+    "input_tokens": 192639,
+    "output_tokens": 7997,
+    "total_tokens": 200636,
+    "attempted_requests": 20
+  },
+  "state": {
+    "status": "incomplete",
+    "phase": "explore",
+    "plan": [
+      {
+        "title": "检查仓库结构与基线状态",
+        "status": "doing"
+      },
+      {
+        "title": "完整阅读 environ.py、logger.py、stats_logger.py 并记录关键机制",
+        "status": "todo"
+      },
+      {
+        "title": "运行修改前完整 pytest 基线",
+        "status": "todo"
+      },
+      {
+        "title": "跨三个模块实现长度预算与统计日志豁免",
+        "status": "todo"
+      },
+      {
+        "title": "运行修改后完整 pytest、生成 run.log 与 patch.diff",
+        "status": "todo"
+      },
+      {
+        "title": "检查改动范围并完成最终验证",
+        "status": "todo"
+      }
+    ],
+    "read_files": [
+      "deepinfer/engine/stats_logger.py",
+      "deepinfer/environ.py",
+      "deepinfer/logger.py"
+    ],
+    "writes": 0,
+    "workspace_revision": 0,
+    "baseline": {
+      "python -m pytest -q": {
+        "rc": 1,
+        "fingerprint": {
+          "deepinfer/engine/stats_logger.py": "9ef93c3930d6dd8d889d4ba69558a85459c2210ae0714d5073c3b4328c8e7cb9",
+          "deepinfer/environ.py": "fe2c531989c419f0b51b169a07f5ed826dcec7f95c0c5bc3a351805923c4f218",
+          "deepinfer/logger.py": "5b8f8d9947de692353609c1fc2851097d24f9b6ba6004dce1dbfa394dc6d3ec8"
+        },
+        "revision": 0
+      }
+    },
+    "verification": {
+      "python -m pytest -q": {
+        "rc": 1,
+        "fingerprint": {
+          "deepinfer/engine/stats_logger.py": "9ef93c3930d6dd8d889d4ba69558a85459c2210ae0714d5073c3b4328c8e7cb9",
+          "deepinfer/environ.py": "fe2c531989c419f0b51b169a07f5ed826dcec7f95c0c5bc3a351805923c4f218",
+          "deepinfer/logger.py": "5b8f8d9947de692353609c1fc2851097d24f9b6ba6004dce1dbfa394dc6d3ec8"
+        },
+        "revision": 0
+      }
+    },
+    "focus_paths": [
+      "deepinfer/engine/stats_logger.py"
+    ]
+  },
+  "artifacts": [
+    "run.log",
+    "patch.diff",
+    "evidence.json"
+  ]
+}

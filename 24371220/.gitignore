@@ -3,3 +3,7 @@ __pycache__/
 .pytest_cache/
 experiments/tmp/
 experiments/unit_tmp*/
+# Reconstructible course copies; keep original logs, usage and scores tracked.
+experiments/long-context/*/workspace/
+experiments/long-context/*/*/submission/
+experiments/long-context/*/paper/repo/

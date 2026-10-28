@@ -14,8 +14,8 @@ config = json.loads((root / 'config.json').read_text())
 rules = json.loads((course / 'tools/public_rules.json').read_text())
 output = root / 'experiments/feature/comparison01'
 output.mkdir(parents=True, exist_ok=False)
-snapshot = {p.name: hashlib.sha256(p.read_bytes()).hexdigest()
-            for p in root.glob('*.py')}
+snapshot = {p.relative_to(root).as_posix(): hashlib.sha256(p.read_bytes()).hexdigest()
+            for p in [*root.glob('*.py'), *root.glob('codeagent/**/*.py')]}
 (output / 'protocol.json').write_text(json.dumps({
     'config': config, 'source_sha256': snapshot, 'agent_timeout': 600,
     'pytest_timeout': 120, 'design': 'case05 off/on alternating 3 repetitions; all five once per mode',

@@ -1,0 +1,38 @@
+{
+  "engine": "v2",
+  "context_mode": "evidence",
+  "model": "deepseek-flash",
+  "base_url": "https://api.deepseek.com",
+  "key_env": "DEEPSEEK_API_KEY",
+  "scope": "one source evaluation then one paper evaluation; no automatic retries or efficiency runs",
+  "max_model_requests": {
+    "source": 20,
+    "paper": 40
+  },
+  "source_sha256": {
+    "agent.py": "b7b2c4c4b9d785c349592378fb72717c4b5b251f7236655b183224b026589918",
+    "build_report.py": "fedb163006f918753492b640deaeb81de8012d5a46d2eab0ab92014d5c47d8ba",
+    "context_selection.py": "e9e84a0027872c55519f24fdbea2e59915819095bca1298d6c6d3ec7a4d9f953",
+    "evaluate_long_context_v2.py": "5d900c99affbb770ae11f59fb9a4695777ea39ee35c544af1bb08468b009dbb6",
+    "experiment.py": "792693ac30876fa0a066b7d6d55b8fdd85d698143dcabf048163763257682390",
+    "runtime.py": "9d42154f636e399d4f1cd7626bc2b35d83f4f9658af90bde861cc195355266a3",
+    "setup_wsl.py": "727bb87901369ca961b7bbcc66c0f6e661181e4c018826e15669cf0d8233c691",
+    "test_agent.py": "62bc8ddfdfb12cfc683b495b459cd2accc1c1744014ca705333266e4bbdc57cb",
+    "codeagent/cli.py": "4ced35c4cddd46910921c06342a5d3d34afcd3d904addecad8395bd1c0955e98",
+    "codeagent/context.py": "283babefa61a7bd3e93e3526b70b0ecc94c3e092645127ea5f488a6fc968776e",
+    "codeagent/controller.py": "c673a7449b31fd84b6b0200d081336a6009c22c664adc7117dc53c676ebf180f",
+    "codeagent/evidence.py": "83928083b6bcd230a8ad1b5348be00377ae45275b7bfa9c39111229034b439a8",
+    "codeagent/executor.py": "34fe4b2e5920a9f354176ab6a2e4e4992480af32a916e7631f222ac1df38437c",
+    "codeagent/model.py": "d328c7925486a0f77556443e487c61400ec1fd1aeb57eebf75fa3ad19e8393dc",
+    "codeagent/policies.py": "923b958285db3c9775e361706a41457e184f0bb821a2f67e2df40c566d9f0b5d",
+    "codeagent/recording.py": "95e76f97d4f44a48b7e7e2a79be19b0f308bc4d286d87ed72dc009f801428b67",
+    "codeagent/state.py": "7a989158eb082bf2934b999c05a6d9200238acf083ae6dbe2ec80dabfc59a7d9",
+    "codeagent/workspace.py": "a3555b4f3c4f41464c76c402e1af8fc563592888c3e9c4a287e9d0ce51d24d26",
+    "codeagent/__init__.py": "381ba9f1d4c2de74fd058e57f5e77b51e4fc9cae4326b28fc60a89a60d67fd36"
+  },
+  "python": "3.12.3 (main, Jun 19 2026, 12:46:00) [GCC 13.3.0]",
+  "results": {
+    "source_exit_code": 1,
+    "paper_exit_code": 1
+  }
+}

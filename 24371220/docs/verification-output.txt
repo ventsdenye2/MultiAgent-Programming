@@ -1,0 +1,9 @@
+........s.................................................s.....         [100%]
+=========================== short test summary info ===========================
+SKIPPED [1] test_agent.py:104: 当前系统不允许创建符号链接
+SKIPPED [1] tests\test_v2_workspace.py:62: Windows symlink privilege is unavailable
+62 passed, 2 skipped in 15.11s
+Exception ignored in: <function Console.__del__ at 0x0000018675C45760>
+Traceback (most recent call last):
+  File "C:\Users\VENTSDENYE5\AppData\Roaming\Python\Python313\site-packages\pyreadline3\console\console.py", line 254, in __del__
+OSError: [WinError -1073741816] Windows Error 0xc0000008

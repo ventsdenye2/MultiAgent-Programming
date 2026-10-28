@@ -225,9 +225,22 @@ def main():
     parser.add_argument('--repo', required=True)
     parser.add_argument('--model', required=True)
     parser.add_argument('--auto', action='store_true')
-    parser.add_argument('--context-mode', choices=['baseline', 'diagnostic'], default=None)
+    parser.add_argument('--context-mode', choices=['baseline', 'diagnostic', 'evidence'], default=None)
+    parser.add_argument('--engine', choices=['legacy', 'v2'], default=os.environ.get('CODE_AGENT_ENGINE', 'legacy'),
+                        help='v2 使用 Python 工具编排和证据工作集；默认保留已评测的 legacy')
+    parser.add_argument('--action-mode', choices=['code', 'json'], default=None)
+    parser.add_argument('--profile', choices=['auto', 'generic', 'basic', 'paper', 'source'], default='auto')
+    parser.add_argument('--efficiency', action='store_true', help='v2 按课程效率复测固定参数计算实际请求预算')
     parser.add_argument('--allow', nargs='+', help='题面无法提取时，明确指定允许修改的相对文件')
     args = parser.parse_args()
+    if args.engine == 'v2':
+        from codeagent.cli import run_from_args
+        try:
+            return run_from_args(args)
+        except (ValueError, OSError, KeyError) as exc:
+            parser.error(str(exc))
+    if args.action_mode or args.efficiency or args.profile != 'auto' or args.context_mode == 'evidence':
+        parser.error('这些扩展选项需要 --engine v2')
     config = json.loads(Path(__file__).with_name('config.json').read_text(encoding='utf-8'))
     config['context_mode'] = args.context_mode or os.environ.get('MINI_CONTEXT_MODE', 'baseline')
     if config['context_mode'] not in ('baseline', 'diagnostic'):

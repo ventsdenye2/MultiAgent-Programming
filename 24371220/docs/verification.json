@@ -1,0 +1,19 @@
+{
+  "python": "3.13.9 | packaged by Anaconda, Inc. | (main, Oct 21 2025, 19:09:58) [MSC v.1929 64 bit (AMD64)]",
+  "command": [
+    "C:\\ProgramData\\anaconda3\\python.exe",
+    "-X",
+    "utf8",
+    "-m",
+    "pytest",
+    "test_agent.py",
+    "tests",
+    "-q",
+    "-rs",
+    "--basetemp=.pytest-v2-delivery"
+  ],
+  "exit_code": 0,
+  "model_transport": "simulated; no paid API calls",
+  "wsl": "not verified: Wsl/E_ACCESSDENIED",
+  "course_evaluation": "not_run"
+}
