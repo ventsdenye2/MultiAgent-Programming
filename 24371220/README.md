@@ -1,98 +1,80 @@
-# 24371220：迷你编码智能体（基础版本）
+# Code Agent：smolagents 官方内核 + EA-CM
 
-实现四项基础能力，以及 Diagnostic-Driven Context Selection and Compression 特色功能。报告和对照实验位于本目录及 experiments/feature/comparison01/。
-使用标准库直接调用 Chat Completions，自行实现消息组织、JSON 动作解析、计划和执行循环，不使用 Agent 框架。
+默认入口直接使用内置的 **smolagents 1.26.0** 官方代码。自研部分负责上下文管理及课程工具适配。原版本保留为 `--engine legacy`，历史说明见 [README.legacy.md](README.legacy.md)。
 
-基础版本已在 WSL 正式评测 `experiments/public/attempt05/` 中全部通过：5/5 分，86/86 个公开测试通过，五题过程、真实日志和补丁还原检查全部合格。另有 10/10 项基础机制单元测试通过。
+详细来源、复用边界与验证口径见 [SMOLAGENTS_REBUILD.md](SMOLAGENTS_REBUILD.md)。
 
-## 环境
+## 安装与校验
 
-已在 Ubuntu WSL 2 验证 Python 3.12.3，项目内虚拟环境为 `.venv`，pytest 8.4.2，GNU patch 来自 Ubuntu 已有安装。
-智能体本身没有第三方依赖；pytest 是验证依赖。`wheels/` 保存离线安装包。
-Git 不跟踪虚拟环境、下载包和本机 WSL 配置备份。新克隆若缺少 `wheels/`，可先在 Windows 的课程根目录下载：`python -m pip download --no-cache-dir --dest 24371220/wheels pip pytest==8.4.2`，然后执行下面的 WSL 环境重建步骤。
-首次重建环境（在本目录执行）：
+使用 WSL、Python 3.12、GNU patch 和 poppler-utils。将下面命令中的路径切换到当前提交目录。
 
 ```bash
-python3 -m venv --without-pip .venv
-.venv/bin/python setup_wsl.py
-source .venv/bin/activate
-patch --version
+python3.12 -m venv .venv
+.venv/bin/python -m pip install -r requirements.txt
+.venv/bin/python verify_vendor.py
+.venv/bin/python lock_dependencies.py
 ```
 
-本机 WSL 网络原为 Mirrored，启动时失败并回退为无网络。经用户授权，用户级 `.wslconfig` 仅将 `networkingMode=mirrored` 改为 `networkingMode=nat`，其余选项保留；原始配置备份为 `wslconfig.original`。
-虚拟环境、下载包、评测副本和临时目录均位于本项目。不要提交 `.venv/`。
+Ubuntu 缺少 venv/ensurepip 时，先安装对应的 `python3.12-venv` 系统包；已有带 pip 的课程环境也可以用 `python -m pip --python 新环境/bin/python install -r requirements.txt` 安装到独立环境。依赖较多，建议将环境和运行副本放在 WSL 原生文件系统；数据结果会归档回项目。
 
-## 模型配置
+`requirements.txt` 固定本轮实际验证的 37 项依赖。无需另外安装全局 smolagents；内置包包含官方提示词与许可证，启动时检查实际导入路径和版本。不要编辑 vendor 目录。
 
-入口同目录 `config.json` 使用 `deepseek-flash`、官方根地址 `https://api.deepseek.com`、密钥环境变量名 `DEEPSEEK_API_KEY`。
-`--model` 必须与配置一致。密钥仅存于进程环境，不写入任何项目文件。运行前在 WSL 终端输入：
+## 运行
+
+配置文件仅保留模型、服务地址和密钥环境变量名，密钥通过环境变量提供。
 
 ```bash
-read -rsp 'DeepSeek API Key: ' DEEPSEEK_API_KEY; echo
-export DEEPSEEK_API_KEY
+.venv/bin/python agent.py --task /path/task.md --repo /path/repo --model deepseek-flash --auto
 ```
 
-默认最多 60 轮，温度 0，单次输出预算 4096 token，网络超时 90 秒，工具命令超时 120 秒。预算耗尽、模型失败或验证失败返回非零。
+保持课程四参数接口。默认 `--context-mode evidence`；追加 `--context-mode upstream` 可使用官方完整记忆组织，其他课程约束和预算不变。追加 `--engine legacy` 运行旧入口；其上下文参数仍为 `baseline|diagnostic`。
 
-## 使用
+默认自动识别基础题、源码题和论文题。普通工作副本可使用 `--profile generic --allow file.py` 明确范围。移除 `--auto` 后，写入和命令会展示动作并等待确认，可输入 `/status`、`/add 指令` 或 `/quit`。
 
-从课程根目录创建新副本，再进入其 `run` 目录运行入口。每次必须使用新的启动目录，不覆盖已有日志或补丁：
+输出目录为启动目录，必须使用新目录。生成：
+
+- `run.log`：完整实际模型请求/响应、工具调用与结果、计划、阅读、笔记、上下文选择和 usage。
+- `patch.diff`：与启动时允许编辑文件快照的实际差异。
+- `run-result.json`：完成状态、失败原因、已知用量及完整性、未完成条件。
+- `memory.json`：完整官方步骤记忆。
+- `evidence.json`：来源、版本、范围、原文、笔记和实际呈现记录。
+
+源码/论文分别限制 20/40 次实际模型请求，单请求完整 JSON 最多 32,000 字符。首轮固定 deepseek-flash、4096 输出、关闭思考与自动重试。
+
+## 离线验证
 
 ```bash
-source 24371220/.venv/bin/activate
-python tools/check_submission.py --case case01_bug_fix --prepare 24371220/experiments/public/manual01
-cd 24371220/experiments/public/manual01/run
-python ../../../../agent.py --task ../work/task.md --repo ../work/repo --model deepseek-flash --auto
+.venv/bin/python run_smolagents_tests.py
+.venv/bin/python evaluate_course.py --preflight-only
 ```
 
-不加 `--auto` 则交互执行：每轮可以输入新指令；`/add 指令` 追加要求，`/status` 查看计划，`/quit` 或 Ctrl+C 中断。
-写入前显示完整新内容，命令执行前显示参数，输入 `y` 确认或 `n` 拒绝。追加指令会取消当前待确认动作，让模型重新决定。
-自动模式全程不读取键盘。允许修改的文件从题面“只修改/只允许修改”行提取；其他格式的任务可显式使用 `--allow file.py`。
+第一条运行真实官方内核和模拟 HTTP 回归，使用原生 Linux 临时目录，结果保存在 `experiments/smolagents/offline-*/`。第二条验证完整复制后的提交包、源码基线、PDF 提取和归档，默认不调用模型。
 
-工具：`list` 列目录，`read` 完整读取，`write` 完整写入允许文件，`command` 执行完整 pytest 或 `run_checks.py`，`plan` 更新状态，`finish` 提交完成结果。
-写入限制在 `--repo` 内，拒绝越界、隐藏路径、测试文件和符号链接越界。不提供 shell、任意 Python 脚本或删除命令。
-程序要求先计划、读业务文件、运行基线测试再写入；写入后重置验证状态，最后只有测试、诊断和全部计划完成才退出 0。
-第四题的独立写入、净额中间验证与计划更新顺序由任务/系统提示约束，并由课程评测器核验。
+课程材料默认位于工作区的 `materials/long-context/`。测试异地复制时可通过 `COURSE_MATERIALS` 指定其绝对路径。课程运行器在当前工作区布局下使用同一份材料。
 
-## 上下文与日志
+## 分阶段真实验收
 
-每次请求保留系统提示、完整题面、追加指令和当前计划/验证状态。单条结果超过 4500 字符时保留头尾；总 content 超过 15000 字符时从最早的动作/结果对开始移除，硬上限 16000。
-优先保留当前失败线索和原始目标；头尾裁剪可能丢失中段关键线索，模型可再次读取文件。
-`context_clip` 记录原长度、保留文本及舍弃中段；`context_drop` 记录移除消息和保留消息。完整原输出始终在日志中。
-
-`run.log` 是逐操作刷盘的 UTF-8 JSONL。`model_request.body` 为真实请求，不含鉴权头；`model_response.response` 为完整返回（含 reasoning_content）；`usage` 原样使用 API 上报字段及实际模型，不估算缺失值。
-`file_read/file_write` 包含完整路径和内容，`command_result` 包含真实解释器 argv、rc、完整 stdout/stderr，`plan.items` 包含标题和 todo/doing/done。
-追加指令、工具错误、中断和预算耗尽使用附加事件。日志保存在启动目录，不写入业务仓库。
-`patch.diff` 基于运行开始快照生成统一 diff，支持 GNU patch `-p1`，失败和中断也保存已有改动。
-
-核心范围：`agent.py` 的 `SYSTEM` 和 `Agent`，以及整个 `context_selection.py`，合计 288 个非空非纯注释物理行。`main` 的参数/配置解析和 `runtime.py` 底层传输、日志、文件、命令及补丁为辅助代码。
-
-## 验证
-
-单元测试明确使用模拟模型测试协议，不冒充模型轨迹或公开题成绩：
+以下命令会使用付费 Provider，应在确认运行阶段后执行；每次建立新输出目录，不自动重试：
 
 ```bash
-bash run_unit.sh
+.venv/bin/python evaluate_course.py --run-paid --stage smoke
+.venv/bin/python evaluate_course.py --run-paid --stage basic
+.venv/bin/python evaluate_course.py --run-paid --stage source
+.venv/bin/python evaluate_course.py --run-paid --stage paper
 ```
 
-从课程根目录执行五题正式评测，临时目录也限定在项目内：
+smoke 为基础第 1 题；basic 为基础五题。结果归档在 `experiments/smolagents/smolagents-*/`，原生目录也保留。过程检查、功能得分和真实用量分别查看，不把离线测试通过记为课程通过。
 
-```bash
-bash 24371220/run_public.sh new_attempt
-```
+## 文件职责
 
-项目位于 Windows 挂载盘：pytest 默认 fd 捕获与此盘上的临时文件出现 `FileNotFoundError`。评测器会清除 PYTEST_ADDOPTS，因而不能靠改变捕获方式解决。运行脚本在项目内的 `experiments/linux_tmp` 挂载最多 256MB 的 tmpfs，子进程在同一挂载环境中运行，结束自动卸载。需要 sudo 挂载权限，临时文件仍位于项目路径，不修改评测器或测试；单元测试脚本使用独立的 128MB 临时挂载。
-
-`--out` 必须不存在。成绩和每题过程证据见相应轮次的 `summary.md`、`result.json`、`evidence.json`；完整模型日志和补丁随该轮保留。`attempt01` 是 Windows 尝试，课程评测器因 POSIX `os.killpg` 不兼容 Windows 中断，不能视为五题成绩；`attempt02` 至 `attempt04` 均因挂载盘临时文件兼容问题或挂载命名空间问题中断，保留原记录；`attempt05` 开始使用同一进程环境内的 tmpfs 正式运行。
-
-实现依据：课程题目、README、日志格式说明和公开工具协议。实现及报告由 AI 编程助手协助完成，模型轨迹与评分来自真实运行。
-
-## 诊断驱动上下文与实验
-
-默认保持 baseline。入口增加 `--context-mode baseline|diagnostic`；课程评测器可通过环境变量 `MINI_CONTEXT_MODE=diagnostic` 开启，CLI 优先。两种模式共享提示词、工具和预算。
-
-诊断模式按实际工具观察建立候选池：重复命令结果覆盖旧结果，成功写入使旧读取版本失效。根据写入和验证状态划分 explore/repair/verify/finish，从当前失败提取文件路径、测试名及异常类型，以失败、当前验证、路径匹配、代码和新近程度排序。命令长输出抽取诊断行和相邻行、去除完全重复行，再按头尾限长；未识别内容回退到头尾裁剪，长代码暂不做函数级切片。
-
-`context_summary` 包含候选 id、分数、理由、是否选中、处理前后长度和实际发送消息；被覆盖的观察仍在原始工具日志中。任务及当前状态固定保留，实际请求 content 总和不超过 15000 字符。
-
-运行实验：在 WSL 设置密钥后，以有项目内挂载权限的用户执行 `bash run_experiment.sh`。脚本在项目内临时挂载 tmpfs，退出自动卸载。每次须修改实验输出轮次为新目录，禁止覆盖历史。实验使用课程原始评测器，长日志题交替各跑三次，再各跑全部五题；protocol.json 保存固定配置和源码哈希。报告 PDF/Markdown 及构建脚本均保留。
+| 文件 | 职责 |
+|---|---|
+| `agent.py` | 新旧引擎入口选择 |
+| `course_agent/engine.py` | 官方 CodeAgent 接入、上下文钩子与禁止超额收尾请求 |
+| `course_agent/audit.py` | 官方 OpenAIModel/SDK 的 HTTP 审计与预算 |
+| `course_agent/context.py` | EA-CM 发送视图 |
+| `course_agent/evidence.py` | 证据去重、曝光、笔记与版本失效 |
+| `course_agent/session.py` | 官方 Tool 接口、课程过程及 final_answer_checks |
+| `course_agent/policy.py` | 题型、范围与预算 |
+| `course_agent/workspace.py` | 底层文件、命令和补丁操作 |
+| `evaluate_course.py` | WSL 原生预检、复制校验、分阶段评测与归档 |
