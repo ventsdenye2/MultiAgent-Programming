@@ -1,0 +1,170 @@
+{
+  "kind": "paid_smoke_diagnosis",
+  "evaluatedCommit": "cd0b3cf5fbc19ad55d631f8148dd0d5a77cb712b",
+  "sourceRunLogSha256": "b205ed6b33f67f620b784880d8446475675711ccaa8d349e662019fa004f5be1",
+  "calcChars": 396,
+  "unchangedFiles": [
+    {
+      "path": "task.md",
+      "unchanged": true
+    },
+    {
+      "path": "repo/calc.py",
+      "unchanged": true
+    },
+    {
+      "path": "repo/test_calc.py",
+      "unchanged": true
+    },
+    {
+      "path": "repo/test_calc_edges.py",
+      "unchanged": true
+    }
+  ],
+  "patchBytes": 0,
+  "runtimeFiles": 43,
+  "runtimeMismatches": [],
+  "requests": [
+    {
+      "number": 1,
+      "bodyChars": 13834,
+      "contentChars": 13102,
+      "roleChars": [
+        {
+          "role": "system",
+          "chars": 10950
+        },
+        {
+          "role": "user",
+          "chars": 2152
+        }
+      ],
+      "fullFileInBody": false,
+      "defectLineInBody": false
+    },
+    {
+      "number": 2,
+      "bodyChars": 15201,
+      "contentChars": 14248,
+      "roleChars": [
+        {
+          "role": "system",
+          "chars": 10950
+        },
+        {
+          "role": "user",
+          "chars": 2379
+        },
+        {
+          "role": "assistant",
+          "chars": 277
+        },
+        {
+          "role": "user",
+          "chars": 642
+        }
+      ],
+      "fullFileInBody": false,
+      "defectLineInBody": false
+    },
+    {
+      "number": 3,
+      "bodyChars": 15668,
+      "contentChars": 14698,
+      "roleChars": [
+        {
+          "role": "system",
+          "chars": 10950
+        },
+        {
+          "role": "user",
+          "chars": 2347
+        },
+        {
+          "role": "assistant",
+          "chars": 355
+        },
+        {
+          "role": "user",
+          "chars": 1046
+        }
+      ],
+      "fullFileInBody": false,
+      "defectLineInBody": false
+    },
+    {
+      "number": 4,
+      "bodyChars": 15662,
+      "contentChars": 14654,
+      "roleChars": [
+        {
+          "role": "system",
+          "chars": 10950
+        },
+        {
+          "role": "user",
+          "chars": 2325
+        },
+        {
+          "role": "assistant",
+          "chars": 333
+        },
+        {
+          "role": "user",
+          "chars": 1046
+        }
+      ],
+      "fullFileInBody": false,
+      "defectLineInBody": false
+    },
+    {
+      "number": 5,
+      "bodyChars": 15720,
+      "contentChars": 14740,
+      "roleChars": [
+        {
+          "role": "system",
+          "chars": 10950
+        },
+        {
+          "role": "user",
+          "chars": 2325
+        },
+        {
+          "role": "assistant",
+          "chars": 96
+        },
+        {
+          "role": "user",
+          "chars": 1369
+        }
+      ],
+      "fullFileInBody": false,
+      "defectLineInBody": false
+    }
+  ],
+  "responseSeconds": [
+    {
+      "number": 1,
+      "seconds": 0.7432317733764648
+    },
+    {
+      "number": 2,
+      "seconds": 1.4324150085449219
+    },
+    {
+      "number": 3,
+      "seconds": 130.31074786186218
+    },
+    {
+      "number": 4,
+      "seconds": 0.8652293682098389
+    },
+    {
+      "number": 5,
+      "seconds": 0.9545397758483887
+    }
+  ],
+  "agentWallSeconds": 190.5185534954071,
+  "offlineReplay": "../replay-smoke-20261028/summary.json"
+}

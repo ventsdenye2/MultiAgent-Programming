@@ -1,0 +1,121 @@
+{
+  "stage": "smoke",
+  "protocol_status": "completed",
+  "stage_results": {
+    "smoke": {
+      "agent": 1,
+      "process": 1,
+      "functional": 1
+    }
+  },
+  "runs": [
+    {
+      "path": "experiments\\smolagents\\smolagents-20261028-225055-084673\\smoke-attempt\\run\\run.log",
+      "requests": 5,
+      "responses": 5,
+      "model_errors": 0,
+      "usage_complete": true,
+      "known_prompt_tokens": 17778,
+      "known_completion_tokens": 384,
+      "known_total_tokens": 18162,
+      "cache_hit_tokens": 12288,
+      "cache_miss_tokens": 5490,
+      "max_request_chars": 15720,
+      "response_classes": {
+        "ok": 5
+      },
+      "counts": {
+        "snapshot": 1,
+        "run_start": 1,
+        "file_read": 3,
+        "context_selection": 5,
+        "model_request": 5,
+        "model_response": 5,
+        "usage": 5,
+        "context_exposure": 5,
+        "tool_call": 6,
+        "plan": 3,
+        "tool_result": 6,
+        "agent_step": 6,
+        "command_result": 1,
+        "evidence": 1,
+        "run_error": 1,
+        "run_result": 1
+      },
+      "commands": [
+        {
+          "argv": [
+            "/mnt/d/Muiti-Agent Programing/experiments/code-agent-smolagents/24371220/.venv/bin/python",
+            "-m",
+            "pytest",
+            "-q"
+          ],
+          "rc": 1,
+          "timed_out": false
+        }
+      ],
+      "recent_actions": [
+        {
+          "event": "tool_call",
+          "tool": "update_plan",
+          "error_type": null,
+          "error": null
+        },
+        {
+          "event": "tool_call",
+          "tool": "update_plan",
+          "error_type": null,
+          "error": null
+        },
+        {
+          "event": "tool_call",
+          "tool": "run_command",
+          "error_type": null,
+          "error": null
+        },
+        {
+          "event": "tool_call",
+          "tool": "update_plan",
+          "error_type": null,
+          "error": null
+        },
+        {
+          "event": "tool_call",
+          "tool": "read_file",
+          "error_type": null,
+          "error": null
+        },
+        {
+          "event": "tool_call",
+          "tool": "read_file",
+          "error_type": null,
+          "error": null
+        }
+      ],
+      "result": {
+        "status": "failed",
+        "engine": "smolagents",
+        "upstream_version": "1.26.0",
+        "context_mode": "evidence",
+        "reason": "ValueError: CONTEXT_FIXED_OVERFLOW: task, tools and recent feedback exceed budget",
+        "usage": {
+          "requests": 5,
+          "complete": true,
+          "prompt_tokens": 17778,
+          "completion_tokens": 384
+        },
+        "remaining": [
+          "verify current files: python -m pytest -q",
+          "make the requested change",
+          "finish all plan items after their work and checks"
+        ]
+      },
+      "invalid_lines": 0
+    }
+  ],
+  "total_requests": 5,
+  "known_prompt_tokens": 17778,
+  "known_completion_tokens": 384,
+  "known_total_tokens": 18162,
+  "usage_complete": true
+}

@@ -1,0 +1,18 @@
+{
+  "status": "failed",
+  "engine": "smolagents",
+  "upstream_version": "1.26.0",
+  "context_mode": "evidence",
+  "reason": "ValueError: CONTEXT_FIXED_OVERFLOW: task, tools and recent feedback exceed budget",
+  "usage": {
+    "requests": 5,
+    "complete": true,
+    "prompt_tokens": 17778,
+    "completion_tokens": 384
+  },
+  "remaining": [
+    "verify current files: python -m pytest -q",
+    "make the requested change",
+    "finish all plan items after their work and checks"
+  ]
+}

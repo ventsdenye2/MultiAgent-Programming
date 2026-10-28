@@ -1,0 +1,282 @@
+{
+  "kind": "offline_recorded_response_replay",
+  "provider_requests": 0,
+  "source_archive": "/mnt/d/Muiti-Agent Programing/experiments/code-agent-smolagents/24371220/experiments/smolagents/smolagents-20261028-225055-084673",
+  "native_retained": "/tmp/smoke-context-replay-zn_w47us",
+  "mock_responses_consumed": 5,
+  "agent_exit_code": 1,
+  "result": {
+    "status": "failed",
+    "engine": "smolagents",
+    "upstream_version": "1.26.0",
+    "context_mode": "evidence",
+    "reason": "ValueError: CONTEXT_FIXED_OVERFLOW: task, tools and recent feedback exceed budget",
+    "usage": {
+      "requests": 5,
+      "complete": true,
+      "prompt_tokens": 0,
+      "completion_tokens": 0
+    },
+    "remaining": [
+      "verify current files: python -m pytest -q",
+      "make the requested change",
+      "finish all plan items after their work and checks"
+    ]
+  },
+  "context_attempts": [
+    {
+      "request_number": 1,
+      "fit_attempts": [
+        {
+          "body_chars": 13834,
+          "content_chars": 13105,
+          "message_chars": [
+            10950,
+            1684,
+            471
+          ],
+          "accepted": true
+        }
+      ],
+      "selection": {
+        "evidence_ids": [],
+        "note_ids": [],
+        "deferred": [],
+        "estimated_body_chars": 13834,
+        "reason": "reserve latest feedback; retain notes; recall; unseen evidence; edit prerequisites"
+      }
+    },
+    {
+      "request_number": 2,
+      "fit_attempts": [
+        {
+          "body_chars": 15201,
+          "content_chars": 14251,
+          "message_chars": [
+            10950,
+            1684,
+            698,
+            277,
+            642
+          ],
+          "accepted": true
+        }
+      ],
+      "selection": {
+        "evidence_ids": [],
+        "note_ids": [],
+        "deferred": [],
+        "estimated_body_chars": 15201,
+        "reason": "reserve latest feedback; retain notes; recall; unseen evidence; edit prerequisites"
+      }
+    },
+    {
+      "request_number": 3,
+      "fit_attempts": [
+        {
+          "body_chars": 17030,
+          "content_chars": 16001,
+          "message_chars": [
+            10950,
+            1684,
+            666,
+            355,
+            2346
+          ],
+          "accepted": false
+        },
+        {
+          "body_chars": 15668,
+          "content_chars": 14701,
+          "message_chars": [
+            10950,
+            1684,
+            666,
+            355,
+            1046
+          ],
+          "accepted": true
+        }
+      ],
+      "selection": {
+        "evidence_ids": [],
+        "note_ids": [],
+        "deferred": [],
+        "estimated_body_chars": 15668,
+        "reason": "reserve latest feedback; retain notes; recall; unseen evidence; edit prerequisites"
+      }
+    },
+    {
+      "request_number": 4,
+      "fit_attempts": [
+        {
+          "body_chars": 16554,
+          "content_chars": 15454,
+          "message_chars": [
+            10950,
+            1684,
+            644,
+            333,
+            1843
+          ],
+          "accepted": false
+        },
+        {
+          "body_chars": 15662,
+          "content_chars": 14657,
+          "message_chars": [
+            10950,
+            1684,
+            644,
+            333,
+            1046
+          ],
+          "accepted": true
+        },
+        {
+          "body_chars": 16244,
+          "content_chars": 15187,
+          "message_chars": [
+            10950,
+            1684,
+            644,
+            333,
+            1046,
+            530
+          ],
+          "accepted": false
+        },
+        {
+          "body_chars": 16020,
+          "content_chars": 15016,
+          "message_chars": [
+            10950,
+            1684,
+            644,
+            333,
+            1046,
+            359
+          ],
+          "accepted": false
+        }
+      ],
+      "selection": {
+        "evidence_ids": [],
+        "note_ids": [],
+        "deferred": [
+          "ev-dd051fd22c3195f8bfe3"
+        ],
+        "estimated_body_chars": 15662,
+        "reason": "reserve latest feedback; retain notes; recall; unseen evidence; edit prerequisites"
+      }
+    },
+    {
+      "request_number": 5,
+      "fit_attempts": [
+        {
+          "body_chars": 15722,
+          "content_chars": 14743,
+          "message_chars": [
+            10950,
+            1684,
+            644,
+            96,
+            1369
+          ],
+          "accepted": true
+        },
+        {
+          "body_chars": 16304,
+          "content_chars": 15273,
+          "message_chars": [
+            10950,
+            1684,
+            644,
+            96,
+            1369,
+            530
+          ],
+          "accepted": false
+        },
+        {
+          "body_chars": 16080,
+          "content_chars": 15102,
+          "message_chars": [
+            10950,
+            1684,
+            644,
+            96,
+            1369,
+            359
+          ],
+          "accepted": false
+        }
+      ],
+      "selection": {
+        "evidence_ids": [],
+        "note_ids": [],
+        "deferred": [
+          "ev-dd051fd22c3195f8bfe3"
+        ],
+        "estimated_body_chars": 15722,
+        "reason": "reserve latest feedback; retain notes; recall; unseen evidence; edit prerequisites"
+      }
+    },
+    {
+      "request_number": 6,
+      "fit_attempts": [
+        {
+          "body_chars": 19324,
+          "content_chars": 18160,
+          "message_chars": [
+            10950,
+            1684,
+            4182,
+            40,
+            1304
+          ],
+          "accepted": false
+        },
+        {
+          "body_chars": 18615,
+          "content_chars": 17510,
+          "message_chars": [
+            10950,
+            1684,
+            4182,
+            40,
+            654
+          ],
+          "accepted": false
+        },
+        {
+          "body_chars": 18388,
+          "content_chars": 17310,
+          "message_chars": [
+            10950,
+            1684,
+            4182,
+            40,
+            454
+          ],
+          "accepted": false
+        },
+        {
+          "body_chars": 18236,
+          "content_chars": 17160,
+          "message_chars": [
+            10950,
+            1684,
+            4182,
+            40,
+            304
+          ],
+          "accepted": false
+        }
+      ],
+      "error": "CONTEXT_FIXED_OVERFLOW: task, tools and recent feedback exceed budget",
+      "stalled_requests": 2,
+      "recent_results_chars": 3380
+    }
+  ]
+}
