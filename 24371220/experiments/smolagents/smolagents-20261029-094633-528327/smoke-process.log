@@ -1,0 +1,21 @@
+【产物自检通过】case01_bug_fix：日志、补丁、修改范围和过程检查合格；仍需确认完整 pytest 测试全部通过。
+{
+  "ok": true,
+  "case": "case01_bug_fix",
+  "changed": [
+    "calc.py"
+  ],
+  "agent_exit_code": 0,
+  "patch_matches": true,
+  "errors": [],
+  "process": {
+    "checks": {
+      "observable_write": true,
+      "baseline_test": true,
+      "post_tests": true
+    },
+    "passed": true,
+    "failed_checks": [],
+    "max_request_chars": 14820
+  }
+}
