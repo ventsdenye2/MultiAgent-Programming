@@ -1,0 +1,17 @@
+usage: agent.py [-h] --task TASK --repo REPO --model MODEL [--auto]
+                [--context-mode {evidence,upstream}]
+                [--profile {auto,basic,generic,source,paper}]
+                [--allow ALLOW [ALLOW ...]] [--config CONFIG]
+
+CLI and run artifacts; all autonomous decisions execute in official CodeAgent.
+
+options:
+  -h, --help            show this help message and exit
+  --task TASK
+  --repo REPO
+  --model MODEL
+  --auto
+  --context-mode {evidence,upstream}
+  --profile {auto,basic,generic,source,paper}
+  --allow ALLOW [ALLOW ...]
+  --config CONFIG

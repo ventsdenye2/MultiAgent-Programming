@@ -321,3 +321,80 @@ def test_real_source_first_write_directly_reuses_mechanisms_without_notes(tmp_pa
         assert any(event['event'] == 'file_read' and event['path'] == rel and i < first_write
                    for i, event in enumerate(events))
     assert not any(event['event'] == 'agent_error' for event in events)
+
+
+
+def _source_working_set_fixture(tmp_path, build_session, oversized=False):
+    repo = tmp_path / 'source-working-set'
+    repo.mkdir()
+    targets = ['deepinfer/environ.py', 'deepinfer/logger.py', 'deepinfer/engine/stats_logger.py']
+    with tarfile.open(MATERIALS / '公开任务/题目2/DeepInfer-774ce244.tar.gz') as archive:
+        for rel in targets:
+            member = next(m for m in archive.getmembers() if m.name.endswith('/' + rel))
+            target = repo / rel
+            target.parent.mkdir(parents=True, exist_ok=True)
+            target.write_bytes(archive.extractfile(member).read())
+    if oversized:
+        logger = repo / 'deepinfer/logger.py'
+        logger.write_text(logger.read_text() + '\n# ' + 'Oversized surrounding comment. ' * 2000 + '\n')
+    task = (MATERIALS / '公开任务/题目2/task.md').read_text(encoding='utf-8')
+    session, context, agent, model = build_session('source', repo, task)
+    for rel in targets:
+        session.invoke('read_file', {'path': rel})
+    return session, context, agent, model
+
+
+def test_source_surrounding_ranges_remain_across_turns_and_expire_with_version(tmp_path, build_session):
+    session, context, agent, model = _source_working_set_fixture(tmp_path, build_session)
+    required = set().union(*session.evidence.required.values())
+    messages = context.build(agent.memory, model)
+    session.evidence.mark_exposed({'messages': [m.dict() for m in messages]}, response(code('print(1)')), 1)
+    assert required.issubset(session.evidence.current)
+    ranges = [session.invoke('read_range', {'path': 'deepinfer/environ.py', 'start_line': 95, 'end_line': 230})]
+    messages = context.build(agent.memory, model)
+    session.evidence.mark_exposed({'messages': [m.dict() for m in messages]}, response(code('print(2)')), 2)
+    for path, start, end in [('deepinfer/environ.py', 1, 30),
+                             ('deepinfer/logger.py', 1, 32), ('deepinfer/logger.py', 69, 96)]:
+        ranges.append(session.invoke('read_range', {'path': path, 'start_line': start, 'end_line': end}))
+    for number in (3, 4):
+        messages = context.build(agent.memory, model)
+        body = {'messages': [m.dict() for m in messages]}
+        assert model.estimate(messages) <= 32000
+        assert all(contains(body, item['content']) for item in ranges)
+        assert all(contains(body, session.evidence.items[eid].text) for eid in required)
+        # A containing range replaces a complete mechanism rather than adding
+        # a second copy; mechanisms not fully contained remain independently.
+        assert all(sum(text.count(session.evidence.items[eid].text)
+                       for msg in messages for text in strings(msg.content)) == 1 for eid in required)
+        session.evidence.mark_exposed(body, response(code(f'print({number})')), number)
+        assert required.issubset(session.evidence.current)
+        assert not session.evidence.pending
+    old_ids = {eid for item in ranges if item['path'] == 'deepinfer/environ.py' for eid in item['evidence_ids']}
+    environ = session.contract.repo / 'deepinfer/environ.py'
+    environ.write_text(environ.read_text() + '\n# New source version.\n')
+    session.evidence.refresh()
+    assert all(not session.evidence.items[eid].valid for eid in old_ids)
+    messages = context.build(agent.memory, model)
+    assert not old_ids.intersection(context.last_manifest['evidence_ids'])
+    assert not session.evidence.source_reused('deepinfer/environ.py')
+
+
+def test_oversized_surrounding_range_cannot_evict_required_source_mechanisms(tmp_path, build_session):
+    session, context, agent, model = _source_working_set_fixture(tmp_path, build_session, oversized=True)
+    required = set().union(*session.evidence.required.values())
+    messages = context.build(agent.memory, model)
+    session.evidence.mark_exposed({'messages': [m.dict() for m in messages]}, response(code('print(1)')), 1)
+    logger = session.contract.repo / 'deepinfer/logger.py'
+    surrounding = session.invoke('read_range', {'path': 'deepinfer/logger.py', 'start_line': 1,
+                                               'end_line': len(logger.read_text().splitlines())})
+    assert len(surrounding['content']) > 32000
+    for number in (2, 3):
+        messages = context.build(agent.memory, model)
+        body = {'messages': [m.dict() for m in messages]}
+        assert model.estimate(messages) <= 32000
+        assert all(contains(body, session.evidence.items[eid].text) for eid in required)
+        assert not contains(body, surrounding['content'])
+        assert set(surrounding['evidence_ids']).issubset(session.evidence.pending)
+        session.evidence.mark_exposed(body, response(code(f'print({number})')), number)
+        assert required.issubset(session.evidence.current)
+        assert set(surrounding['evidence_ids']).issubset(session.evidence.pending)

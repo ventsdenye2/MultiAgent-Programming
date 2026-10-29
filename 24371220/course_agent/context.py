@@ -158,7 +158,16 @@ class EvidenceContext:
         reuse = valid[-6:] if self.session.contract.profile not in {'source', 'paper'} else []
         priorities = list(dict.fromkeys(self.store.pending + required_unseen + unseen +
                                        self.store.source_priorities(selected_notes) + reuse))
-        priorities = self.store.covering_first(priorities)
+        if self.session.contract.profile == 'source':
+            # Reserve the required mechanisms before optional surrounding
+            # ranges. Existing evidence is the working set; no new state is
+            # needed to keep an explicitly read range across turns.
+            required = self.store.source_priorities(selected_notes)
+            ranges = [eid for eid in reversed(valid)
+                      if self.store.items[eid].source in self.session.contract.required_reads]
+            priorities = list(dict.fromkeys(required + self.store.pending + required_unseen + unseen + ranges))
+        else:
+            priorities = self.store.covering_first(priorities)
         recovery = []
         if self.session.contract.profile == 'paper':
             actions = [step for step in memory.steps if isinstance(step, ActionStep)]
@@ -190,10 +199,40 @@ class EvidenceContext:
                               eid in self.store.notes[k]['evidence_ids'] for k in selected_notes)
             if represented and eid not in unseen and eid not in self.store.pending and eid not in recovery:
                 continue
+            if self.session.contract.profile == 'source':
+                # A complete surrounding range may replace already selected
+                # same-version mechanisms, but only if the replacement fits.
+                covered = [i for i, (other, _, _) in enumerate(offered)
+                           if self.store.items[other].source == item.source
+                           and self.store.items[other].version == item.version
+                           and len(self.store.items[other].text) < len(item.text)
+                           and self.store.items[other].text in item.text]
+                if covered:
+                    candidate = message(self.store.render(eid))
+                    kept = [m for i, m in enumerate(original_payload) if i not in covered]
+                    notes_payload = [m for m in payload if m not in original_payload]
+                    if self.fits(base + notes_payload + kept + [candidate], model):
+                        original_payload = kept + [candidate]
+                        payload = notes_payload + original_payload
+                        selected = [v for i, v in enumerate(selected) if i not in covered] + [eid]
+                        offered = [v for i, v in enumerate(offered) if i not in covered] + [(eid, 0, len(item.text))]
+                        continue
+                    # Never sacrifice a required mechanism for a range that
+                    # cannot fit in full.
+                    if eid in unseen or eid in self.store.pending:
+                        deferred.append(eid)
+                    continue
             # An explicit range can already contain a required mechanism.
             # Send that original once; the HTTP hook recognizes every covered
             # item and acknowledges its pending demand from the actual body.
-            if contains([m.dict() for m in original_payload], item.text):
+            already_contained = (any(self.store.items[other].source == item.source
+                                     and self.store.items[other].version == item.version
+                                     and item.text in self.store.items[other].text
+                                     for other, start, end in offered
+                                     if start == 0 and end == len(self.store.items[other].text))
+                                 if self.session.contract.profile == 'source'
+                                 else contains([m.dict() for m in original_payload], item.text))
+            if already_contained:
                 continue
             part = self._part(eid, base + payload, model)
             if part is None:

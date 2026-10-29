@@ -1,0 +1,8 @@
+{
+  "required_pages": 52,
+  "pages_exposed": 52,
+  "reading_requests_simulated": 27,
+  "max_body_chars": 29865,
+  "five_notes_reused": true,
+  "provider_calls": 0
+}
