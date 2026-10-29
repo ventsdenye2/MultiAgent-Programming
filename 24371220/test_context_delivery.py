@@ -6,7 +6,7 @@ import shutil
 import httpx
 import pytest
 
-from course_agent.audit import BudgetExceeded, contains, request_size
+from course_agent.audit import contains, request_size
 from course_agent.cli import execute
 from smolagents.memory import ActionStep, TaskStep
 from smolagents.models import MessageRole
@@ -136,13 +136,11 @@ def test_repeated_large_feedback_never_grows_fixed_status(tmp_path):
         agent.memory.steps.append(ActionStep(step_number=1, timing=Timing(start_time=0, end_time=1),
                                             code_action='read_file(path="a.py")', observations='huge log\n' * 10000,
                                             error=AgentExecutionError(error, agent.logger)))
-        for _ in range(6):
+        for _ in range(8):
             messages = context.build(agent.memory, model)
             assert model.measure(messages)['course_content_chars'] <= 15000
             assert contains({'messages': [m.dict() for m in messages]}, error)
-        with pytest.raises(BudgetExceeded, match='NO_PROGRESS'):
-            context.build(agent.memory, model)
-        assert context.stalled_requests == 6
+        assert session.progress_monitor.stalled_steps == 0, 'Building context is not an executed model step'
     finally:
         model.close()
         log.close()
@@ -364,6 +362,55 @@ def test_assistant_history_contains_only_complete_code_actions(tmp_path):
         parsed = context._recent(agent.memory, (len(code(action)), 80, 80))
         assert parsed[0].role == MessageRole.ASSISTANT
         assert parsed[0].content[0]['text'] == code(action)
+    finally:
+        model.close()
+        log.close()
+
+
+def test_distinct_executor_work_is_not_a_repeated_action_cycle(tmp_path):
+    replies = [f'value_{n} = {n}' for n in range(8)]
+    replies.append(DONE + "\nfinal_answer('Variables prepared')")
+    rc, result, calls, events = run_script(tmp_path, replies, {'max_steps':10})
+    assert rc == 0, result
+    assert len(calls) == 9
+    assert not any(e['event'] == 'run_stalled' for e in events)
+
+
+def test_progress_snapshot_and_final_gate_share_verified_versions(tmp_path):
+    session, context, agent, model, log = make_session(tmp_path, profile='basic', config={
+        'read_only':False, 'editable':['a.py'], 'context_chars':15000})
+    try:
+        (session.contract.repo / 'a.py').write_text('value = 1\n')
+        session.invoke('update_plan', {'items':[{'title':'Edit and verify','status':'doing'}]})
+        session.invoke('read_file', {'path':'a.py'})
+        agent.memory.steps.append(TaskStep(session.task_prompt()))
+        messages = context.build(agent.memory, model)
+        session.evidence.mark_exposed({'messages':[m.dict() for m in messages]}, response(code('print(1)')), 1)
+        session.baselines.add(('python','-m','pytest','-q'))
+        before = session.progress()
+        assert before.phase == 'edit'
+        assert before.remaining == session.status()['remaining']
+        with pytest.raises(ValueError, match='make the requested change'):
+            session.check_final('premature', agent.memory)
+        session.invoke('write_file', {'path':'a.py','content':'value = 2\n',
+                                     'expected_hash':session.workspace.current_hash('a.py')})
+        assert before.phase == 'edit', 'A previously captured snapshot is immutable'
+        assert session.progress().phase == 'verify'
+        session.verified[('python','-m','pytest','-q')] = session.versions()
+        assert session.progress().phase == 'finish_plan'
+        session.invoke('update_plan', {'items':[{'title':'Edit and verify','status':'done'}]})
+        assert session.progress().ready_for_final
+        assert session.check_final('verified', agent.memory)
+        session.two_stage = True
+        assert not session.progress().ready_for_final
+        with pytest.raises(ValueError, match='intermediate first-subtask'):
+            session.check_final('missing subtask proof', agent.memory)
+        session.stage_one_verified = True
+        assert session.progress().ready_for_final
+        (session.contract.repo / 'a.py').write_text('value = 3\n')
+        assert session.progress().phase == 'verify'
+        with pytest.raises(ValueError, match='verify current files'):
+            session.check_final('stale verification', agent.memory)
     finally:
         model.close()
         log.close()

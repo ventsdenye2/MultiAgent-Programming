@@ -2,11 +2,13 @@
 import json
 import ast
 import re
+from inspect import Parameter, Signature
 
 from smolagents import Tool
 
 from .evidence import EvidenceStore
 from .policy import PYTEST
+from .progress import TaskProgress
 from .workspace import TOOL_SPECS, WorkspaceTools
 
 
@@ -36,18 +38,17 @@ class CourseTool(Tool):
         self.output_type = 'object'
         self.parameters = {'type': 'object', 'properties': properties, 'required': required,
                            'additionalProperties': False}
+        self.call_signature = Signature([
+            Parameter(key, Parameter.POSITIONAL_OR_KEYWORD,
+                      default=Parameter.empty if key in required else None)
+            for key in self.inputs
+        ])
         super().__init__()
 
     def forward(self, *args, **kwargs):
-        # Official Tool.__call__ forwards ordinary Python positional arguments.
-        # Bind those using the same parameter order advertised in the prompt.
-        if len(args) > len(self.inputs):
-            raise TypeError(f'{self.name} accepts at most {len(self.inputs)} positional arguments')
-        for key, value in zip(self.inputs, args):
-            if key in kwargs:
-                raise TypeError(f'{self.name} received multiple values for {key}')
-            kwargs[key] = value
-        arguments = {k: v for k, v in kwargs.items() if v is not None}
+        # Use Python's binding rules for the same signature exposed by Tool.
+        bound = self.call_signature.bind(*args, **kwargs)
+        arguments = {k:v for k,v in bound.arguments.items() if v is not None}
         WorkspaceTools._validate_schema_value(arguments, self.parameters)
         return self.session.invoke(self.name, arguments)
 
@@ -68,6 +69,7 @@ class CourseSession:
         self.agent = None
         self.context = None
         self.audit = None
+        self.progress_monitor = None
         self.last_test = None
         self.two_stage = contract.profile == 'basic' and '净额' in contract.text and 'CSV' in contract.text
         self.stage_one_verified = False
@@ -84,24 +86,38 @@ class CourseSession:
             result.append(CourseTool(self, name, description, properties, required))
         return result
 
-    def status(self, compact=False):
+    def progress(self):
+        """One state snapshot; presentation and completion use the same facts."""
         missing = self.evidence.missing(first_write=not self.writes) if not self.writes or self.contract.profile == 'paper' else []
         versions = self.versions()
-        missing += ['baseline: ' + ' '.join(cmd) for cmd in self.contract.verify_commands
-                    if tuple(cmd) not in self.baselines]
-        if self.contract.require_write:
-            targets = self.contract.editable if self.contract.profile == 'source' else set()
-            if targets - self.writes:
-                missing.append('remaining source changes: ' + ', '.join(sorted(targets - self.writes)))
-            elif not self.writes:
-                missing.append('make the requested change')
-        missing += ['verify current files: ' + ' '.join(cmd) for cmd in self.contract.verify_commands
-                    if self.verified.get(tuple(cmd)) != versions]
-        if not self.plan or any(item['status'] != 'done' for item in self.plan):
-            missing.append('finish all plan items after their work and checks')
-        data = {'plan': self.plan, 'remaining': missing, 'changed_files': sorted(self.writes),
-                'requests_left': self.contract.max_calls - (self.audit.calls if self.audit else 0),
-                'pending_recall': self.evidence.pending[:20],
+        commands = tuple(tuple(cmd) for cmd in self.contract.verify_commands)
+        unverified = tuple(cmd for cmd in commands if self.verified.get(cmd) != versions)
+        targets = self.contract.editable if self.contract.require_write and self.contract.profile == 'source' else set()
+        return TaskProgress(
+            plan=tuple((i['title'], i['status']) for i in self.plan),
+            evidence_missing=tuple(missing),
+            baseline_missing=tuple(cmd for cmd in commands if cmd not in self.baselines),
+            changes_missing=tuple(sorted(targets - self.writes)),
+            require_change=self.contract.require_write and not self.writes,
+            verification_missing=unverified, changed_files=tuple(sorted(self.writes)),
+            baseline_done=len(self.baselines), verified_current=len(commands)-len(unverified),
+            required_checks=len(commands),
+            requests_left=self.contract.max_calls-(self.audit.calls if self.audit else 0),
+            completion_missing=('intermediate first-subtask verification and plan update',)
+            if self.two_stage and not self.stage_one_verified else ())
+
+    def progress_token(self):
+        """Material progress for the run monitor; plan churn alone is not work."""
+        return json.dumps({
+            'reads':self.evidence.full_reads, 'exposed':sorted(self.evidence.exposed),
+            'ranges':self.evidence.received_ranges, 'notes':self.evidence.notes,
+            'writes':self.written_versions, 'baselines':sorted(self.baselines),
+            'verified':sorted((list(cmd), versions) for cmd,versions in self.verified.items()),
+            'ready':self.progress().ready_for_final,
+        }, ensure_ascii=False, sort_keys=True)
+
+    def status(self, compact=False):
+        data = {**self.progress().status(), 'pending_recall': self.evidence.pending[:20],
                 'repeated_action_count': self.evidence.repeats,
                 'next_step': 'write notes after each batch; then complete changes and verification' if self.contract.profile == 'paper'
                 else 'read full files once; summarize complete mechanisms; edit; verify'}
@@ -157,15 +173,13 @@ class CourseSession:
         return {'items': self.plan}
 
     def _before_write(self, args):
-        if not self.plan:
+        progress = self.progress()
+        if not progress.plan:
             raise ValueError('Establish a plan before editing')
-        absent = [cmd for cmd in self.contract.verify_commands if tuple(cmd) not in self.baselines]
-        if absent:
-            raise ValueError('Run baseline verification before editing: ' + str(absent))
-        if not self.writes or self.contract.profile == 'paper':
-            missing = self.evidence.missing(first_write=not self.writes)
-            if missing:
-                raise ValueError('Edit prerequisites: ' + '; '.join(missing))
+        if progress.baseline_missing:
+            raise ValueError('Run baseline verification before editing: ' + str(progress.baseline_missing))
+        if progress.evidence_missing:
+            raise ValueError('Edit prerequisites: ' + '; '.join(progress.evidence_missing))
         if self.contract.profile in {'basic', 'generic'}:
             target = args['path']
             current = self.workspace.current_hash(target)
@@ -247,9 +261,7 @@ class CourseSession:
             raise
 
     def check_final(self, answer, memory, agent=None):
-        remaining = self.status(compact=True)['remaining']
-        if self.two_stage and not self.stage_one_verified:
-            remaining.append('intermediate first-subtask verification and plan update')
+        remaining = self.progress().remaining
         if remaining:
             raise ValueError('; '.join(remaining))
         return True

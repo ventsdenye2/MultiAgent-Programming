@@ -1,0 +1,210 @@
+{
+  "archive_name": "agent实践-长上下文.zip",
+  "archive_sha256": "18c95af73d98b85adc9910e08429f888d6bc03ee32e0ac6b59e63ded18db82ac",
+  "files": [
+    {
+      "path": "eval_paper.py",
+      "archive_sha256": "ab3d4093c7084548792ee45bfac268b93e9ee213d064c80bdb6048d7bc0d83d7",
+      "workspace_sha256": "ab3d4093c7084548792ee45bfac268b93e9ee213d064c80bdb6048d7bc0d83d7",
+      "match": true
+    },
+    {
+      "path": "requirements.txt",
+      "archive_sha256": "b8abe3dded025ee4f6676554cea66de39bc1b6e07816b1f074ffc5ed9a9a649c",
+      "workspace_sha256": "b8abe3dded025ee4f6676554cea66de39bc1b6e07816b1f074ffc5ed9a9a649c",
+      "match": true
+    },
+    {
+      "path": "eval_deepinfer.py",
+      "archive_sha256": "6c92bf811ff06bfbad9d41485036a29702d25b00c26a48cd1ede6bf312d5f53c",
+      "workspace_sha256": "6c92bf811ff06bfbad9d41485036a29702d25b00c26a48cd1ede6bf312d5f53c",
+      "match": true
+    },
+    {
+      "path": "eval_efficiency.py",
+      "archive_sha256": "7762d0cde32f9e3f103cd29993925514a4658a21a16734fc42bdba485d80b4ba",
+      "workspace_sha256": "7762d0cde32f9e3f103cd29993925514a4658a21a16734fc42bdba485d80b4ba",
+      "match": true
+    },
+    {
+      "path": "README.md",
+      "archive_sha256": "51f7d6a0472041407c20f7f8cb2ce499ad6dab8bfbf9e0fd40b6845b2b174303",
+      "workspace_sha256": "51f7d6a0472041407c20f7f8cb2ce499ad6dab8bfbf9e0fd40b6845b2b174303",
+      "match": true
+    },
+    {
+      "path": "prepare.py",
+      "archive_sha256": "a4058e34e67fe37ad26abc80863e5fae02bb4ccba0f5bf417b79428866fb9051",
+      "workspace_sha256": "a4058e34e67fe37ad26abc80863e5fae02bb4ccba0f5bf417b79428866fb9051",
+      "match": true
+    },
+    {
+      "path": "题目/实践02-长论文阅读与开源代码修改.md",
+      "archive_sha256": "cbd2a5ae9a7eab76aa8d47a653d4912ff5665ff11c2ab919e3754e8b3c7f66ad",
+      "workspace_sha256": "cbd2a5ae9a7eab76aa8d47a653d4912ff5665ff11c2ab919e3754e8b3c7f66ad",
+      "match": true
+    },
+    {
+      "path": "tools/common.py",
+      "archive_sha256": "7d6e8db8cad8867e5c4960f1d0e35cb159f2d890c47f50a978763b3d3e674223",
+      "workspace_sha256": "7d6e8db8cad8867e5c4960f1d0e35cb159f2d890c47f50a978763b3d3e674223",
+      "match": true
+    },
+    {
+      "path": "tools/development.py",
+      "archive_sha256": "ce37bd184fdb5416758f03d3fb94de15026311125a8c746f77fb586b0b7d7e1b",
+      "workspace_sha256": "ce37bd184fdb5416758f03d3fb94de15026311125a8c746f77fb586b0b7d7e1b",
+      "match": true
+    },
+    {
+      "path": "tools/deepinfer.py",
+      "archive_sha256": "9ec144e0627fe28e0193149a3b16cc7996bb5d67d35a2aa29cb643d80b906d85",
+      "workspace_sha256": "9ec144e0627fe28e0193149a3b16cc7996bb5d67d35a2aa29cb643d80b906d85",
+      "match": true
+    },
+    {
+      "path": "tools/proxy.py",
+      "archive_sha256": "b601c4d7e00ec2837beadd2550109159cdea73d8b94bd5826382e0f0b8eea1ca",
+      "workspace_sha256": "b601c4d7e00ec2837beadd2550109159cdea73d8b94bd5826382e0f0b8eea1ca",
+      "match": true
+    },
+    {
+      "path": "tools/test_logger.py",
+      "archive_sha256": "faa8753c7e9d503309b2e5e1f953fdeaf296d46426d95cac70671c83cf604b9f",
+      "workspace_sha256": "faa8753c7e9d503309b2e5e1f953fdeaf296d46426d95cac70671c83cf604b9f",
+      "match": true
+    },
+    {
+      "path": "tools/paper.py",
+      "archive_sha256": "69b3bf2ae93a2caaa70d9828add6f017b60f87515223100188098dd23ff71236",
+      "workspace_sha256": "69b3bf2ae93a2caaa70d9828add6f017b60f87515223100188098dd23ff71236",
+      "match": true
+    },
+    {
+      "path": "tools/check_logger.py",
+      "archive_sha256": "0a0af58ba90329fb0eb1b1a586d43f4e35690002e3c6ee8a582421d4c501b839",
+      "workspace_sha256": "0a0af58ba90329fb0eb1b1a586d43f4e35690002e3c6ee8a582421d4c501b839",
+      "match": true
+    },
+    {
+      "path": "tools/load_logger.py",
+      "archive_sha256": "bc6dba3d9a369dfc5768df1de5556e738639e2b0cd4204c1236654942b8dd2d1",
+      "workspace_sha256": "bc6dba3d9a369dfc5768df1de5556e738639e2b0cd4204c1236654942b8dd2d1",
+      "match": true
+    },
+    {
+      "path": "tools/source_context.py",
+      "archive_sha256": "5f80b30c5a40fc5968a6bf392b4ab94fe80de6fc8506b6229af549d8c3539cd2",
+      "workspace_sha256": "5f80b30c5a40fc5968a6bf392b4ab94fe80de6fc8506b6229af549d8c3539cd2",
+      "match": true
+    },
+    {
+      "path": "tools/__init__.py",
+      "archive_sha256": "ec59c7cd3707fe5c22eadbdd1d6bc4624f70160e788ea8b92e96635ca50f2e8c",
+      "workspace_sha256": "ec59c7cd3707fe5c22eadbdd1d6bc4624f70160e788ea8b92e96635ca50f2e8c",
+      "match": true
+    },
+    {
+      "path": "tools/test_logging_config.py",
+      "archive_sha256": "3db0482752a6f16523c5939429494bfd29aa4c5be611d72d89619302241d49bd",
+      "workspace_sha256": "3db0482752a6f16523c5939429494bfd29aa4c5be611d72d89619302241d49bd",
+      "match": true
+    },
+    {
+      "path": "说明/日志与产物规范.md",
+      "archive_sha256": "0c1f377adfc14614d8765e2e6d230abdd613a71c343c178c5c2683540f14b775",
+      "workspace_sha256": "0c1f377adfc14614d8765e2e6d230abdd613a71c343c178c5c2683540f14b775",
+      "match": true
+    },
+    {
+      "path": ".gitignore",
+      "archive_sha256": "bf00729b636c71eae76b90296275df76cc03293b2d1bdbd5b81243bcf73f2a23",
+      "workspace_sha256": "bf00729b636c71eae76b90296275df76cc03293b2d1bdbd5b81243bcf73f2a23",
+      "match": true
+    },
+    {
+      "path": "公开任务/题目1/来源与校验.json",
+      "archive_sha256": "527f5a46f0563a37a05ba20cdc817e029cd6ce3c6c0f543d3ef6a963fd81d89d",
+      "workspace_sha256": "527f5a46f0563a37a05ba20cdc817e029cd6ce3c6c0f543d3ef6a963fd81d89d",
+      "match": true
+    },
+    {
+      "path": "公开任务/题目1/来源与许可.md",
+      "archive_sha256": "f3f86d4bbe33204264157e586db7740fc73bc55e515976661d383fe35b0e6ada",
+      "workspace_sha256": "f3f86d4bbe33204264157e586db7740fc73bc55e515976661d383fe35b0e6ada",
+      "match": true
+    },
+    {
+      "path": "公开任务/题目1/repo/paper.pdf",
+      "archive_sha256": "b4767423c79db69ae7138f4c0aed7733af6385e0a370da21ad7d6fe029d7fb8c",
+      "workspace_sha256": "b4767423c79db69ae7138f4c0aed7733af6385e0a370da21ad7d6fe029d7fb8c",
+      "match": true
+    },
+    {
+      "path": "公开任务/题目1/repo/paper.json",
+      "archive_sha256": "06555c84cc484e6dcef2a1488dcc63cceb470aa6bbed2a1e471759e72425d095",
+      "workspace_sha256": "06555c84cc484e6dcef2a1488dcc63cceb470aa6bbed2a1e471759e72425d095",
+      "match": true
+    },
+    {
+      "path": "公开任务/题目1/repo/test_report.py",
+      "archive_sha256": "19b61aab979ac4d22a24412bc5e1f119a13a21649a126aeadb7b28d72d252fa2",
+      "workspace_sha256": "19b61aab979ac4d22a24412bc5e1f119a13a21649a126aeadb7b28d72d252fa2",
+      "match": true
+    },
+    {
+      "path": "公开任务/题目1/repo/report.json",
+      "archive_sha256": "ca3d163bab055381827226140568f3bef7eaac187cebd76878e0b63e9e442356",
+      "workspace_sha256": "ca3d163bab055381827226140568f3bef7eaac187cebd76878e0b63e9e442356",
+      "match": true
+    },
+    {
+      "path": "公开任务/题目1/repo/read_pdf.py",
+      "archive_sha256": "1887ddc34f91f82c0c465697a7571e8e69043f70147346c8f76d94d27d34a72e",
+      "workspace_sha256": "1887ddc34f91f82c0c465697a7571e8e69043f70147346c8f76d94d27d34a72e",
+      "match": true
+    },
+    {
+      "path": "公开任务/题目1/task.md",
+      "archive_sha256": "232f850bd33e74574723cb41cb70a0c6261583ee352ae6f8044801a2b195f08d",
+      "workspace_sha256": "232f850bd33e74574723cb41cb70a0c6261583ee352ae6f8044801a2b195f08d",
+      "match": true
+    },
+    {
+      "path": "公开任务/题目2/来源与校验.json",
+      "archive_sha256": "172f7dc2347abd0c4a9805ba698341ebf90159d18bb72698256a8a15d290e201",
+      "workspace_sha256": "172f7dc2347abd0c4a9805ba698341ebf90159d18bb72698256a8a15d290e201",
+      "match": true
+    },
+    {
+      "path": "公开任务/题目2/read_source.py",
+      "archive_sha256": "a904c4c49180041bcfd4c92dcdc2015495fb078b15f264af4a010dc53ea1c261",
+      "workspace_sha256": "a904c4c49180041bcfd4c92dcdc2015495fb078b15f264af4a010dc53ea1c261",
+      "match": true
+    },
+    {
+      "path": "公开任务/题目2/来源与许可.md",
+      "archive_sha256": "a3daa60094a7fbed4a143b80876a49c8d04a67dbde8cdaca7f36f26eae929307",
+      "workspace_sha256": "a3daa60094a7fbed4a143b80876a49c8d04a67dbde8cdaca7f36f26eae929307",
+      "match": true
+    },
+    {
+      "path": "公开任务/题目2/task.md",
+      "archive_sha256": "81bc1fb32f5347bee3b20559ed1dc3f2f1150c0e845eac814ef260438afe5294",
+      "workspace_sha256": "81bc1fb32f5347bee3b20559ed1dc3f2f1150c0e845eac814ef260438afe5294",
+      "match": true
+    },
+    {
+      "path": "公开任务/题目2/DeepInfer-774ce244.tar.gz",
+      "archive_sha256": "c9abab9e0b1ef08a9e76b213c8aa72dfc002aefa72db479e7a6e6938c1d6987c",
+      "workspace_sha256": "c9abab9e0b1ef08a9e76b213c8aa72dfc002aefa72db479e7a6e6938c1d6987c",
+      "match": true
+    },
+    {
+      "path": "rank_efficiency.py",
+      "archive_sha256": "6f991e27e6a71d9ee73ccfb1256ba3c30fc3d86a9b5deba47e4cff884d4d6970",
+      "workspace_sha256": "6f991e27e6a71d9ee73ccfb1256ba3c30fc3d86a9b5deba47e4cff884d4d6970",
+      "match": true
+    }
+  ]
+}

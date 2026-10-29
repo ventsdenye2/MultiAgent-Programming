@@ -4,7 +4,7 @@ import json
 from smolagents.memory import ActionStep, TaskStep
 from smolagents.models import ChatMessage, MessageRole
 
-from .audit import BudgetExceeded, strings
+from .audit import strings
 
 
 def message(text, role=MessageRole.USER):
@@ -28,8 +28,6 @@ class EvidenceContext:
         self.log = session.log
         self.last_manifest = {}
         self.capacity = 0
-        self.progress_signature = None
-        self.stalled_requests = 0
 
     def fits(self, messages, model):
         spec = self.session.contract
@@ -76,27 +74,19 @@ class EvidenceContext:
                                   clip(str(error_step.error), limits[2])))
         return result
 
-    def _status(self, limit):
+    def _status(self, progress, limit):
         """A sending projection, never a second copy of tool results."""
-        status = self.session.status(compact=True)
         unseen = [eid for eid, item in self.store.items.items() if item.valid and eid not in self.store.exposed]
-        versions = self.session.versions()
-        verified = sum(self.session.verified.get(tuple(cmd)) == versions
-                       for cmd in self.session.contract.verify_commands)
-        data = {'next_requirement': clip(status['remaining'][0], 180) if status['remaining'] else 'final_answer when ready',
-                'remaining_count': len(status['remaining']), 'requests_left': status['requests_left'],
-                'baseline_done': len(self.session.baselines),
-                'changed_files': sorted(self.session.writes), 'verified_current': verified}
-        if status['remaining'] == ['finish all plan items after their work and checks']:
-            data['next_requirement'] = 'Changes and current-file tests are complete. Mark the existing plan done, then final_answer.'
+        data = progress.prompt_state()
         optional = {'unseen_evidence_count': len(unseen), 'queued_recall_count': len(self.store.pending)}
         if unseen or self.store.pending:
             optional['delivery'] = 'Pending originals are sent below; do not reread unchanged files.'
-        if self.stalled_requests >= 2:
-            optional['no_progress_requests'] = self.stalled_requests
-        if 'last_response_classification' in status:
-            data['last_response_classification'] = status['last_response_classification']
-        if status['requests_left'] <= 6:
+        monitor = self.session.progress_monitor
+        if monitor and monitor.stalled_steps >= 2:
+            optional['no_progress_steps'] = monitor.stalled_steps
+        if self.session.audit and self.session.audit.last_classification not in {None, 'ok'}:
+            data['last_response_classification'] = self.session.audit.last_classification
+        if progress.requests_left <= 6:
             optional['delivery_reserve'] = 'Complete notes/changes, verify, then final_answer.'
         for key, value in optional.items():
             if len(json.dumps({**data, key:value}, ensure_ascii=False)) <= limit:
@@ -129,37 +119,23 @@ class EvidenceContext:
     def build(self, memory, model):
         self.store.refresh()
         self.store.offered = []
+        progress = self.session.progress()
         fixed = memory.system_prompt.to_messages()
         for step in memory.steps:
             if isinstance(step, TaskStep):
                 fixed.extend(step.to_messages())
-        if self.session.plan:
+        if progress.plan:
             # The plan API requires exact titles/order. This is required control
             # state, not optional feedback: never hide it while enforcing it.
             fixed.append(message('Current plan; retain these exact titles and order, update status only:\n' +
-                                 json.dumps(self.session.plan, ensure_ascii=False)))
-        progress = repr((self.store.full_reads, sorted(self.store.exposed), self.store.received_ranges,
-                         self.store.notes, self.session.written_versions, self.session.verified,
-                         sorted(self.session.baselines), not self.session.status(compact=True)['remaining']))
-        self.stalled_requests = self.stalled_requests + 1 if progress == self.progress_signature else 0
-        self.progress_signature = progress
-        if self.stalled_requests >= 6:
-            self.log('context_blocked', reason='no_progress', consecutive_requests=self.stalled_requests)
-            raise BudgetExceeded('NO_PROGRESS: six actions without new reading, notes, changes or verification')
-        prefix = recent = None
-        minimum = None
-        # Start with the smallest usable frame. A larger frame that merely fits
-        # must not consume the source reservation before evidence is considered.
-        for status_limit, limits in ((300, (80, 160, 256)),):
-            trial_prefix, trial_recent = fixed + [self._status(status_limit)], self._recent(memory, limits)
-            if self.fits(trial_prefix + trial_recent, model):
-                prefix, recent, minimum = trial_prefix, trial_recent, limits
-                break
-        if prefix is None:
-            size = model.measure(trial_prefix + trial_recent)
+                                 json.dumps(progress.plan_items, ensure_ascii=False)))
+        minimum = (80, 160, 256)
+        prefix, recent = fixed + [self._status(progress, 300)], self._recent(memory, minimum)
+        base = prefix + recent
+        if not self.fits(base, model):
+            size = model.measure(base)
             self.log('context_blocked', reason='fixed', **size)
             raise ValueError('CONTEXT_FIXED_OVERFLOW: minimum sending view exceeds budget: ' + json.dumps(size))
-        base = prefix + recent
         payload, selected_notes, optional_notes = [], [], []
         read_pages = {self.store.items[eid].page for eid in self.store.exposed if self.store.items[eid].valid}
         paper_reading = (self.session.contract.profile == 'paper' and
