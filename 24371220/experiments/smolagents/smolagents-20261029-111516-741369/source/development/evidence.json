@@ -1,0 +1,221 @@
+{
+  "evidence": [
+    {
+      "id": "ev-8554ade850ecb397d235",
+      "source": "deepinfer/environ.py",
+      "version": "fe2c531989c419f0b51b169a07f5ed826dcec7f95c0c5bc3a351805923c4f218",
+      "locator": "lines:31-94",
+      "text": "class EnvVar[T]:\n    \"\"\"Non-data descriptor, resolved on first access\"\"\"\n\n    __slots__ = (\"name\", \"init\", \"lock\")\n\n    def __init__(self, init: Callable[[str | None], T]) -> None:\n        self.init = init\n        self.lock = threading.Lock()\n\n    def __set_name__(self, owner: type[envs], name: str) -> None:\n        self.name = name\n        _descriptors[name] = self\n\n    def __get__(self, instance: envs | None, owner: type[envs]) -> T:\n        with self.lock:\n            cached = owner.__dict__.get(self.name, self)\n            if cached is not self:\n                return cached\n            try:\n                value = self.init(os.getenv(self.name))\n            except Exception as e:  # noqa: BLE001\n                try:\n                    raise type(e)(f\"{self.name}: {e}\") from e\n                except TypeError:\n                    raise e from None\n            setattr(owner, self.name, value)\n            return value\n\n    # -- Factory Methods --\n\n    @staticmethod\n    def int(*, default: int = 0) -> EnvVar[int]:\n        return EnvVar(lambda v: _int(v, default))\n\n    @staticmethod\n    def float(*, default: float = 0.0) -> EnvVar[float]:\n        return EnvVar(lambda v: _float(v, default))\n\n    @staticmethod\n    def bool(*, default: bool = False) -> EnvVar[bool]:\n        return EnvVar(lambda v: _bool(v, \"1\" if default else \"0\"))\n\n    @staticmethod\n    def str(*, default: str = \"\") -> EnvVar[str]:\n        return EnvVar(lambda v: _str(v, default))\n\n    @staticmethod\n    def str_or_none() -> EnvVar[str | None]:\n        return EnvVar(lambda v: v)\n\n    @staticmethod\n    def int_or_none() -> EnvVar[int | None]:\n        return EnvVar(lambda v: int(v) if v is not None else None)\n\n    @staticmethod\n    def choice(*, default: str | None = None, choices: tuple[str, ...]) -> EnvVar[str | None]:\n        def _init(v: str | None) -> str | None:\n            if v is None:\n                return default\n            if v not in choices:\n                raise ValueError(f\"{v!r}, must be one of {choices}\")\n            return v\n\n        return EnvVar(_init)",
+      "required": true,
+      "page": null,
+      "valid": false,
+      "atomic": true
+    },
+    {
+      "id": "ev-246c6e73a88cb2c9edc3",
+      "source": "deepinfer/environ.py",
+      "version": "fe2c531989c419f0b51b169a07f5ed826dcec7f95c0c5bc3a351805923c4f218",
+      "locator": "lines:213-215",
+      "text": "def rearm(name: str) -> None:\n    \"\"\"Rearm specific descriptor, will resolve again on next access.\"\"\"\n    setattr(envs, name, _descriptors[name])",
+      "required": true,
+      "page": null,
+      "valid": false,
+      "atomic": true
+    },
+    {
+      "id": "ev-ef45633e339c9e5fd82f",
+      "source": "deepinfer/environ.py",
+      "version": "fe2c531989c419f0b51b169a07f5ed826dcec7f95c0c5bc3a351805923c4f218",
+      "locator": "lines:218-221",
+      "text": "def rearm_all() -> None:\n    \"\"\"Rearm all descriptors.\"\"\"\n    for name, descriptor in _descriptors.items():\n        setattr(envs, name, descriptor)",
+      "required": true,
+      "page": null,
+      "valid": false,
+      "atomic": true
+    },
+    {
+      "id": "ev-30754515034e43628968",
+      "source": "deepinfer/logger.py",
+      "version": "5b8f8d9947de692353609c1fc2851097d24f9b6ba6004dce1dbfa394dc6d3ec8",
+      "locator": "lines:33-68",
+      "text": "class NewLineFormatter(logging.Formatter):\n    \"\"\"Adds logging prefix to newlines to align multi-line messages, optionally with microsecond precision.\n\n    若 use_color=True 且输出为 TTY，会给日志级别染色（不影响写入文件的纯净度）。\n    \"\"\"\n\n    def __init__(\n        self,\n        fmt: str,\n        datefmt: str | None = None,\n        high_precision: bool = False,\n        use_color: bool = False,\n    ) -> None:\n        super().__init__(fmt, datefmt)\n        self.high_precision = high_precision\n        self.use_color = use_color\n\n    def formatTime(self, record: logging.LogRecord, datefmt: str | None = None) -> str:\n        if not self.high_precision:\n            # 调用 logging.Formatter 默认实现，保持原来的格式\n            return super().formatTime(record, datefmt)\n        # ===== 高精度模式：在普通 datefmt 基础上附加微秒 =====\n        base = time.strftime(datefmt or _DATE_FORMAT, self.converter(record.created))\n        return f\"{base}.{record.msecs * 1000:06.0f}\"\n\n    def format(self, record: logging.LogRecord) -> str:\n        msg = super().format(record)\n        # 快速路径：单行日志（绝大多数情况）无需做对齐处理\n        if \"\\n\" in msg and record.message:\n            prefix = msg[: msg.find(record.message)]\n            msg = msg.replace(\"\\n\", \"\\n\" + prefix)\n        if self.use_color:\n            color = _LEVEL_COLORS.get(record.levelno)\n            if color:\n                msg = f\"{color}{msg}{_COLOR_RESET}\"\n        return msg",
+      "required": true,
+      "page": null,
+      "valid": true,
+      "atomic": true
+    },
+    {
+      "id": "ev-d69c220908cefeeae7f2",
+      "source": "deepinfer/logger.py",
+      "version": "5b8f8d9947de692353609c1fc2851097d24f9b6ba6004dce1dbfa394dc6d3ec8",
+      "locator": "lines:75-90",
+      "text": "def _setup_logger() -> None:\n    global _default_handler\n    _root_logger.setLevel(logging.DEBUG)\n    if _default_handler is None:\n        _default_handler = logging.StreamHandler(sys.stdout)\n        _default_handler.flush = sys.stdout.flush\n        _default_handler.setLevel(logging.INFO)\n        _root_logger.addHandler(_default_handler)\n\n    fmt = NewLineFormatter(\n        _FORMAT,\n        datefmt=_DATE_FORMAT,\n        use_color=sys.stdout.isatty(),\n    )\n    _default_handler.setFormatter(fmt)\n    _root_logger.propagate = False",
+      "required": true,
+      "page": null,
+      "valid": true,
+      "atomic": true
+    },
+    {
+      "id": "ev-51e2fa3b9fc1aebe86f3",
+      "source": "deepinfer/logger.py",
+      "version": "5b8f8d9947de692353609c1fc2851097d24f9b6ba6004dce1dbfa394dc6d3ec8",
+      "locator": "lines:96-107",
+      "text": "def init_logger(name: str) -> logging.Logger:\n    logger = logging.getLogger(name)\n    logger.setLevel(logging.DEBUG)\n    # name 在 \"deepinfer\" 层级下时，通过 propagate 冒泡复用 root logger 的 handler，\n    # 无需自己挂 handler。否则回退到直接挂 handler（避免重复添加）。\n    if name == \"deepinfer\" or name.startswith(\"deepinfer.\"):\n        logger.propagate = True\n    else:\n        logger.propagate = False\n        if _default_handler is not None and _default_handler not in logger.handlers:\n            logger.addHandler(_default_handler)\n    return logger",
+      "required": true,
+      "page": null,
+      "valid": true,
+      "atomic": true
+    },
+    {
+      "id": "ev-ddb5be78a5cf6218d616",
+      "source": "deepinfer/engine/stats_logger.py",
+      "version": "9ef93c3930d6dd8d889d4ba69558a85459c2210ae0714d5073c3b4328c8e7cb9",
+      "locator": "lines:116-126",
+      "text": "def _log_worker(q: queue.SimpleQueue[list[str] | None]) -> None:\n    need_sleep = True\n    for msgs in iter(q.get, None):\n        try:\n            if need_sleep:\n                time.sleep((dist.get_rank() % 8) * 0.005)\n            for m in msgs:\n                logger.info(m)\n            need_sleep = q.empty()  # we skip sleep when q has backlog\n        except Exception:\n            traceback.print_exc()",
+      "required": true,
+      "page": null,
+      "valid": true,
+      "atomic": true
+    },
+    {
+      "id": "ev-c8859274b7c70879ff16",
+      "source": "deepinfer/engine/stats_logger.py",
+      "version": "9ef93c3930d6dd8d889d4ba69558a85459c2210ae0714d5073c3b4328c8e7cb9",
+      "locator": "lines:342-344",
+      "text": "def _emit_logs(self, msgs: list[str]) -> None:\n        \"\"\"投递日志到固定 worker 线程，主线程不触碰 logger 的 handler 锁。\"\"\"\n        self._log_queue.put(msgs)",
+      "required": true,
+      "page": null,
+      "valid": true,
+      "atomic": true
+    },
+    {
+      "id": "ev-5a3c8c1ca1246b61b813",
+      "source": "deepinfer/engine/stats_logger.py",
+      "version": "9ef93c3930d6dd8d889d4ba69558a85459c2210ae0714d5073c3b4328c8e7cb9",
+      "locator": "lines:20-20",
+      "text": "from deepinfer.logger import init_logger",
+      "required": true,
+      "page": null,
+      "valid": true,
+      "atomic": true
+    },
+    {
+      "id": "ev-5abfdabfb975754c6683",
+      "source": "deepinfer/engine/stats_logger.py",
+      "version": "9ef93c3930d6dd8d889d4ba69558a85459c2210ae0714d5073c3b4328c8e7cb9",
+      "locator": "lines:29-29",
+      "text": "logger = init_logger(__name__)",
+      "required": true,
+      "page": null,
+      "valid": true,
+      "atomic": true
+    },
+    {
+      "id": "ev-bae57eeee18761001e03",
+      "source": "deepinfer/logger.py",
+      "version": "5b8f8d9947de692353609c1fc2851097d24f9b6ba6004dce1dbfa394dc6d3ec8",
+      "locator": "lines:1-32",
+      "text": "# SPDX-License-Identifier: Apache-2.0\n# Derived from vLLM; modified by DeepSeek.\n\n# Adapted from\n# https://github.com/skypilot-org/skypilot/blob/86dc0f6283a335e4aa37b3c10716f90999f48ab6/sky/sky_logging.py\n\"\"\"Logging configuration for DeepInfer.\"\"\"\n\nimport datetime\nimport logging\nimport multiprocessing\nimport os\nimport sys\nimport threading\nimport time\nfrom multiprocessing.context import ForkProcess, SpawnProcess\nfrom multiprocessing.process import BaseProcess\nfrom types import TracebackType\n\n_FORMAT = \"[%(levelname)s %(asctime)s %(filename)s:%(lineno)d] %(message)s\"\n_DATE_FORMAT = \"%m-%d %H:%M:%S\"\n\n# ANSI 颜色（仅在 TTY 输出时使用），按日志级别区分\n_LEVEL_COLORS = {\n    logging.DEBUG: \"\\033[36m\",  # cyan\n    logging.INFO: \"\\033[32m\",  # green\n    logging.WARNING: \"\\033[33m\",  # yellow\n    logging.ERROR: \"\\033[31m\",  # red\n    logging.CRITICAL: \"\\033[1;31m\",  # bold red\n}\n_COLOR_RESET = \"\\033[0m\"\n\n\n",
+      "required": false,
+      "page": null,
+      "valid": true,
+      "atomic": true
+    }
+  ],
+  "notes": {
+    "environ": {
+      "id": "environ",
+      "content": "environ.py: EnvVar is a non-data descriptor with __slots__ and a lock; __get__ checks owner.__dict__ for a cached value, else calls init(os.getenv(self.name)), wraps errors as f'{self.name}: {e}', and setattr caches result. Factory methods are staticmethods returning EnvVar(lambda v: ...). int_or_none returns int(v) if v is not None else None (no validation). rearm(name) does setattr(envs, name, _descriptors[name]). rearm_all() loops _descriptors. To add DEEPINFER_LOG_MAX_MESSAGE_CHARS with >=32 validation and non-bool, add a factory method returning EnvVar with a lambda that raises ValueError containing variable name.",
+      "sources": [
+        "deepinfer/environ.py"
+      ],
+      "evidence_ids": [
+        "ev-246c6e73a88cb2c9edc3",
+        "ev-8554ade850ecb397d235",
+        "ev-ef45633e339c9e5fd82f"
+      ],
+      "valid": false,
+      "request": 11
+    },
+    "logger_stats": {
+      "id": "logger_stats",
+      "content": "logger.py: NewLineFormatter.__init__(fmt, datefmt=None, high_precision=False, use_color=False) stores flags. format() calls super().format(record) producing full string with prefix and message; then adds prefix after newlines (record.message), applies color. To add budget: add keyword-only max_message_chars after 4 positional params, validate >=32 and not bool, save budget. In format(), truncate record.message portion before multi-line handling - must not mutate record.msg/args. _setup_logger creates handler once, always resets formatter with NewLineFormatter(_FORMAT, datefmt, use_color) - add max_message_chars=envs.DEEPINFER_LOG_MAX_MESSAGE_CHARS there. init_logger attaches _default_handler if not already present. stats_logger._log_worker iterates queue batches, calls logger.info(m) per message; change to logger.info(m, extra={'keep_full_message': True}).",
+      "sources": [
+        "deepinfer/engine/stats_logger.py",
+        "deepinfer/logger.py"
+      ],
+      "evidence_ids": [
+        "ev-30754515034e43628968",
+        "ev-51e2fa3b9fc1aebe86f3",
+        "ev-5a3c8c1ca1246b61b813",
+        "ev-5abfdabfb975754c6683",
+        "ev-c8859274b7c70879ff16",
+        "ev-d69c220908cefeeae7f2",
+        "ev-ddb5be78a5cf6218d616"
+      ],
+      "valid": true,
+      "request": 12
+    }
+  },
+  "exposed": [
+    "ev-30754515034e43628968",
+    "ev-51e2fa3b9fc1aebe86f3",
+    "ev-5a3c8c1ca1246b61b813",
+    "ev-5abfdabfb975754c6683",
+    "ev-bae57eeee18761001e03",
+    "ev-c8859274b7c70879ff16",
+    "ev-d69c220908cefeeae7f2",
+    "ev-ddb5be78a5cf6218d616"
+  ],
+  "received_ranges": {
+    "ev-30754515034e43628968": [
+      [
+        0,
+        1369
+      ]
+    ],
+    "ev-d69c220908cefeeae7f2": [
+      [
+        0,
+        534
+      ]
+    ],
+    "ev-51e2fa3b9fc1aebe86f3": [
+      [
+        0,
+        521
+      ]
+    ],
+    "ev-ddb5be78a5cf6218d616": [
+      [
+        0,
+        408
+      ]
+    ],
+    "ev-c8859274b7c70879ff16": [
+      [
+        0,
+        139
+      ]
+    ],
+    "ev-5a3c8c1ca1246b61b813": [
+      [
+        0,
+        40
+      ]
+    ],
+    "ev-5abfdabfb975754c6683": [
+      [
+        0,
+        30
+      ]
+    ],
+    "ev-bae57eeee18761001e03": [
+      [
+        0,
+        891
+      ]
+    ]
+  },
+  "full_read_ids": {}
+}

@@ -304,9 +304,15 @@ and its evidence_ids. Notes are source-version-bound; never invent sources or no
 before the first edit. A source note may replace original text only after its mechanisms were exposed.
 '''
         elif self.contract.profile == 'paper':
-            instructions += '''Cover every required page and update five section notes incrementally; section must be
-overview/reasoning/tool_use/multi_agent/outlook. After full coverage reuse all five notes together,
-write report.json, run the final tests and mark the plan done. Do not reread unchanged pages.
+            instructions += '''For the paper, repeat: receive one batch -> immediately update the relevant section notes -> next batch.
+Do NOT postpone notes until all pages have been read. Unnoted pages stay in context until you summarize them.
+Use read_pdf for page extraction; its results are also logged as the required read_pdf.py command.
+Keep exactly five evolving topics: overview/reasoning/tool_use/multi_agent/outlook. Preserve earlier verified
+facts, page numbers and useful exact quotations when updating a note. Cite every received page in at least
+one note; irrelevant pages can be summarized briefly. Prefer concise notes, about 300-800 characters each.
+You may write several notes and request the next batch in one action. Pending pages arrive automatically;
+do not reread unchanged pages or call task_status merely to advance the batch. Actual source blocks are below.
+After full coverage, reuse all five final notes together, write report.json, run final tests and mark the plan done.
 '''
         return (self.contract.text + '\n\nCourse execution contract:\n' +
                 json.dumps(self.contract.view(), ensure_ascii=False) + instructions)

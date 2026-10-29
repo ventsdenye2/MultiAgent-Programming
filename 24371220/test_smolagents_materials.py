@@ -168,6 +168,20 @@ def test_real_pdf_52_pages_fit_batched_and_five_notes_reused(tmp_path, build_ses
         body = {'messages': [m.dict() for m in messages]}
         session.evidence.mark_exposed(body, response(code('print(1)')), number)
         seen |= session.evidence.current
+        batch = session.evidence.unsummarized_pages()
+        assert batch
+        # Advancing the view alone must not erase an unrecorded batch. This
+        # catches the real failure that read 52 pages but kept only the end.
+        waiting = {'messages': [m.dict() for m in context.build(agent.memory, model)]}
+        assert all(contains(waiting, session.evidence.items[eid].text) for eid in batch)
+        assert not any(contains(waiting, session.evidence.items[eid].text)
+                       for eid in set(page_ids) - session.evidence.exposed)
+        assert 'write_note for the received PDF batch' in session.evidence.missing()[0]
+        topic = session.contract.topics[(number - 1) % 5]
+        note = ('Offline capacity note for ' + topic + '; retain facts, page locators and quotations. ').ljust(800, '.')
+        session.evidence.last_response = response(code(f'write_note(content={note!r})'))
+        session.invoke('write_note', {'title': topic, 'section': topic, 'content': note, 'evidence_ids': batch})
+        assert not session.evidence.unsummarized_pages()
         if set(page_ids).issubset(seen):
             break
     assert set(page_ids).issubset(seen), {'missing': len(set(page_ids) - seen), 'sizes': sizes}

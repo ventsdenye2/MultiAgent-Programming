@@ -134,15 +134,11 @@ class EvidenceContext:
             self.log('context_blocked', reason='fixed', **size)
             raise ValueError('CONTEXT_FIXED_OVERFLOW: minimum sending view exceeds budget: ' + json.dumps(size))
         payload, selected_notes, optional_notes = [], [], []
-        read_pages = {self.store.items[eid].page for eid in self.store.exposed if self.store.items[eid].valid}
-        paper_reading = (self.session.contract.profile == 'paper' and
-                         not set(self.session.contract.paper_pages).issubset(read_pages))
         for key, note in self.store.notes.items():
             if not note['valid']:
                 continue
             candidate = message(f"Model-authored note {key}, sources={note['sources']}:\n{note['content']}")
-            required = self.session.contract.profile == 'source' or (
-                self.session.contract.profile == 'paper' and not paper_reading)
+            required = self.session.contract.profile in {'source', 'paper'}
             if required and self.fits(base + payload + [candidate], model):
                 payload.append(candidate)
                 selected_notes.append(key)
@@ -160,6 +156,13 @@ class EvidenceContext:
         reuse = valid[-6:] if self.session.contract.profile not in {'source', 'paper'} else []
         priorities = list(dict.fromkeys(self.store.pending + required_unseen + unseen +
                                        self.store.source_priorities(selected_notes) + reuse))
+        if self.session.contract.profile == 'paper':
+            unnoted = self.store.unsummarized_pages()
+            if unnoted:
+                # Do not erase a received batch to make room for unread pages.
+                # The model decides what to record in its five evolving notes;
+                # only that successful summarization releases the batch.
+                priorities = unnoted + [eid for eid in priorities if self.store.items[eid].page is None]
         selected, deferred, offered = [], [], []
         for eid in priorities:
             item = self.store.items[eid]

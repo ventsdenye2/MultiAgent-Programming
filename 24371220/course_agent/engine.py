@@ -4,6 +4,7 @@ from smolagents.agents import CODEAGENT_RESPONSE_FORMAT
 from smolagents.memory import ActionStep, FinalAnswerStep
 
 from .audit import BudgetExceeded
+from .prompts import course_prompt_templates
 
 
 class ProgressMonitor:
@@ -65,6 +66,9 @@ def make_agent(model, session, context=None, code_block_tags='markdown', use_str
             session.log("finish", summary=str(step.output))
 
     agent = CourseCodeAgent(tools=session.tools(), model=model, context=context,
+                            prompt_templates=course_prompt_templates()
+                            if use_structured_outputs_internally and session.contract.profile in {'source', 'paper'}
+                            else None,
                             max_steps=session.contract.max_calls, planning_interval=None,
                             final_answer_checks=[session.check_final],
                             step_callbacks=[record_step], add_base_tools=False,
