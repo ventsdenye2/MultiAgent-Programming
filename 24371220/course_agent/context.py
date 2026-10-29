@@ -29,11 +29,11 @@ class EvidenceContext:
         self.last_manifest = {}
         self.capacity = 0
 
-    def fits(self, messages, model):
+    def fits(self, messages, model, reserve=0):
         spec = self.session.contract
         size = model.measure(messages)
-        return (size['chars'] <= min(spec.soft_chars, spec.hard_chars - 128)
-                and (not spec.content_chars or size['course_content_chars'] <= spec.content_chars - 128))
+        return (size['chars'] <= min(spec.soft_chars, spec.hard_chars - 128) - reserve
+                and (not spec.content_chars or size['course_content_chars'] <= spec.content_chars - 128 - reserve))
 
     def _recent(self, memory, limits=(1800, 2200, 4000)):
         actions = [step for step in memory.steps if isinstance(step, ActionStep)]
@@ -97,7 +97,11 @@ class EvidenceContext:
         """Fit an ordinary-file range; PDF pages and source mechanisms stay whole."""
         item = self.store.items[eid]
         start, end = self.store.delivery_range(eid)
-        if self.fits(messages + [message(self.store.render(eid, start, end))], model):
+        # Admission of a new PDF batch reserves room for the next request's
+        # changing progress and minimum error feedback. Previously admitted,
+        # unsummarized pages can use that reserve to remain visible.
+        reserve = 768 if item.page is not None and eid not in self.store.exposed else 0
+        if self.fits(messages + [message(self.store.render(eid, start, end))], model, reserve):
             return start, end
         if item.atomic or end - start < 128:
             return None

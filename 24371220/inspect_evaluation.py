@@ -30,6 +30,12 @@ def inspect_log(path, actions=0):
     checks = [dict(argv=e.get('argv'), rc=e.get('rc'), timed_out=e.get('timed_out', False))
               for e in events if e.get('event') == 'command_result']
     tools = [e for e in events if e.get('event') in {'tool_call', 'tool_error', 'agent_error'}]
+    evidence = {e['id']: e for e in events if e.get('event') == 'evidence'}
+    presented = set().union(*(set(e.get('fully_exposed_ids', e.get('evidence_ids', [])))
+                              for e in events if e.get('event') == 'context_exposure'))
+    pages = sorted({evidence[eid]['page'] for eid in presented
+                    if eid in evidence and evidence[eid].get('page') is not None})
+    section_notes = [e for e in events if e.get('event') == 'section_note']
     result = {
         'path': str(path), 'requests': len(requests), 'responses': len(responses),
         'model_errors': len(errors), 'usage_complete': complete,
@@ -42,6 +48,11 @@ def inspect_log(path, actions=0):
                                   for e in requests), default=0),
         'response_classes': dict(Counter(e.get('classification', 'unknown') for e in responses)),
         'counts': dict(counts), 'commands': checks,
+        'paper_pages_exposed': pages, 'paper_page_count': len(pages),
+        'section_note_count': len(section_notes),
+        'section_topics': sorted({e['section'] for e in section_notes}),
+        'changed_files': sorted({e['path'] for e in events if e.get('event') == 'file_write' and e.get('changed')}),
+        'agent_error_types': dict(Counter(e.get('error_type') for e in events if e.get('event') == 'agent_error')),
         'recent_actions': [{'event': e['event'], 'tool': e.get('tool'),
                             'error_type': e.get('error_type'), 'error': e.get('error')}
                            for e in tools[-6:]],

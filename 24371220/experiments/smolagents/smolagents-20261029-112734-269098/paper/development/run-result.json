@@ -1,0 +1,19 @@
+{
+  "status": "failed",
+  "engine": "smolagents",
+  "upstream_version": "1.26.0",
+  "context_mode": "evidence",
+  "reason": "MAX_STEPS_NO_EXTRA_REQUEST",
+  "usage": {
+    "requests": 40,
+    "complete": true,
+    "prompt_tokens": 306251,
+    "completion_tokens": 11645
+  },
+  "remaining": [
+    "PDF pages not yet sent: 52",
+    "make the requested change",
+    "verify current files: python -m pytest -q",
+    "finish all plan items after their work and checks"
+  ]
+}

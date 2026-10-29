@@ -22,6 +22,16 @@ EXTRA_TOOLS = {
     'task_status': ('Show the current plan, remaining reading, notes, changes and verification, plus evidence ids.', {}, []),
 }
 
+COURSE_TOOL_DETAILS = {
+    'read_file': " Returns dict: content (text), file_hash, evidence_ids. Read result['content'], not result[:N].",
+    'read_range': ' Returns dict: content (text), file_hash, evidence_ids.',
+    'read_symbol': ' Returns dict: content (text), file_hash, evidence_ids.',
+    'run_command': ' argv is a Python list[str]. Returns dict: rc, stdout (text), stderr, timed_out.',
+    'read_pdf': ' Returns dict: pages (list of {page,text}), evidence_ids, delivery. '
+                'Extract the required range once; complete pages are sent in bounded batches. '
+                'Queued ids are not yet read. Do not print all pages.',
+}
+
 
 class CourseTool(Tool):
     skip_forward_signature_validation = True  # Official wrapper-tool extension point.
@@ -75,9 +85,11 @@ class CourseSession:
         return {path: self.workspace.current_hash(path) for path in sorted(self.contract.editable)}
 
     def tools(self):
-        result = [CourseTool(self, name, spec['description'], spec['parameters']['properties'],
+        detailed = self.contract.profile in {'source', 'paper'}
+        excluded = {'list_files', 'search_code', 'read_range', 'read_symbol', 'replace_text'} if self.contract.profile == 'paper' else {'read_pdf'}
+        result = [CourseTool(self, name, spec['description'] + (COURSE_TOOL_DETAILS.get(name, '') if detailed else ''), spec['parameters']['properties'],
                              spec['parameters']['required']) for name, spec in TOOL_SPECS.items()
-                  if name != 'read_pdf' or self.contract.profile == 'paper']
+                  if name not in excluded]
         for name, (description, properties, required) in EXTRA_TOOLS.items():
             result.append(CourseTool(self, name, description, properties, required))
         paper = self.contract.profile == 'paper'
@@ -86,7 +98,9 @@ class CourseSession:
             'content': {'type': 'string', 'description':
                         f'One contiguous string literal, 20..{1500 if paper else 3000} characters. '
                         'No adjacent string fragments, concatenation or variable; text must occur verbatim in your response.'},
-            'evidence_ids': {'type': 'array', 'description': 'Ids of current-version originals already sent to you.'},
+            'evidence_ids': {'type': 'array', 'items': {'type': 'string'}, 'description':
+                             "Python list[str], e.g. ['ev-abc'], not a string. Copy ids from delivered Evidence headers."
+                             if detailed else 'Ids of current-version originals already sent to you.'},
         }
         note_required = ['title', 'content', 'evidence_ids']
         if paper:
@@ -304,15 +318,18 @@ and its evidence_ids. Notes are source-version-bound; never invent sources or no
 before the first edit. A source note may replace original text only after its mechanisms were exposed.
 '''
         elif self.contract.profile == 'paper':
-            instructions += '''For the paper, repeat: receive one batch -> immediately update the relevant section notes -> next batch.
-Do NOT postpone notes until all pages have been read. Unnoted pages stay in context until you summarize them.
-Use read_pdf for page extraction; its results are also logged as the required read_pdf.py command.
-Keep exactly five evolving topics: overview/reasoning/tool_use/multi_agent/outlook. Preserve earlier verified
-facts, page numbers and useful exact quotations when updating a note. Cite every received page in at least
-one note; irrelevant pages can be summarized briefly. Prefer concise notes, about 300-800 characters each.
-You may write several notes and request the next batch in one action. Pending pages arrive automatically;
-do not reread unchanged pages or call task_status merely to advance the batch. Actual source blocks are below.
-After full coverage, reuse all five final notes together, write report.json, run final tests and mark the plan done.
+            instructions += '''Paper workflow:
+1. Plan, baseline pytest, read report.json and paper.json; call read_pdf ONCE for the task's full page range.
+This extracts to local storage and logs read_pdf.py; only bounded batches reach the model. Do not print all pages.
+2. After EACH delivered batch, update relevant topic notes. Unnoted pages remain visible; summarizing releases
+the next batch automatically. Do not call read_pdf/task_status just to advance. Cite every received page at
+least once; summarize irrelevant pages briefly. Use only evidence ids from delivered Evidence headers.
+3. Preserve earlier verified facts when updating notes. Each final topic note must contain its two answers,
+PDF page numbers and continuous exact quotations supporting ALL answer items, within 1500 characters.
+Use write_note(title=..., content=..., evidence_ids=['ev-...'], section='overview') with the actual topic.
+4. After full coverage, reuse all five final notes, build report.json across actions if needed, test, finish plan.
+This agent already has versioned evidence, bounded page selection, note reuse, tools and verification.
+Multi-agent collaboration and training are future suggestions, not implemented features.
 '''
         return (self.contract.text + '\n\nCourse execution contract:\n' +
                 json.dumps(self.contract.view(), ensure_ascii=False) + instructions)

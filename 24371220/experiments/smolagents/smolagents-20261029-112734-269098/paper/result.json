@@ -1,0 +1,41 @@
+{
+  "task": "题目1自测",
+  "passed": false,
+  "checks": {
+    "学生程序与报告生成": "agent 退出码 1，查看 agent-console.log；未产生 file_write，尚未完成指定文件；先检查 agent-console.log 中的退出原因；report.json 与初始内容相同或为空，尚未生成阅读报告",
+    "其他文件保持原样": true
+  },
+  "score": 0.0,
+  "section_scores": {
+    "overview": 0.0,
+    "reasoning": 0.0,
+    "tool_use": 0.0,
+    "multi_agent": 0.0,
+    "outlook": 0.0
+  },
+  "question_scores": {
+    "overview": {
+      "categories": 0.0,
+      "search_methods": 0.0
+    },
+    "reasoning": {
+      "self_consistency_selection": 0.0,
+      "tot_search": 0.0
+    },
+    "tool_use": {
+      "toolformer_tools": 0.0,
+      "toolbench_api_count": 0.0
+    },
+    "multi_agent": {
+      "camel_prompting": 0.0,
+      "generative_agents_evaluators": 0.0
+    },
+    "outlook": {
+      "agenda_topics": 0.0,
+      "shared_foundations": 0.0
+    }
+  },
+  "scoring_enabled": false,
+  "max_score": 5,
+  "report_status": "not_generated"
+}

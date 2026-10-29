@@ -1,0 +1,19 @@
+{
+  "status": "failed",
+  "engine": "smolagents",
+  "upstream_version": "1.26.0",
+  "context_mode": "evidence",
+  "reason": "AgentGenerationError: Error in generating model output:\nConnection error.",
+  "usage": {
+    "requests": 4,
+    "complete": false,
+    "prompt_tokens": 369,
+    "completion_tokens": 135
+  },
+  "remaining": [
+    "source read but not yet fully sent: calc.py",
+    "make the requested change",
+    "verify current files: python -m pytest -q",
+    "finish all plan items after their work and checks"
+  ]
+}

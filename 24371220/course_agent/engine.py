@@ -73,6 +73,7 @@ def make_agent(model, session, context=None, code_block_tags='markdown', use_str
                             final_answer_checks=[session.check_final],
                             step_callbacks=[record_step], add_base_tools=False,
                             additional_authorized_imports=['json'],
+                            executor_kwargs={'timeout_seconds': session.workspace.command_timeout + 5},
                             code_block_tags=code_block_tags,
                             use_structured_outputs_internally=use_structured_outputs_internally,
                             stream_outputs=False, max_print_outputs_length=1000000,

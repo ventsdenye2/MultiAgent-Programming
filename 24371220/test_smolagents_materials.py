@@ -178,13 +178,14 @@ def test_real_pdf_52_pages_fit_batched_and_five_notes_reused(tmp_path, build_ses
                        for eid in set(page_ids) - session.evidence.exposed)
         assert 'write_note for the received PDF batch' in session.evidence.missing()[0]
         topic = session.contract.topics[(number - 1) % 5]
-        note = ('Offline capacity note for ' + topic + '; retain facts, page locators and quotations. ').ljust(800, '.')
+        note = ('Offline capacity note for ' + topic + '; retain facts, page locators and quotations. ').ljust(1500, '.')
         session.evidence.last_response = response(code(f'write_note(content={note!r})'))
         session.invoke('write_note', {'title': topic, 'section': topic, 'content': note, 'evidence_ids': batch})
         assert not session.evidence.unsummarized_pages()
         if set(page_ids).issubset(seen):
             break
     assert set(page_ids).issubset(seen), {'missing': len(set(page_ids) - seen), 'sizes': sizes}
+    assert number <= 30, 'Reserve at least ten requests for setup, report delivery and verification'
     note_tool = next(tool for tool in session.tools() if tool.name == 'write_note')
     assert 'section' in note_tool.parameters['required']
     with pytest.raises(ValueError, match='20..1500'):

@@ -1,4 +1,5 @@
 """Run offline regressions with native Linux temporary files and save results."""
+import argparse
 import datetime
 import json
 import os
@@ -10,6 +11,9 @@ import tempfile
 
 
 def main():
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument('tests', nargs='*', help='Optional pytest files/node ids; defaults to the full offline suite')
+    args = parser.parse_args()
     if sys.platform != 'linux':
         raise SystemExit('Run this test launcher in WSL')
     root = Path(__file__).resolve().parent
@@ -22,8 +26,8 @@ def main():
         raise RuntimeError('Tests require native Linux temp files')
     env = os.environ.copy()
     env.update(TMPDIR=str(native), PYTHONDONTWRITEBYTECODE='1')
-    cmd = [sys.executable, '-m', 'pytest', '-q', 'test_smolagents.py', 'test_smolagents_materials.py',
-           'test_context_delivery.py',
+    tests = args.tests or ['test_smolagents.py', 'test_smolagents_materials.py', 'test_context_delivery.py']
+    cmd = [sys.executable, '-m', 'pytest', '-q', *tests,
            '--basetemp', str(native / 'pytest'), '--junitxml', str(out / 'junit.xml')]
     with (out / 'pytest.log').open('w', encoding='utf-8') as log:
         rc = subprocess.call(cmd, cwd=root, env=env, stdout=log, stderr=subprocess.STDOUT)

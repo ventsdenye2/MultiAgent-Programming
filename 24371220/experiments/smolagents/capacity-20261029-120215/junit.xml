@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="0" failures="1" skipped="0" tests="4" time="164.009" timestamp="2026-10-29T11:59:56.358453+08:00" hostname="VENTSDENYE5"><testcase classname="test_smolagents_materials" name="test_real_three_file_preedit_coverage_and_source_notes" time="50.161" /><testcase classname="test_smolagents_materials" name="test_real_pdf_52_pages_fit_batched_and_five_notes_reused" time="8.196"><failure message="assert []">tmp_path = PosixPath('/tmp/smolagents-capacity-20261029-120215/test_real_pdf_52_pages_fit_bat0')
+build_session = &lt;function build_session.&lt;locals&gt;.build at 0x7f3993801940&gt;
+
+    def test_real_pdf_52_pages_fit_batched_and_five_notes_reused(tmp_path, build_session):
+        assert shutil.which('pdftotext'), 'Run this course test in WSL with poppler-utils installed'
+        source = MATERIALS / '公开任务/题目1'
+        repo = tmp_path / 'repo'
+        repo.mkdir()
+        for name in ('paper.pdf', 'paper.json', 'read_pdf.py', 'report.json'):
+            shutil.copy2(source / 'repo' / name, repo / name)
+        task = (source / 'task.md').read_text(encoding='utf-8')
+        session, context, agent, model = build_session('paper', repo, task)
+        session.invoke('read_file', {'path': 'report.json'})
+        session.invoke('read_pdf', {'start_page': 1, 'end_page': 52})
+        page_ids = [eid for eid, e in session.evidence.items.items() if e.page]
+        assert len(page_ids) == 52
+        assert sum(len(session.evidence.items[eid].text) for eid in page_ids) &gt; 100000
+        session.evidence.recall(page_ids, 12000)
+        seen = set()
+        sizes = []
+        for number in range(1, 36):
+            messages = context.build(agent.memory, model)
+            sizes.append(model.estimate(messages))
+            body = {'messages': [m.dict() for m in messages]}
+            session.evidence.mark_exposed(body, response(code('print(1)')), number)
+            seen |= session.evidence.current
+            batch = session.evidence.unsummarized_pages()
+&gt;           assert batch
+E           assert []
+
+test_smolagents_materials.py:172: AssertionError</failure></testcase><testcase classname="test_smolagents_materials" name="test_recorded_source_note_uses_source_limit_and_source_log_event" time="0.098" /><testcase classname="test_smolagents_materials" name="test_large_source_cannot_evict_latest_error" time="0.037" /></testsuite></testsuites>
