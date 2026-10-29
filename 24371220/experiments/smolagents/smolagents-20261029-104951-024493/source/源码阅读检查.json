@@ -1,0 +1,98 @@
+{
+  "source_characters": 33763,
+  "first_write_event": -1,
+  "decision_request": null,
+  "groups": {
+    "deepinfer/logger.py": {
+      "source_sent_before_write": false,
+      "direct_reuse": false,
+      "model_note_reuse": false,
+      "notes": [],
+      "locations": [
+        {
+          "location": "NewLineFormatter",
+          "start_line": 33,
+          "end_line": 68,
+          "source_sent": false
+        },
+        {
+          "location": "_setup_logger",
+          "start_line": 75,
+          "end_line": 90,
+          "source_sent": false
+        },
+        {
+          "location": "init_logger",
+          "start_line": 96,
+          "end_line": 107,
+          "source_sent": false
+        }
+      ],
+      "source_requests": []
+    },
+    "deepinfer/environ.py": {
+      "source_sent_before_write": false,
+      "direct_reuse": false,
+      "model_note_reuse": false,
+      "notes": [],
+      "locations": [
+        {
+          "location": "EnvVar",
+          "start_line": 31,
+          "end_line": 94,
+          "source_sent": false
+        },
+        {
+          "location": "rearm",
+          "start_line": 213,
+          "end_line": 215,
+          "source_sent": false
+        },
+        {
+          "location": "rearm_all",
+          "start_line": 218,
+          "end_line": 221,
+          "source_sent": false
+        }
+      ],
+      "source_requests": []
+    },
+    "deepinfer/engine/stats_logger.py": {
+      "source_sent_before_write": false,
+      "direct_reuse": false,
+      "model_note_reuse": false,
+      "notes": [],
+      "locations": [
+        {
+          "location": "_log_worker",
+          "start_line": 116,
+          "end_line": 126,
+          "source_sent": false
+        },
+        {
+          "location": "_emit_logs",
+          "start_line": 342,
+          "end_line": 344,
+          "source_sent": false
+        },
+        {
+          "location": "第20行调用或初始化",
+          "start_line": 20,
+          "end_line": 20,
+          "source_sent": false
+        },
+        {
+          "location": "第29行调用或初始化",
+          "start_line": 29,
+          "end_line": 29,
+          "source_sent": false
+        }
+      ],
+      "source_requests": []
+    }
+  },
+  "checks": {
+    "相关源码真实读取并入模": "缺少完整阅读位置：deepinfer/logger.py:33～68（NewLineFormatter）、deepinfer/logger.py:75～90（_setup_logger）、deepinfer/logger.py:96～107（init_logger）、deepinfer/environ.py:31～94（EnvVar）、deepinfer/environ.py:213～215（rearm）、deepinfer/environ.py:218～221（rearm_all）、deepinfer/engine/stats_logger.py:116～126（_log_worker）、deepinfer/engine/stats_logger.py:342～344（_emit_logs）、deepinfer/engine/stats_logger.py:20～20（第20行调用或初始化）、deepinfer/engine/stats_logger.py:29～29（第29行调用或初始化）",
+    "首次修改复用相关源码或模型笔记": "未复用：deepinfer/logger.py、deepinfer/environ.py、deepinfer/engine/stats_logger.py"
+  }
+}

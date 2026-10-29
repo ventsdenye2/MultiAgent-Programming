@@ -194,7 +194,7 @@ class CourseSession:
         if progress.evidence_missing:
             raise ValueError('Edit prerequisites: ' + '; '.join(progress.evidence_missing))
         if self.contract.profile in {'basic', 'generic'}:
-            target = args['path']
+            target = self.workspace._norm_rel(args['path'])
             current = self.workspace.current_hash(target)
             if current != 'missing' and self.written_versions.get(target) != current:
                 if self.evidence.full_reads.get(target) != current:

@@ -12,7 +12,7 @@ def read_json(path):
         return None
 
 
-def inspect_log(path):
+def inspect_log(path, actions=0):
     events, invalid = [], 0
     for line in path.read_text(encoding='utf-8').splitlines():
         try:
@@ -30,7 +30,7 @@ def inspect_log(path):
     checks = [dict(argv=e.get('argv'), rc=e.get('rc'), timed_out=e.get('timed_out', False))
               for e in events if e.get('event') == 'command_result']
     tools = [e for e in events if e.get('event') in {'tool_call', 'tool_error', 'agent_error'}]
-    return {
+    result = {
         'path': str(path), 'requests': len(requests), 'responses': len(responses),
         'model_errors': len(errors), 'usage_complete': complete,
         'known_prompt_tokens': sum(u.get('prompt_tokens', 0) for u in usages),
@@ -48,15 +48,22 @@ def inspect_log(path):
         'result': read_json(path.with_name('run-result.json')),
         'invalid_lines': invalid,
     }
+    if actions:
+        result['model_actions'] = [{'request': e.get('number'),
+            'content': (e.get('response', {}).get('choices') or [{}])[0].get('message', {}).get('content')}
+            for e in responses[-actions:]]
+        result['delivery'] = [e for e in events if e.get('event') == 'context_selection'][-actions:]
+    return result
 
 
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('directory', type=Path)
     parser.add_argument('--save', type=Path)
+    parser.add_argument('--actions', type=int, default=0, help='Include the last N actual model actions and delivery manifests')
     args = parser.parse_args()
     protocol = read_json(args.directory / 'protocol.json') or {}
-    logs = [inspect_log(path) for path in sorted(args.directory.rglob('run.log'))
+    logs = [inspect_log(path, max(0, args.actions)) for path in sorted(args.directory.rglob('run.log'))
             if not any(part in {'workspace', 'submission', 'repo_after'} for part in path.relative_to(args.directory).parts)]
     report = {'stage': protocol.get('stage'), 'protocol_status': protocol.get('status'),
               'stage_results': protocol.get('results'), 'runs': logs,

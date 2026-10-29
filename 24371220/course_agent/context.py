@@ -4,7 +4,7 @@ import json
 from smolagents.memory import ActionStep, TaskStep
 from smolagents.models import ChatMessage, MessageRole
 
-from .audit import strings
+from .audit import contains, strings
 
 
 def message(text, role=MessageRole.USER):
@@ -157,9 +157,9 @@ class EvidenceContext:
         unseen = [eid for eid in valid if eid not in self.store.exposed]
         required_unseen = [eid for eid in unseen if self.store.items[eid].required or
                            self.store.items[eid].source in self.session.contract.required_reads]
-        reuse = valid[-6:] if self.session.contract.profile != 'paper' else []
+        reuse = valid[-6:] if self.session.contract.profile not in {'source', 'paper'} else []
         priorities = list(dict.fromkeys(self.store.pending + required_unseen + unseen +
-                                       self.store.source_priorities() + reuse))
+                                       self.store.source_priorities(selected_notes) + reuse))
         selected, deferred, offered = [], [], []
         for eid in priorities:
             item = self.store.items[eid]
@@ -169,9 +169,15 @@ class EvidenceContext:
                               eid in self.store.notes[k]['evidence_ids'] for k in selected_notes)
             if represented and eid not in unseen and eid not in self.store.pending:
                 continue
+            # An explicit range can already contain a required mechanism.
+            # Send that original once; the HTTP hook recognizes every covered
+            # item and acknowledges its pending demand from the actual body.
+            if contains([m.dict() for m in payload], item.text):
+                continue
             part = self._part(eid, base + payload, model)
             if part is None:
-                deferred.append(eid)
+                if eid in unseen or eid in self.store.pending:
+                    deferred.append(eid)
                 continue
             start, end = part
             payload.append(message(self.store.render(eid, start, end)))

@@ -9,7 +9,7 @@ import tarfile
 
 import pytest
 
-from course_agent.audit import contains
+from course_agent.audit import contains, strings
 from course_agent.policy import load_task
 from course_agent.recording import RunLog
 from course_agent.session import CourseSession
@@ -72,6 +72,27 @@ def test_real_three_file_preedit_coverage_and_source_notes(tmp_path, build_sessi
     with pytest.raises(ValueError, match='Edit prerequisites'):
         session._before_write({'path': targets[0]})
     all_ids = set(session.evidence.items)
+    # Unsummarized mechanisms remain available in consecutive requests. The
+    # previous implementation oscillated between sources: being present in
+    # the previous HTTP body incorrectly made them optional in the next one.
+    for number in range(1, 4):
+        messages = context.build(agent.memory, model)
+        body = {'messages': [m.dict() for m in messages]}
+        session.evidence.mark_exposed(body, response(code('print(1)')), number)
+        assert all_ids.issubset(session.evidence.current)
+        assert not session.evidence.missing()
+        assert not context.last_manifest['deferred']
+    # A requested range containing a mechanism should not duplicate that
+    # mechanism as another evidence block in the sending view.
+    item = next(item for item in session.evidence.items.values()
+                if item.source == 'deepinfer/logger.py' and 'class NewLineFormatter' in item.text)
+    start, end = map(int, item.locator.removeprefix('lines:').split('-'))
+    session.invoke('read_range', {'path': item.source, 'start_line': start, 'end_line': end + 1})
+    messages = context.build(agent.memory, model)
+    body = {'messages': [m.dict() for m in messages]}
+    assert sum(text.count(item.text) for msg in messages for text in strings(msg.content)) == 1
+    session.evidence.mark_exposed(body, response(code('print(1)')), 4)
+    assert not session.evidence.pending
     for number in range(1, 15):
         messages = context.build(agent.memory, model)
         assert model.estimate(messages) <= 32000

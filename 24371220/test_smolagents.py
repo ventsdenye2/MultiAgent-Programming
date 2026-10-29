@@ -253,6 +253,19 @@ def test_workspace_boundaries_and_stale_hash(tmp_path):
     (repo / 'a.py').write_text('before')
     tool = WorkspaceTools(repo, tmp_path / 'out', ['a.py'], lambda *a, **k: None)
     snapshot = tool.invoke('read_file', {'path': 'a.py'})
+    assert tool.invoke('read_file', {'path': str(repo / 'a.py')}) == snapshot
+    assert tool._resolve(str(repo), allow_dir=True) == repo
+    (repo / 'check.py').write_text("print('executed at repository root')\n")
+    tool.command_rules.append([sys.executable, 'check.py'])
+    ran = tool.invoke('run_command', {'argv': [sys.executable, 'check.py'], 'cwd': str(repo)})
+    assert ran['rc'] == 0 and ran['cwd'] == str(repo)
+    assert 'executed at repository root' in ran['stdout']
+    (tmp_path / 'outside.txt').write_text('outside root')
+    (repo / 'linked.txt').symlink_to(tmp_path / 'outside.txt')
+    for denied in (str(tmp_path / 'outside.txt'), str(repo / 'linked.txt'),
+                   str(repo / '.env'), str(repo / '.git/config')):
+        with pytest.raises(ValueError):
+            tool.invoke('read_file', {'path': denied})
     (repo / 'a.py').write_text('external change')
     with pytest.raises(ValueError, match='hash changed'):
         tool.invoke('write_file', {'path': 'a.py', 'content': 'overwrite', 'expected_hash': snapshot['file_hash']})

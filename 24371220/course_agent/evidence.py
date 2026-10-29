@@ -306,13 +306,21 @@ class EvidenceStore:
         return any(key in self.current_notes and note['valid'] and source in note['sources']
                    and needed.issubset(note['evidence_ids']) for key, note in self.notes.items())
 
-    def source_priorities(self):
+    def source_priorities(self, selected_notes):
+        """Keep an unsummarized working set across requests, not every other turn.
+
+        ``current`` describes the previous HTTP request. It cannot decide which
+        originals this new view may forget. Only a note included in this view
+        can replace the source mechanisms it represents.
+        """
         result = []
         for source in sorted(self.contract.required_reads):
-            if self.contract.profile == 'source' and not self.source_reused(source):
-                result.extend(sorted(self.required.get(source, set()) - self.exposed))
-                if self.required.get(source, set()).issubset(self.exposed):
-                    result.extend(sorted(self.required.get(source, set())))
+            needed = self.required.get(source, set())
+            represented = any(source in self.notes[key]['sources'] and
+                              needed.issubset(self.notes[key]['evidence_ids'])
+                              for key in selected_notes)
+            if self.contract.profile == 'source' and not represented:
+                result.extend(sorted(needed))
         return list(dict.fromkeys(result))
 
     def missing(self, first_write=True):

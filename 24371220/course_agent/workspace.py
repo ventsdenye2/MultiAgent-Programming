@@ -29,7 +29,7 @@ TOOL_SPECS = {
     "write_file": {"description": "Replace an editable text file after checking its current hash.", "parameters": _schema({"path": {"type": "string"}, "content": {"type": "string"}, "expected_hash": {"type": "string"}}, ["path", "content", "expected_hash"])},
     "replace_text": {"description": "Replace one unique text occurrence after checking its current hash.", "parameters": _schema({"path": {"type": "string"}, "old_text": {"type": "string"}, "new_text": {"type": "string"}, "expected_hash": {"type": "string"}}, ["path", "old_text", "new_text", "expected_hash"])},
     "read_pdf": {"description": "Read pages using the repository's read_pdf.py helper.", "parameters": _schema({"start_page": {"type": "integer"}, "end_page": {"type": "integer"}}, ["start_page"])},
-    "run_command": {"description": "Run one explicitly allowed argv command without a shell.", "parameters": _schema({"argv": {"type": "array", "items": {"type": "string"}}, "cwd": {"type": "string"}}, ["argv"])},
+    "run_command": {"description": "Run one allowed argv command without a shell. Omit cwd or use '.' for the task repository root.", "parameters": _schema({"argv": {"type": "array", "items": {"type": "string"}}, "cwd": {"type": "string"}}, ["argv"])},
 }
 
 _SECRET_NAMES = {".env", "credentials", "credentials.json", "secrets.json", "id_rsa", "id_ed25519", "known_hosts", "auth.json"}
@@ -63,8 +63,13 @@ class WorkspaceTools:
         if not isinstance(value, str) or not value or "\x00" in value:
             raise ValueError("invalid path")
         p = Path(value)
-        if p.is_absolute() or any(part in ("..", "") for part in p.parts):
-            raise ValueError("path must be relative and remain inside the repository")
+        if p.is_absolute():
+            try:
+                p = p.relative_to(self.repo)
+            except ValueError:
+                raise ValueError("path must remain inside the task repository; use '.' for its root") from None
+        if any(part in ("..", "") for part in p.parts):
+            raise ValueError("path must remain inside the task repository")
         rel = p.as_posix()
         if rel == ".": return "."
         if any(part.lower() == ".git" for part in p.parts) or self._is_secret(p):
