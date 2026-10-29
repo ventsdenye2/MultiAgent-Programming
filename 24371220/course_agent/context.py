@@ -54,8 +54,9 @@ class EvidenceContext:
             feedback += '\nRecent project tool results:\n' + clip(
                 json.dumps(self.store.recent_results[-4:], ensure_ascii=False), limits[1] // 2)
         output = step.model_output or ''
-        action = '<code>\n' + step.code_action + '\n</code>' if step.code_action else None
-        if action and len(output) <= limits[0]:
+        opening, closing = self.session.agent.code_block_tags
+        action = opening + '\n' + step.code_action + '\n' + closing if step.code_action else None
+        if action and output and len(output) <= limits[0]:
             previous = message(output, MessageRole.ASSISTANT)
         elif action and len(action) <= limits[0]:
             previous = message(action, MessageRole.ASSISTANT)

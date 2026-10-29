@@ -17,10 +17,6 @@ EXTRA_TOOLS = {
                     {'items': {'type': 'array', 'description':
                                'List of objects, e.g. [{"title":"Read sources","status":"doing"}]. '
                                'Each status is todo, doing or done; retain existing titles/order.'}}, ['items']),
-    'write_note': ('Save a literal model-written note grounded in previously exposed evidence. Paper notes need section.',
-                   {'title': {'type': 'string'}, 'content': {'type': 'string'},
-                    'evidence_ids': {'type': 'array'}, 'section': {'type': 'string'}},
-                   ['title', 'content', 'evidence_ids']),
     'recall': ('Queue evidence ids; batches are bounded and overflow remains pending.',
                {'evidence_ids': {'type': 'array'}}, ['evidence_ids']),
     'task_status': ('Show the current plan, remaining reading, notes, changes and verification, plus evidence ids.', {}, []),
@@ -84,6 +80,22 @@ class CourseSession:
                   if name != 'read_pdf' or self.contract.profile == 'paper']
         for name, (description, properties, required) in EXTRA_TOOLS.items():
             result.append(CourseTool(self, name, description, properties, required))
+        paper = self.contract.profile == 'paper'
+        note_properties = {
+            'title': {'type': 'string', 'description': 'Stable note title; reuse it when updating the same note.'},
+            'content': {'type': 'string', 'description':
+                        f'Literal model-written text, 20..{1500 if paper else 3000} characters; cite exposed evidence.'},
+            'evidence_ids': {'type': 'array', 'description': 'Ids of current-version originals already sent to you.'},
+        }
+        note_required = ['title', 'content', 'evidence_ids']
+        if paper:
+            note_properties['section'] = {'type': 'string', 'description': 'Required topic: ' + '/'.join(self.contract.topics)}
+            note_required.append('section')
+        else:
+            note_properties['section'] = {'type': 'string', 'description': 'Optional stable note key; source notes still allow 20..3000 characters.'}
+        result.append(CourseTool(self, 'write_note',
+                                 'Save or update a literal model-written note grounded in exposed evidence.',
+                                 note_properties, note_required))
         return result
 
     def progress(self):
@@ -273,6 +285,10 @@ Tools return Python dicts; use their file_hash for expected_hash. Variables pers
 Do not reset a successful plan or repeat completed baseline checks. Continue the next unfinished action.
 All writes and tests must use these tools. Call final_answer only after current-file verification.
 '''
+        instructions += ('The Python action interpreter only imports: ' +
+                         ', '.join(self.agent.authorized_imports) + '.\n'
+                         'Use read_file/read_range/read_symbol/list_files/search_code for filesystem access, '
+                         'and run_command for subprocesses; os and pathlib are unavailable in action code.\n')
         if self.contract.profile in {'source', 'paper'}:
             instructions += '''Read original evidence in batches. After each batch, write_note with a literal model-written summary
 and its evidence_ids. Notes are source-version-bound; never invent sources or note text.

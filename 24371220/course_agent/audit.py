@@ -154,6 +154,7 @@ class AuditedOpenAIModel(OpenAIModel):
     """Only transport auditing extends the official model implementation."""
     def __init__(self, config, audit, api_key, transport=None):
         self.audit = audit
+        self.action_stop_sequences = ['Observation:', 'Calling tools:']
         client = httpx.Client(timeout=httpx.Timeout(float(config.get("timeout", 210))),
                               transport=transport,
                               event_hooks={"request": [audit.request], "response": [audit.response]})
@@ -171,7 +172,7 @@ class AuditedOpenAIModel(OpenAIModel):
 
     def measure(self, messages):
         body = self._prepare_completion_kwargs(messages, model=self.model_id,
-                                              stop_sequences=["Observation:", "Calling tools:", "</code>"],
+                                              stop_sequences=self.action_stop_sequences,
                                               custom_role_conversions=self.custom_role_conversions,
                                               convert_images_to_image_urls=True)
         body.update(body.pop("extra_body", {}))

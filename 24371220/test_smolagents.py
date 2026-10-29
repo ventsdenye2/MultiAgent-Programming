@@ -32,8 +32,12 @@ def response(content, reason='stop', usage=True):
     return payload
 
 
-def code(text):
+def legacy_code(text):
     return '<code>\n' + text + '\n</code>'
+
+
+def code(text):
+    return '```python\n' + text + '\n```'
 
 
 def run_script(tmp_path, replies, config=None, profile='generic', setup=None, context_mode='evidence'):
@@ -86,6 +90,45 @@ def test_official_parser_recovers_and_records_error(tmp_path):
     assert rc == 0, result
     assert contains(calls[1], 'Error in code parsing')
     assert any(e.get('error_type') == 'AgentParsingError' for e in events)
+
+
+def test_markdown_protocol_ignores_xml_marker_in_prose_and_matches_wire_size(tmp_path):
+    # The real failed source response mentioned <code> in its explanation;
+    # the XML parser treated that mention as the start of the executable body.
+    first = 'The previous <code> marker was only explanatory text.\n' + code(DONE + '\nvalue=41')
+    rc, result, calls, events = run_script(tmp_path, [response(first), "final_answer(str(value+1))"])
+    assert rc == 0 and result['answer'] == '42', result
+    assert not any(e['event'] == 'agent_error' for e in events)
+    assert all(call['stop'] == ['Observation:', 'Calling tools:'] for call in calls)
+    assert contains(calls[1], first)
+    estimates = [e['estimated_body_chars'] for e in events if e['event'] == 'context_selection']
+    actual = [e['chars'] for e in events if e['event'] == 'model_request']
+    assert estimates == actual
+
+
+def test_dsml_failure_uses_upstream_recovery_without_a_second_action_parser(tmp_path):
+    malformed = '<｜｜DSML｜｜ calls><｜｜DSML｜｜ invoke name="task_status"></｜｜DSML｜｜ invoke></｜｜DSML｜｜ calls>'
+    rc, result, calls, events = run_script(tmp_path, [response(malformed), DONE + "\nfinal_answer('Recovered')"])
+    assert rc == 0, result
+    errors = [e for e in events if e['event'] == 'agent_error']
+    assert len(errors) == 1 and errors[0]['error_type'] == 'AgentParsingError'
+    assert contains(calls[1], '```python')
+    assert not any(e.get('tool') == 'task_status' for e in events if e['event'] == 'tool_call')
+
+
+def test_unsupported_os_import_recovers_with_declared_file_tools(tmp_path):
+    def setup(repo):
+        (repo / 'message.txt').write_text('Read using the tool.\n')
+    rc, result, calls, events = run_script(tmp_path, [
+        'import os',
+        DONE + "\nr=read_file(path='message.txt')",
+        "final_answer(r['content'])",
+    ], setup=setup)
+    assert rc == 0 and result['answer'] == 'Read using the tool.\n', result
+    assert contains(calls[0], 'os and pathlib are unavailable in action code')
+    errors = [e for e in events if e['event'] == 'agent_error']
+    assert len(errors) == 1 and 'Import of os is not allowed' in errors[0]['error']
+    assert any(e['event'] == 'file_read' and e['path'] == 'message.txt' for e in events)
 
 
 def test_empty_truncated_response_has_distinct_classification(tmp_path):

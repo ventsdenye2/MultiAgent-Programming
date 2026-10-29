@@ -132,6 +132,12 @@ def test_real_pdf_52_pages_fit_batched_and_five_notes_reused(tmp_path, build_ses
         if set(page_ids).issubset(seen):
             break
     assert set(page_ids).issubset(seen), {'missing': len(set(page_ids) - seen), 'sizes': sizes}
+    note_tool = next(tool for tool in session.tools() if tool.name == 'write_note')
+    assert 'section' in note_tool.parameters['required']
+    with pytest.raises(ValueError, match='20..1500'):
+        session.evidence.write_note('too long', 'x' * 1501, [page_ids[0]], section='overview')
+    with pytest.raises(ValueError, match='20..1500'):
+        session.evidence.write_note('too long', 'x' * 1501, [page_ids[0]])
     assert max(sizes) <= 32000
     for i, topic in enumerate(session.contract.topics):
         content = 'A simulated reading note for ' + topic + ', based on the actual exposed PDF text and page provenance.'
@@ -147,6 +153,44 @@ def test_real_pdf_52_pages_fit_batched_and_five_notes_reused(tmp_path, build_ses
         'required_pages': 52, 'pages_exposed': len(set(page_ids) & seen),
         'reading_requests_simulated': number, 'max_body_chars': max(sizes),
         'five_notes_reused': True, 'provider_calls': 0}, indent=2))
+
+
+def test_recorded_source_note_uses_source_limit_and_source_log_event(tmp_path, build_session):
+    archived = Path(__file__).resolve().parent / 'experiments/smolagents/smolagents-20261029-095013-395938'
+    events = [json.loads(line) for line in
+              (archived / 'source/development/run.log').read_text(encoding='utf-8').splitlines()]
+    repo = tmp_path / 'repo'
+    repo.mkdir()
+    for event in events:
+        if event['event'] == 'snapshot':
+            target = repo / event['path']
+            target.parent.mkdir(parents=True, exist_ok=True)
+            target.write_text(event['content'], encoding='utf-8')
+    task = (MATERIALS / '公开任务/题目2/task.md').read_text(encoding='utf-8')
+    session, context, agent, model = build_session('source', repo, task)
+    args = next(e['arguments'] for e in events if e['event'] == 'tool_call' and e['tool'] == 'write_note')
+    assert args['section'] == 'mechanisms' and 1500 < len(args['content']) <= 3000
+    for rel in sorted(session.contract.required_reads):
+        session.invoke('read_file', {'path': rel})
+    # Deliver the original sources through the real selector. The note text is
+    # exactly the historical model output; this is an offline validation only.
+    payload = next(e['response'] for e in events if e['event'] == 'model_response' and e['number'] == 10)
+    for number in range(1, 10):
+        messages = context.build(agent.memory, model)
+        session.evidence.mark_exposed({'messages': [m.dict() for m in messages]}, payload, number)
+        if set(args['evidence_ids']).issubset(session.evidence.exposed):
+            break
+    assert set(args['evidence_ids']).issubset(session.evidence.exposed)
+    note_tool = next(tool for tool in session.tools() if tool.name == 'write_note')
+    assert note_tool.inputs['section']['nullable']
+    note_tool(**args)
+    trace = [json.loads(line) for line in (tmp_path / 'run/run.log').read_text().splitlines()]
+    notes = [e for e in trace if e['event'] == 'context_note']
+    assert len(notes) == 1 and notes[0]['content'] == args['content']
+    assert set(notes[0]['sources']) == session.contract.required_reads
+    assert not any(e['event'] == 'section_note' for e in trace)
+    messages = context.build(agent.memory, model)
+    assert contains({'messages': [m.dict() for m in messages]}, args['content'])
 
 
 def test_large_source_cannot_evict_latest_error(tmp_path, build_session):

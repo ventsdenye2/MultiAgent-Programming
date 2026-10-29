@@ -51,7 +51,7 @@ class CourseCodeAgent(CodeAgent):
         raise BudgetExceeded("MAX_STEPS_NO_EXTRA_REQUEST")
 
 
-def make_agent(model, session, context=None):
+def make_agent(model, session, context=None, code_block_tags='markdown'):
     session.progress_monitor = ProgressMonitor(session)
 
     def record_step(step, agent):
@@ -68,7 +68,14 @@ def make_agent(model, session, context=None):
                             final_answer_checks=[session.check_final],
                             step_callbacks=[record_step], add_base_tools=False,
                             additional_authorized_imports=['json'],
+                            code_block_tags=code_block_tags,
                             stream_outputs=False, max_print_outputs_length=1000000,
                             verbosity_level=0)
     session.agent = agent
+    # Match the official CodeAgent generation arguments when estimating the
+    # actual wire body. Markdown's closing tag is contained in its opening tag,
+    # so upstream deliberately does not use it as a stop sequence.
+    model.action_stop_sequences = ['Observation:', 'Calling tools:']
+    if agent.code_block_tags[1] not in agent.code_block_tags[0]:
+        model.action_stop_sequences.append(agent.code_block_tags[1])
     return agent

@@ -233,8 +233,10 @@ class EvidenceStore:
         self.offered = []
 
     def write_note(self, title, content, evidence_ids, section=None):
-        if not isinstance(content, str) or not 20 <= len(content) <= (1500 if section else 3000):
-            raise ValueError('Notes require 20..1500 characters for paper, otherwise 20..3000')
+        paper = self.contract.profile == 'paper'
+        limit = 1500 if paper else 3000
+        if not isinstance(content, str) or not 20 <= len(content) <= limit:
+            raise ValueError(f'Notes for {self.contract.profile} require 20..{limit} characters')
         if not evidence_ids or any(eid not in self.exposed or not self.items[eid].valid for eid in evidence_ids):
             raise ValueError('Notes must cite current-version evidence already sent to the model')
         if not contains(self.last_response, content):
@@ -246,7 +248,7 @@ class EvidenceStore:
                     raise ValueError('Read all required mechanisms for this source before recording its note: ' + source)
             # Bind the note to every mechanism required by its named source.
             evidence_ids = sorted(set(evidence_ids).union(*(self.required.get(s, set()) for s in sources)))
-        if self.contract.profile == 'paper' and section not in self.contract.topics:
+        if paper and section not in self.contract.topics:
             raise ValueError('A paper note needs one of the five section ids')
         key = section or title
         if not isinstance(key, str) or not key.strip():
@@ -258,7 +260,7 @@ class EvidenceStore:
         note = {'id': key, 'content': content, 'sources': sources, 'evidence_ids': evidence_ids,
                 'valid': True, 'request': self.request_number}
         self.notes[key] = note
-        if section:
+        if paper:
             pages = sorted({self.items[eid].page for eid in evidence_ids if self.items[eid].page is not None})
             self.log('section_note', section=section, pages=pages, content=content)
         else:

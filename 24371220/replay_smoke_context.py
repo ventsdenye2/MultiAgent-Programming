@@ -31,6 +31,9 @@ def main():
     replies = [e['response'] for e in events if e['event'] == 'model_response']
     protocol = json.loads((archive / 'protocol.json').read_text(encoding='utf-8'))
     cfg = dict(protocol['config'], base_url='https://offline.invalid/v1', key_env='OFFLINE_REPLAY_KEY')
+    start = next((e for e in events if e['event'] == 'run_start'), {})
+    tags = start.get('code_block_tags', ['<code>', '</code>'])
+    cfg['code_block_tags'] = tuple(tags)
     native = Path(tempfile.mkdtemp(prefix='smoke-context-replay-'))
     shutil.copytree(archive / 'smoke-attempt/before', native / 'work')
     contract = load_task((native / 'work/task.md').read_text(encoding='utf-8'),
@@ -59,7 +62,7 @@ def main():
             return result
         except ValueError as exc:
             current['error'] = str(exc)
-            current['stalled_requests'] = context.stalled_requests
+            current['stalled_steps'] = context.session.progress_monitor.stalled_steps
             current['recent_results_chars'] = len(json.dumps(context.store.recent_results[-4:],
                                                              ensure_ascii=False))
             raise

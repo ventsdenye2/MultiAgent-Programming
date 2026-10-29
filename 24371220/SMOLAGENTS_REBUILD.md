@@ -38,6 +38,8 @@ flowchart TD
 
 `_run_stream`、`_step_stream`、代码解析与 `create_python_executor` 均直接继承官方实现。跨轮变量、Python 语法执行和 `AgentError` 恢复由官方负责。没有第二套动作 JSON 协议、自制执行 AST 白名单、RPC 执行器或 Agent 状态机。
 
+动作格式通过官方 `code_block_tags="markdown"` 配置，历史发送视图使用同一组标签；请求容量估计采用与官方生成调用一致的停止序列。错误响应继续交给官方错误恢复，不增加 DSML/XML 转换器。历史离线回放保留原记录的标签配置。
+
 项目工具通过官方 `Tool` 包装接口接入。文件范围、版本冲突、基线和最终测试、双子任务顺序、论文笔记是课程业务约束，集中在 `session.py`、`policy.py`、`workspace.py`；源码 AST 仅用于提取阅读单位和检查课程规定的函数定义，不用于执行模型代码。
 
 `CourseSession` 根据真实阅读、文件版本与命令结果生成不可变的 `TaskProgress`。编辑前检查、`task_status`、EA-CM 状态提示和最终检查读取同一份要求；上下文层不再解析状态文案来推断是否完成。工具适配器根据同一参数声明构造 Python `Signature`，按标准绑定规则接收位置和关键字参数，然后进行原有类型与业务检查。

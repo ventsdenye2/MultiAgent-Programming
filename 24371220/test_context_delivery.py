@@ -13,7 +13,7 @@ from smolagents.models import MessageRole
 from smolagents.monitoring import Timing
 from smolagents.utils import AgentExecutionError
 from course_agent.policy import load_task
-from test_smolagents import make_session, response, code, run_script, DONE
+from test_smolagents import make_session, response, code, legacy_code, run_script, DONE
 
 
 ROOT = Path(__file__).resolve().parent
@@ -29,13 +29,14 @@ def test_recorded_smoke_reaches_edit_and_passes_public_checks(tmp_path):
     replies = [e['response']['choices'][0]['message']['content'] for e in events if e['event'] == 'model_response']
     # A separate simulated continuation validates execution; these are not new
     # real-model decisions or a paid course pass.
-    replies.append(code("replace_text(path='calc.py', old_text='return price * discount / 100', "
+    replies.append(legacy_code("replace_text(path='calc.py', old_text='return price * discount / 100', "
                         "new_text='return price * discount', expected_hash=res['file_hash'])\n"
                         "run_command(argv=['python','-m','pytest','-q'])\n"
                         "for item in plan: item['status']='done'\n"
                         "update_plan(items=plan)\nfinal_answer('Fixed and verified')"))
     cfg = json.loads((ROOT / 'config.json').read_text(encoding='utf-8'))
-    cfg.update(base_url='https://offline.invalid/v1', key_env='OFFLINE_TEST_KEY', max_steps=8)
+    cfg.update(base_url='https://offline.invalid/v1', key_env='OFFLINE_TEST_KEY', max_steps=8,
+               code_block_tags=None)  # Preserve the saved run's official XML protocol.
     contract = load_task((tmp_path / 'work/task.md').read_text(encoding='utf-8'), repo, cfg)
     calls = []
     def handler(request):
@@ -174,7 +175,7 @@ def test_recorded_plan_error_does_not_starve_source_or_restart_plan(tmp_path):
                if e['event'] == 'model_response'][:6]
     # The first six saved real replies include a plan-schema error and its
     # successful correction. The continuation is explicitly offline/simulated.
-    replies.append(code("import json\n"
+    replies.append(legacy_code("import json\n"
                         "print(json.dumps({'stage':'editing'}))\n"
                         "replace_text(path='calc.py', old_text='return price * discount / 100', "
                         "new_text='return price * discount', expected_hash=calc['file_hash'])\n"
@@ -182,7 +183,8 @@ def test_recorded_plan_error_does_not_starve_source_or_restart_plan(tmp_path):
                         "for item in plan['items']: item['status']='done'\n"
                         "update_plan(items=plan['items'])\nfinal_answer('Verified')"))
     cfg = json.loads((ROOT / 'config.json').read_text(encoding='utf-8'))
-    cfg.update(base_url='https://offline.invalid/v1', key_env='OFFLINE_TEST_KEY', max_steps=9)
+    cfg.update(base_url='https://offline.invalid/v1', key_env='OFFLINE_TEST_KEY', max_steps=9,
+               code_block_tags=None)
     contract = load_task((tmp_path / 'work/task.md').read_text(encoding='utf-8'), repo, cfg)
     calls = []
     def handler(request):
@@ -262,15 +264,16 @@ def test_recorded_missing_plan_is_retained_and_can_recover(tmp_path):
     plan = next(e['items'] for e in events if e['event'] == 'plan')
     replies = [e['response']['choices'][0]['message']['content'] for e in events
                if e['event'] == 'model_response'][:3]
-    replies += [code("items = task_status()['plan']\nitems[0]['status']='done'\n"
+    replies += [legacy_code("items = task_status()['plan']\nitems[0]['status']='done'\n"
                      "update_plan(items=items)\ncalc = read_file(path='calc.py')"),
-                code("replace_text(path='calc.py', old_text='return price * discount / 100', "
+                legacy_code("replace_text(path='calc.py', old_text='return price * discount / 100', "
                      "new_text='return price * discount', expected_hash=calc['file_hash'])\n"
                      "run_command(argv=['python','-m','pytest','-q'])\n"
                      "for item in items: item['status']='done'\n"
                      "update_plan(items=items)\nfinal_answer('Verified')")]
     cfg = json.loads((ROOT / 'config.json').read_text(encoding='utf-8'))
-    cfg.update(base_url='https://offline.invalid/v1', key_env='OFFLINE_TEST_KEY', max_steps=8)
+    cfg.update(base_url='https://offline.invalid/v1', key_env='OFFLINE_TEST_KEY', max_steps=8,
+               code_block_tags=None)
     contract = load_task((tmp_path / 'work/task.md').read_text(encoding='utf-8'), repo, cfg)
     calls = []
     def handler(request):
