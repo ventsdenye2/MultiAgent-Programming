@@ -1,0 +1,122 @@
+--- a/deepinfer/engine/stats_logger.py
++++ b/deepinfer/engine/stats_logger.py
+@@ -120,7 +120,7 @@
+             if need_sleep:
+                 time.sleep((dist.get_rank() % 8) * 0.005)
+             for m in msgs:
+-                logger.info(m)
++                logger.info(m, extra={"keep_full_message": True})
+             need_sleep = q.empty()  # we skip sleep when q has backlog
+         except Exception:
+             traceback.print_exc()
+--- a/deepinfer/environ.py
++++ b/deepinfer/environ.py
+@@ -23,6 +23,16 @@
+ 
+ def _str(v: str | None, default: str = "") -> str:
+     return v if v is not None else default
++
++
++def _optional_int_min(v: str | None, minimum: int) -> int | None:
++    """Parse an optional integer, enforcing a lower bound when it is set."""
++    if v is None:
++        return None
++    value = int(v)
++    if value < minimum:
++        raise ValueError(f"{value!r} must be >= {minimum}")
++    return value
+ 
+ 
+ _descriptors: dict[str, EnvVar[Any]] = {}
+@@ -104,6 +114,10 @@
+     DEEPINFER_COMPUTE_SUM_SMALLER_PROBS = EnvVar.bool()
+     DEEPINFER_JIT_CACHE_DIR = EnvVar.str_or_none()
+ 
++    # -- Logging --
++    DEEPINFER_LOG_MAX_MESSAGE_CHARS = EnvVar(lambda v: _optional_int_min(v, 32))
++    "普通诊断日志消息正文的最大字符数；未设置表示不限长，有效值须不小于 32。"
++
+     # -- Distributed Communication --
+     DEEPINFER_NCCL_NUM_SMS = EnvVar.int(default=32)
+     DEEPINFER_USERBUFFER_COMM_SMS = EnvVar.int()
+--- a/deepinfer/logger.py
++++ b/deepinfer/logger.py
+@@ -16,6 +16,8 @@
+ from multiprocessing.process import BaseProcess
+ from types import TracebackType
+ 
++from deepinfer.environ import envs
++
+ _FORMAT = "[%(levelname)s %(asctime)s %(filename)s:%(lineno)d] %(message)s"
+ _DATE_FORMAT = "%m-%d %H:%M:%S"
+ 
+@@ -30,6 +32,19 @@
+ _COLOR_RESET = "\033[0m"
+ 
+ 
++_OMITTED_MARKER = "...<omitted>..."
++
++
++def _truncate_message(message: str, budget: int) -> str:
++    """Keep the head and tail of ``message`` so total length fits ``budget``."""
++    keep = budget - len(_OMITTED_MARKER)
++    head_len = (keep + 1) // 2
++    tail_len = keep - head_len
++    head = message[:head_len]
++    tail = message[len(message) - tail_len:] if tail_len > 0 else ""
++    return f"{head}{_OMITTED_MARKER}{tail}"
++
++
+ class NewLineFormatter(logging.Formatter):
+     """Adds logging prefix to newlines to align multi-line messages, optionally with microsecond precision.
+ 
+@@ -42,10 +57,18 @@
+         datefmt: str | None = None,
+         high_precision: bool = False,
+         use_color: bool = False,
++        *,
++        max_message_chars: int | None = None,
+     ) -> None:
+         super().__init__(fmt, datefmt)
+         self.high_precision = high_precision
+         self.use_color = use_color
++        if max_message_chars is not None:
++            if isinstance(max_message_chars, bool) or not isinstance(max_message_chars, int):
++                raise ValueError(f"max_message_chars must be None or an int >= 32, got {max_message_chars!r}")
++            if max_message_chars < 32:
++                raise ValueError(f"max_message_chars must be None or an int >= 32, got {max_message_chars!r}")
++        self.max_message_chars = max_message_chars
+ 
+     def formatTime(self, record: logging.LogRecord, datefmt: str | None = None) -> str:
+         if not self.high_precision:
+@@ -56,10 +79,19 @@
+         return f"{base}.{record.msecs * 1000:06.0f}"
+ 
+     def format(self, record: logging.LogRecord) -> str:
+-        msg = super().format(record)
++        target = record
++        budget = self.max_message_chars
++        if budget is not None and getattr(record, "keep_full_message", None) is not True:
++            message = record.getMessage()
++            if len(message) > budget:
++                # 复制记录，避免改写共享的 msg/args/exc_info/stack_info
++                target = logging.makeLogRecord(dict(record.__dict__))
++                target.msg = _truncate_message(message, budget)
++                target.args = ()
++        msg = super().format(target)
+         # 快速路径：单行日志（绝大多数情况）无需做对齐处理
+-        if "\n" in msg and record.message:
+-            prefix = msg[: msg.find(record.message)]
++        if "\n" in msg and target.message:
++            prefix = msg[: msg.find(target.message)]
+             msg = msg.replace("\n", "\n" + prefix)
+         if self.use_color:
+             color = _LEVEL_COLORS.get(record.levelno)
+@@ -85,6 +117,7 @@
+         _FORMAT,
+         datefmt=_DATE_FORMAT,
+         use_color=sys.stdout.isatty(),
++        max_message_chars=envs.DEEPINFER_LOG_MAX_MESSAGE_CHARS,
+     )
+     _default_handler.setFormatter(fmt)
+     _root_logger.propagate = False

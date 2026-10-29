@@ -1,0 +1,35 @@
+{
+  "task": "题目2开发自测",
+  "passed": false,
+  "checks": {
+    "真实开发过程与修改范围": "agent 退出码 1，查看 agent-console.log；最后修改后须执行完整 pytest 并通过",
+    "补丁可还原实际修改": true,
+    "相关源码真实读取并入模": true,
+    "首次修改复用相关源码或模型笔记": true,
+    "独立兼容与新增功能测试": true,
+    "真实日志处理链路": true,
+    "运行后修改范围仍合规": true,
+    "学生代码与本轮开始一致": true,
+    "服务端真实用量完整": true
+  },
+  "score": 0,
+  "max_score": 1,
+  "usage": {
+    "complete": true,
+    "requests": 20,
+    "input_tokens": 155732,
+    "output_tokens": 18860,
+    "total_tokens": 174592
+  },
+  "actual_models": [
+    "deepseek-flash"
+  ],
+  "status": "complete",
+  "source_sha256": {
+    "deepinfer/logger.py": "5af2a92385a6e86ae0fce00e748170befc43754a844d91c3132ea1c277f94c20",
+    "deepinfer/environ.py": "60257c0a3e7a473d79d8f54d6166dc8e526066040cd1efb3202b7d0f32b84ff7",
+    "deepinfer/engine/stats_logger.py": "554e54ac42df2277016bff89f7ab3deb6cc62af0dc6a89945312751606af5481"
+  },
+  "student_sha256": "4607669ac65fd5107535afbaf941b4826fe706bf407b483745486dd7cee6f7b6",
+  "profile": "d03108378642da240a373be897a5b8deb1326447e85e51a4852b10ce92aa2807"
+}

@@ -322,11 +322,13 @@ A note may replace original text only after its mechanisms were exposed. Do not 
             instructions += '''Paper workflow:
 1. Plan, baseline pytest, read report.json and paper.json; call read_pdf ONCE for the task's full page range.
 This extracts to local storage and logs read_pdf.py; only bounded batches reach the model. Do not print all pages.
-2. Read the delivered page batches in order; update relevant topic notes as useful. The next batch follows
-successful actions automatically. On an action error, correct it using the retained batch. Do not call
-read_pdf/task_status just to advance. Use only evidence ids from delivered Evidence headers.
-3. Preserve earlier verified facts when updating notes. Each final topic note must contain its two answers,
-PDF page numbers and continuous exact quotations supporting ALL answer items, within 1500 characters.
+2. Read the delivered page batches in order. Record a topic's supported findings as soon as useful; do not
+wait until both questions are answered. The next batch follows successful actions automatically. On an
+action error, correct it using the retained batch. Do not call read_pdf/task_status just to advance.
+Use only evidence ids from delivered Evidence headers.
+3. Update the same topic note incrementally, preserving earlier confirmed facts and citations. Each final
+topic note must contain its two answers, PDF page numbers and continuous exact quotations supporting ALL
+answer items, within 1500 characters.
 Use write_note(title=..., content=..., evidence_ids=['ev-...'], section='overview') with the actual topic.
 4. After full coverage, reuse all five final notes, build report.json across actions if needed, test, finish plan.
 This agent already has versioned evidence, bounded page selection, note reuse, tools and verification.

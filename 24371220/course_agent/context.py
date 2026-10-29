@@ -169,6 +169,7 @@ class EvidenceContext:
         else:
             priorities = self.store.covering_first(priorities)
         recovery = []
+        carry = []
         if self.session.contract.profile == 'paper':
             actions = [step for step in memory.steps if isinstance(step, ActionStep)]
             failed = bool(actions and actions[-1].error)
@@ -184,7 +185,18 @@ class EvidenceContext:
             ordinary = [eid for eid in priorities if self.store.items[eid].page is None]
             pages = sorted((eid for eid in priorities if self.store.items[eid].page is not None),
                            key=lambda eid: self.store.items[eid].page)
-            priorities = recovery + ordinary if recovery else ordinary + pages
+            exposed_pages = {self.store.items[eid].page for eid in self.store.exposed
+                             if self.store.items[eid].valid and self.store.items[eid].page is not None}
+            if not recovery and set(self.session.contract.paper_pages).issubset(exposed_pages):
+                carry = [eid for eid in self.last_manifest.get('evidence_ids', [])
+                         if eid in self.store.current and eid not in pages
+                         and self.store.items[eid].valid and self.store.items[eid].page is not None]
+            if recovery:
+                priorities = recovery + ordinary
+            elif carry:
+                priorities = list(dict.fromkeys(pages + ordinary + carry))
+            else:
+                priorities = ordinary + pages
         selected, deferred, offered = [], [], []
         original_payload = []
         page_blocked = False
@@ -197,7 +209,7 @@ class EvidenceContext:
                 continue
             represented = any(item.source in self.store.notes[k]['sources'] and
                               eid in self.store.notes[k]['evidence_ids'] for k in selected_notes)
-            if represented and eid not in unseen and eid not in self.store.pending and eid not in recovery:
+            if represented and eid not in unseen and eid not in self.store.pending and eid not in recovery and eid not in carry:
                 continue
             if self.session.contract.profile == 'source':
                 # A complete surrounding range may replace already selected

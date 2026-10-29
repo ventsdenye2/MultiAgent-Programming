@@ -18,7 +18,8 @@ def paper_runtime(tmp_path):
     resources = []
 
     def build(page_texts, replies, *, verify=False):
-        repo = tmp_path / 'repo'
+        suffix = '' if not resources else f'-{len(resources)}'
+        repo = tmp_path / ('repo' + suffix)
         repo.mkdir()
         (repo / 'paper.json').write_text(json.dumps({'required_pages': [1, len(page_texts)]}))
         (repo / 'paper.pdf').write_bytes(b'Offline evidence fixture; PDF parsing is tested on course materials.')
@@ -31,8 +32,9 @@ def paper_runtime(tmp_path):
         spec = load_task('Read the PDF and update report.json.', repo, cfg, 'paper')
         if not verify:
             spec.verify_commands = []
-        log = RunLog(tmp_path / 'run')
-        session = CourseSession(spec, tmp_path / 'run', log, cfg)
+        output = tmp_path / ('run' + suffix)
+        log = RunLog(output)
+        session = CourseSession(spec, output, log, cfg)
         audit = RequestAudit(spec, log, session.evidence)
         calls, snapshots = [], []
 
@@ -170,3 +172,95 @@ def test_building_views_does_not_acknowledge_delivery_and_note_quote_cannot_hide
     assert new_id in context.last_manifest['evidence_ids']
     assert contains({'messages': [m.dict() for m in messages]}, session.evidence.render(new_id))
     assert new_id in session.evidence.pending and new_id not in session.evidence.exposed
+
+
+
+def test_completed_reading_combines_two_explicit_page_recalls(paper_runtime):
+    pages = ['Earlier fact on PDF page one. ' * 30, 'Complementary fact on PDF page two. ' * 30]
+
+    def recall_page(number):
+        def reply(session):
+            eid = next(eid for eid, item in session.evidence.items.items() if item.page == number)
+            return response(code(f'recall(evidence_ids={[eid]!r})'))
+        return reply
+
+    session, agent, calls, snapshots, ids = paper_runtime(pages, [
+        recall_page(1), recall_page(2), response(code("print('Combine both supplied page facts.')")),
+    ])
+    with pytest.raises(BudgetExceeded, match='MAX_STEPS_NO_EXTRA_REQUEST'):
+        agent.run(session.task_prompt())
+    assert set(ids).issubset(snapshots[1]['exposed']), 'Complete initial reading before testing the recall working set'
+    assert ids[0] in snapshots[1]['pending'] and ids[1] in snapshots[2]['pending']
+    assert all(contains(calls[2], text) for text in pages)
+    assert set(ids).issubset(session.evidence.current)
+    assert not session.evidence.pending
+    assert all(len(json.dumps(body, ensure_ascii=False, separators=(',', ':'))) <= 32000 for body in calls)
+
+
+def test_completed_reading_prioritizes_new_recall_over_previous_large_page(paper_runtime):
+    pages = [f'FULL_PAGE_{n}_' + str(n) * 14500 for n in (1, 2)]
+
+    def recall_first(session):
+        eid = next(eid for eid, item in session.evidence.items.items() if item.page == 1)
+        return response(code(f'recall(evidence_ids={[eid]!r})'))
+
+    session, agent, calls, snapshots, ids = paper_runtime(pages, [
+        response(code("print('Read initial page one.')")), recall_first,
+        response(code("print('Recalled page one takes priority.')")),
+    ])
+    with pytest.raises(BudgetExceeded, match='MAX_STEPS_NO_EXTRA_REQUEST'):
+        agent.run(session.task_prompt())
+    assert contains(calls[0], pages[0]) and not contains(calls[0], pages[1])
+    assert contains(calls[1], pages[1]) and not contains(calls[1], pages[0])
+    assert set(ids).issubset(snapshots[2]['exposed'])
+    assert ids[0] in snapshots[2]['pending']
+    assert contains(calls[2], pages[0]), 'New requested original must be admitted before optional previous-page carry'
+    assert not contains(calls[2], pages[1]), 'Omit the older page when both originals cannot fit'
+    assert not session.evidence.pending
+
+
+    # With room for three originals, a chain of recalls must carry the newest
+    # prior originals rather than preferring unrelated lower page numbers.
+    chain_pages = [f'CHAIN_PAGE_{n}_' + str(n) * 7000 for n in range(1, 8)]
+
+    def recall_pages(*numbers):
+        def reply(session):
+            selected = [eid for number in numbers for eid, item in session.evidence.items.items()
+                        if item.page == number]
+            return response(code(f'recall(evidence_ids={selected!r})'))
+        return reply
+
+    chained, chain_agent, chain_calls, chain_snapshots, chain_ids = paper_runtime(chain_pages, [
+        response(code("print('Initial batch one.')")),
+        response(code("print('Initial batch two.')")),
+        recall_pages(1, 2), recall_pages(3), recall_pages(4, 5), recall_pages(6, 7),
+        response(code("print('Merge the newest recalled originals.')")),
+    ])
+    with pytest.raises(BudgetExceeded, match='MAX_STEPS_NO_EXTRA_REQUEST'):
+        chain_agent.run(chained.task_prompt())
+    assert set(chain_ids).issubset(chain_snapshots[3]['exposed'])
+    assert all(contains(chain_calls[4], chain_pages[number - 1]) for number in (1, 2, 3))
+    assert all(contains(chain_calls[5], chain_pages[number - 1]) for number in (3, 4, 5))
+    assert all(contains(chain_calls[6], chain_pages[number - 1]) for number in (4, 6, 7))
+    assert not contains(chain_calls[6], chain_pages[2]), 'Newer carried page four must outrank older page three'
+    assert all(len(json.dumps(body, ensure_ascii=False, separators=(',', ':'))) <= 32000
+               for body in chain_calls)
+
+
+def test_initial_pdf_reading_does_not_skip_blocked_page_for_later_small_page(paper_runtime):
+    pages = ['FIRST_LARGE_PAGE_' + 'a' * 14500,
+             'SECOND_LARGE_PAGE_' + 'b' * 14500,
+             'THIRD_SMALL_PAGE_This page fits in the space left after page one.']
+    session, agent, calls, snapshots, ids = paper_runtime(pages, [
+        response(code("print('Read the first contiguous batch.')")),
+        response(code("print('Read the remaining contiguous batch.')")),
+    ])
+    with pytest.raises(BudgetExceeded, match='MAX_STEPS_NO_EXTRA_REQUEST'):
+        agent.run(session.task_prompt())
+    assert contains(calls[0], pages[0])
+    assert not contains(calls[0], pages[1])
+    assert not contains(calls[0], pages[2]), 'A blocked page must stop initial sequential admission'
+    assert ids[1] in snapshots[1]['pending'] and ids[2] in snapshots[1]['pending']
+    assert contains(calls[1], pages[1]) and contains(calls[1], pages[2])
+    assert not contains(calls[1], pages[0]), 'Prior pages do not carry before complete required-page exposure'
+    assert set(ids).issubset(session.evidence.exposed)
