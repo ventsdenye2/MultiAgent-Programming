@@ -146,8 +146,8 @@ class CourseSession:
     def status(self, compact=False):
         data = {**self.progress().status(), 'pending_recall': self.evidence.pending[:20],
                 'repeated_action_count': self.evidence.repeats,
-                'next_step': 'write notes after each batch; then complete changes and verification' if self.contract.profile == 'paper'
-                else 'read full files once; summarize complete mechanisms; edit; verify'}
+                'next_step': 'read page batches, update relevant topic notes, then complete the report and verification' if self.contract.profile == 'paper'
+                else 'read full files once; use the original mechanisms or optional notes; edit; verify'}
         if self.audit and self.audit.last_classification not in {None, 'ok'}:
             data['last_response_classification'] = self.audit.last_classification
             data['response_recovery'] = 'Previous body was empty or truncated; produce one complete valid action within the configured output budget.'
@@ -309,21 +309,22 @@ All writes and tests must use these tools. Call final_answer only after current-
             instructions += ('When calling write_note, put the complete exact note text in the thought field, '
                              'then pass that same text as one content string literal in code. This preserves '
                              'a contiguous model-authored copy through JSON/Python escaping.\n')
-        if self.contract.profile in {'source', 'paper'}:
-            instructions += '''Read original evidence in batches. After each batch, write_note with a literal model-written summary
-and its evidence_ids. Notes are source-version-bound; never invent sources or note text.
-'''
+        elif self.contract.profile in {'source', 'paper'}:
+            instructions += ('When calling write_note, include its complete exact content in the prose before the code '
+                             'and pass the same text as one content string literal.\n')
         if self.contract.profile == 'source':
             instructions += '''Read all three files with read_file first, then read/reuse complete mechanisms from all three
-before the first edit. A source note may replace original text only after its mechanisms were exposed.
+before the first edit. Source notes are OPTIONAL; current source blocks can be used directly.
+When progress says phase=edit, the initial reading and baseline are satisfied. Apply a scoped edit and verify.
+A note may replace original text only after its mechanisms were exposed. Do not repeat full reads to register them again.
 '''
         elif self.contract.profile == 'paper':
             instructions += '''Paper workflow:
 1. Plan, baseline pytest, read report.json and paper.json; call read_pdf ONCE for the task's full page range.
 This extracts to local storage and logs read_pdf.py; only bounded batches reach the model. Do not print all pages.
-2. After EACH delivered batch, update relevant topic notes. Unnoted pages remain visible; summarizing releases
-the next batch automatically. Do not call read_pdf/task_status just to advance. Cite every received page at
-least once; summarize irrelevant pages briefly. Use only evidence ids from delivered Evidence headers.
+2. Read the delivered page batches in order; update relevant topic notes as useful. The next batch follows
+successful actions automatically. On an action error, correct it using the retained batch. Do not call
+read_pdf/task_status just to advance. Use only evidence ids from delivered Evidence headers.
 3. Preserve earlier verified facts when updating notes. Each final topic note must contain its two answers,
 PDF page numbers and continuous exact quotations supporting ALL answer items, within 1500 characters.
 Use write_note(title=..., content=..., evidence_ids=['ev-...'], section='overview') with the actual topic.

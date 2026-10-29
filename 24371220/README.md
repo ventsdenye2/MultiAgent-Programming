@@ -41,12 +41,13 @@ Ubuntu 缺少 venv/ensurepip 时，先安装对应的 `python3.12-venv` 系统�
 
 源码/论文分别限制 20/40 次实际模型请求，单请求完整 JSON 最多 32,000 字符。当前两题配置为 deepseek-flash、16384 输出上限、thinking enabled、reasoning_effort high；这些是本项目的运行选择，不是题目1、2的硬性限制。采样参数从 config.json 传给官方客户端，未设置的参数沿用服务端默认。只有题目3排名复测由课程代理强制4096及关闭thinking。仍禁用自动重试，避免不可核对的额外请求。
 
-默认开启官方 `use_structured_outputs_internally=True`：模型返回官方定义的 `thought/code` JSON，Python动作仍由官方解析器和执行器处理。DeepSeek Chat API通过 `response_format={"type":"json_object"}` 约束有效JSON；不宣称服务端严格校验JSON Schema。Markdown代码块配置保留给官方代码提取和历史回放。历史回放恢复原记录的输出模式，不改写已归档响应。允许导入的模块由执行器声明；文件和命令操作通过课程工具完成。
+当前配置使用官方 Markdown Python 代码块模式（`use_structured_outputs_internally=False`、`code_block_tags="markdown"`）；模型先简述动作，再输出一个代码块，由官方解析器和执行器处理。开启 `use_structured_outputs_internally=True` 时仍支持官方 `thought/code` JSON，DeepSeek Chat API 通过 `response_format={"type":"json_object"}` 约束有效 JSON；不宣称服务端严格校验 JSON Schema。两种模式都使用对应的课程提示。历史回放恢复原记录的输出模式，不改写已归档响应。允许导入的模块由执行器声明；文件和命令操作通过课程工具完成。
 
-长上下文两题通过官方 `prompt_templates` 扩展点使用课程精简提示，保留 `thought/code` 协议、动态工具说明、官方解析与执行。论文先由 Agent 提取所需页码至证据存储，再由上下文管理器按预算发送完整页面；每批原文在总结前保持可见，先更新主题笔记再继续阅读。工具说明明确参数类型和返回字段，最终笔记保留问题答案、页码和连续原文引用。
+长上下文两题通过官方 `prompt_templates` 扩展点使用课程精简提示，保留所选输出协议、动态工具说明、官方解析与执行。论文先由 Agent 提取所需页码至证据存储，再由上下文管理器按预算发送完整页面；原文按连续页序分批交付，模型可更新相关主题笔记后继续阅读，不要求每页被笔记引用；失败时保留当前批次供恢复。源码笔记为可选项，满足阅读和基线门槛后可直接依据当前源码开始修改。同一版本中相互包含的源码证据优先发送完整外层范围，避免重复文本挤占预算；各证据仍单独核验实际送达。工具说明明确参数类型和返回字段，最终笔记保留问题答案、页码和连续原文引用。
 
 笔记规则按任务类型确定：源码笔记为20～3000字符，记录 `context_note`；论文笔记为20～1500字符，必须指定五个主题之一，记录 `section_note`。可选笔记键不会改变任务类型。
 结构化模式写笔记时，`thought`保留笔记的完整原文，`code`把同一文字传给工具，保证课程检查能在真实响应中找到连续原文；不放宽原文、来源版本或先读后写的核验。
+Markdown 模式将同一份完整笔记写在代码块前的说明与工具参数中，保持相同的来源核验规则。
 
 ## 离线验证
 

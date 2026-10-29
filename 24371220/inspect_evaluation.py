@@ -47,6 +47,9 @@ def inspect_log(path, actions=0):
         'max_request_chars': max((len(json.dumps(e['body'], ensure_ascii=False, separators=(',', ':')))
                                   for e in requests), default=0),
         'response_classes': dict(Counter(e.get('classification', 'unknown') for e in responses)),
+        'last_request_parameters': {key: requests[-1]['body'].get(key)
+                                    for key in ('model', 'max_tokens', 'thinking', 'reasoning_effort')}
+                                   if requests else {},
         'counts': dict(counts), 'commands': checks,
         'paper_pages_exposed': pages, 'paper_page_count': len(pages),
         'section_note_count': len(section_notes),

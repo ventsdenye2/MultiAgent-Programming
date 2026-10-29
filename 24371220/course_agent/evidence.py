@@ -37,7 +37,6 @@ class EvidenceStore:
         self.exposed = set()
         self.current = set()
         self.notes = {}
-        self.summarized = set()
         self.current_notes = set()
         self.pending = []
         self.last_response = None
@@ -162,7 +161,6 @@ class EvidenceStore:
             self.recall_ranges.pop(eid, None)
         self.exposed -= invalid
         self.current -= invalid
-        self.summarized -= invalid
         self.required.get(source, set()).difference_update(invalid)
         if self.full_reads.get(source) != current_version:
             self.full_reads.pop(source, None)
@@ -272,10 +270,9 @@ class EvidenceStore:
         note = {'id': key, 'content': content, 'sources': sources, 'evidence_ids': evidence_ids,
                 'valid': True, 'request': self.request_number}
         self.notes[key] = note
-        # A revised note may discard irrelevant details from an earlier batch.
-        # Its actual prior summarization remains a fact, tied to that source
-        # version; it is not the same as which notes are in the latest view.
-        self.summarized.update(evidence_ids)
+        # This revision has not yet appeared alongside the other notes in a
+        # model request, even if the previous revision did.
+        self.current_notes.discard(key)
         if paper:
             pages = sorted({self.items[eid].page for eid in evidence_ids if self.items[eid].page is not None})
             self.log('section_note', section=section, pages=pages, content=content)
@@ -291,6 +288,28 @@ class EvidenceStore:
             if eid not in self.pending:
                 self.pending.append(eid)
                 self.recall_ranges[eid] = []
+
+    def covering_first(self, evidence_ids):
+        """Order overlapping originals so a requested enclosing range is sent once.
+
+        Identity and exposure remain per evidence id. This only moves an
+        enclosing, same-version source range before its contained mechanisms;
+        actual HTTP content still acknowledges every covered item.
+        """
+        ids = list(dict.fromkeys(evidence_ids))
+        result = []
+        for eid in ids:
+            item = self.items[eid]
+            parents = [other for other in ids if self.items[other].valid
+                       and self.items[other].source == item.source
+                       and self.items[other].version == item.version
+                       and self.items[other].page is None and item.page is None
+                       and len(self.items[other].text) > len(item.text)
+                       and item.text in self.items[other].text]
+            if parents:
+                result.append(max(parents, key=lambda other: len(self.items[other].text)))
+            result.append(eid)
+        return list(dict.fromkeys(result))
 
     def recall(self, evidence_ids, capacity):
         self.request_originals(evidence_ids)
@@ -329,15 +348,10 @@ class EvidenceStore:
                 result.extend(sorted(needed))
         return list(dict.fromkeys(result))
 
-    def unsummarized_pages(self):
-        return sorted((eid for eid in self.exposed - self.summarized
-                       if self.items[eid].valid and self.items[eid].page in self.contract.paper_pages),
-                      key=lambda eid: self.items[eid].page)
-
     def missing(self, first_write=True):
         self.refresh()
         issues = []
-        if first_write or self.contract.profile == 'paper':
+        if first_write:
             for source in sorted(self.contract.required_reads):
                 if source not in self.full_reads:
                     issues.append('read_file: ' + source)
@@ -348,10 +362,6 @@ class EvidenceStore:
                 if not self.source_reused(source):
                     issues.append('read/reuse complete mechanisms or source note: ' + source)
         if self.contract.profile == 'paper':
-            unnoted = self.unsummarized_pages()
-            if unnoted:
-                issues.append('write_note for the received PDF batch before reading further: ' +
-                              ','.join(str(self.items[eid].page) for eid in unnoted))
             pages = {self.items[eid].page for eid in self.exposed if self.items[eid].valid}
             missing = sorted(set(self.contract.paper_pages) - pages)
             if missing:
@@ -368,7 +378,6 @@ class EvidenceStore:
     def save(self, path):
         path.write_text(json.dumps({'evidence': [asdict(x) for x in self.items.values()],
                                    'notes': self.notes, 'exposed': sorted(self.exposed),
-                                   'summarized': sorted(self.summarized),
                                    'received_ranges': self.received_ranges,
                                    'full_read_ids': self.full_read_ids},
                                   ensure_ascii=False, indent=2), encoding='utf-8')

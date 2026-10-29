@@ -97,9 +97,7 @@ class EvidenceContext:
         """Fit an ordinary-file range; PDF pages and source mechanisms stay whole."""
         item = self.store.items[eid]
         start, end = self.store.delivery_range(eid)
-        # Admission of a new PDF batch reserves room for the next request's
-        # changing progress and minimum error feedback. Previously admitted,
-        # unsummarized pages can use that reserve to remain visible.
+        # Reserve room for the next request's progress and error feedback.
         reserve = 768 if item.page is not None and eid not in self.store.exposed else 0
         if self.fits(messages + [message(self.store.render(eid, start, end))], model, reserve):
             return start, end
@@ -160,34 +158,54 @@ class EvidenceContext:
         reuse = valid[-6:] if self.session.contract.profile not in {'source', 'paper'} else []
         priorities = list(dict.fromkeys(self.store.pending + required_unseen + unseen +
                                        self.store.source_priorities(selected_notes) + reuse))
+        priorities = self.store.covering_first(priorities)
+        recovery = []
         if self.session.contract.profile == 'paper':
-            unnoted = self.store.unsummarized_pages()
-            if unnoted:
-                # Do not erase a received batch to make room for unread pages.
-                # The model decides what to record in its five evolving notes;
-                # only that successful summarization releases the batch.
-                priorities = unnoted + [eid for eid in priorities if self.store.items[eid].page is None]
+            actions = [step for step in memory.steps if isinstance(step, ActionStep)]
+            failed = bool(actions and actions[-1].error)
+            if self.session.audit and self.session.audit.last_classification in {'empty', 'truncated', 'truncated_empty'}:
+                failed = True
+            if failed:
+                recovery = [eid for eid, _, _ in self.last_manifest.get('delivered_parts', [])
+                            if eid in self.store.items and self.store.items[eid].valid
+                            and self.store.items[eid].page is not None]
+                # Exposure is an HTTP fact, not proof that the failed action
+                # processed its input. Queue a fresh demand without undoing it.
+                self.store.request_originals(recovery)
+            ordinary = [eid for eid in priorities if self.store.items[eid].page is None]
+            pages = sorted((eid for eid in priorities if self.store.items[eid].page is not None),
+                           key=lambda eid: self.store.items[eid].page)
+            priorities = recovery + ordinary if recovery else ordinary + pages
         selected, deferred, offered = [], [], []
+        original_payload = []
+        page_blocked = False
         for eid in priorities:
             item = self.store.items[eid]
             if not item.valid:
                 continue
+            if item.page is not None and page_blocked:
+                deferred.append(eid)
+                continue
             represented = any(item.source in self.store.notes[k]['sources'] and
                               eid in self.store.notes[k]['evidence_ids'] for k in selected_notes)
-            if represented and eid not in unseen and eid not in self.store.pending:
+            if represented and eid not in unseen and eid not in self.store.pending and eid not in recovery:
                 continue
             # An explicit range can already contain a required mechanism.
             # Send that original once; the HTTP hook recognizes every covered
             # item and acknowledges its pending demand from the actual body.
-            if contains([m.dict() for m in payload], item.text):
+            if contains([m.dict() for m in original_payload], item.text):
                 continue
             part = self._part(eid, base + payload, model)
             if part is None:
+                if item.page is not None:
+                    page_blocked = True
                 if eid in unseen or eid in self.store.pending:
                     deferred.append(eid)
                 continue
             start, end = part
-            payload.append(message(self.store.render(eid, start, end)))
+            original = message(self.store.render(eid, start, end))
+            payload.append(original)
+            original_payload.append(original)
             selected.append(eid)
             offered.append((eid, start, end))
             if start or end != len(item.text):

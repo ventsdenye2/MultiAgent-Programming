@@ -1,0 +1,18 @@
+{
+  "exit_code": 0,
+  "native": "/tmp/smolagents-offline-yi12eyaz",
+  "filesystem": "ext2/ext3",
+  "python": "3.12.3 (main, Aug 31 2026, 10:18:26) [GCC 13.3.0]",
+  "provider_calls": 0,
+  "command": [
+    "/mnt/d/Muiti-Agent Programing/experiments/code-agent-smolagents/24371220/.venv/bin/python",
+    "-m",
+    "pytest",
+    "-q",
+    "test_smolagents_materials.py::test_real_pdf_52_pages_fit_batched_and_five_notes_reused",
+    "--basetemp",
+    "/tmp/smolagents-offline-yi12eyaz/pytest",
+    "--junitxml",
+    "/mnt/d/Muiti-Agent Programing/experiments/code-agent-smolagents/24371220/experiments/smolagents/offline-20261029-150459/junit.xml"
+  ]
+}

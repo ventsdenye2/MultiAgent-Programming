@@ -210,6 +210,27 @@ def test_structured_note_provenance_survives_json_and_python_escaping(tmp_path):
     assert contains(next(e['response'] for e in events if e['event'] == 'model_response' and e['number'] == 2), note)
 
 
+def test_course_markdown_protocol_uses_upstream_parser_and_configured_sampling(tmp_path):
+    def setup(repo):
+        (repo / 'test_protocol.py').write_text('def test_ready():\n    assert 1 + 1 == 2\n')
+    rc, result, calls, events = run_script(tmp_path, [
+        "update_plan(items=[{'title':'check protocol','status':'doing'}])\n"
+        "run_command(argv=['python','-m','pytest','-q'])\nvalue=41",
+        "update_plan(items=[{'title':'check protocol','status':'done'}])\nfinal_answer(str(value+1))",
+    ],
+        {'use_structured_outputs_internally': False, 'max_tokens': 16384,
+         'thinking': 'enabled', 'reasoning_effort': 'high'}, profile='source', setup=setup)
+    assert rc == 0 and result['answer'] == '42', result
+    assert len(calls) == 2
+    assert all('response_format' not in call for call in calls)
+    assert all(call['thinking'] == {'type': 'enabled'} and call['max_tokens'] == 16384 for call in calls)
+    assert contains(calls[0], 'ONE fenced Python block')
+    assert [e['rc'] for e in events if e['event'] == 'command_result'] == [0]
+    assert not any(e['event'] == 'agent_error' for e in events)
+    assert [e['estimated_body_chars'] for e in events if e['event'] == 'context_selection'] == [
+        e['chars'] for e in events if e['event'] == 'model_request']
+
+
 def test_real_file_tools_pytest_and_final_checks(tmp_path):
     def setup(repo):
         (repo / 'calc.py').write_text('def answer():\n    return 0\n')
