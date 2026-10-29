@@ -38,7 +38,7 @@ flowchart TD
 
 `_run_stream`、`_step_stream`、代码解析与 `create_python_executor` 均直接继承官方实现。跨轮变量、Python 语法执行和 `AgentError` 恢复由官方负责。没有第二套动作 JSON 协议、自制执行 AST 白名单、RPC 执行器或 Agent 状态机。
 
-动作格式通过官方 `code_block_tags="markdown"` 配置，历史发送视图使用同一组标签；请求容量估计采用与官方生成调用一致的停止序列。错误响应继续交给官方错误恢复，不增加 DSML/XML 转换器。历史离线回放保留原记录的标签配置。
+默认开启官方结构化输出选项，使用其自带 `thought/code` 提示词和解析器。DeepSeek Chat接口仅支持 `json_object`，模型适配器只将官方的 `json_schema` 请求参数映射为此模式，不修改返回正文；JSON格式约束不等于严格Schema约束。请求估计与实际发送共用同一参数准备函数。历史发送视图只保留完整真实模型输出为assistant消息，裁剪片段作为参考数据；不合成另一种动作格式。错误响应继续交给官方错误恢复，不增加DSML/XML转换器。历史离线回放保留原记录的输出模式与代码块配置。
 
 项目工具通过官方 `Tool` 包装接口接入。文件范围、版本冲突、基线和最终测试、双子任务顺序、论文笔记是课程业务约束，集中在 `session.py`、`policy.py`、`workspace.py`；源码 AST 仅用于提取阅读单位和检查课程规定的函数定义，不用于执行模型代码。
 

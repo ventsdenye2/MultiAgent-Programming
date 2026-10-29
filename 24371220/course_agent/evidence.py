@@ -240,7 +240,9 @@ class EvidenceStore:
         if not evidence_ids or any(eid not in self.exposed or not self.items[eid].valid for eid in evidence_ids):
             raise ValueError('Notes must cite current-version evidence already sent to the model')
         if not contains(self.last_response, content):
-            raise ValueError('Note text must occur in the actual last model response; use a literal string')
+            raise ValueError('Note text must occur contiguously in the actual model response. '
+                             'Pass content as ONE string literal, not adjacent strings, concatenation or a variable; '
+                             'do not change the note text after generation.')
         sources = sorted({self.items[eid].source for eid in evidence_ids})
         if self.contract.profile == 'source':
             for source in sources:

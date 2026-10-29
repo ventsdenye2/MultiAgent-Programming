@@ -84,7 +84,8 @@ class CourseSession:
         note_properties = {
             'title': {'type': 'string', 'description': 'Stable note title; reuse it when updating the same note.'},
             'content': {'type': 'string', 'description':
-                        f'Literal model-written text, 20..{1500 if paper else 3000} characters; cite exposed evidence.'},
+                        f'One contiguous string literal, 20..{1500 if paper else 3000} characters. '
+                        'No adjacent string fragments, concatenation or variable; text must occur verbatim in your response.'},
             'evidence_ids': {'type': 'array', 'description': 'Ids of current-version originals already sent to you.'},
         }
         note_required = ['title', 'content', 'evidence_ids']
@@ -285,10 +286,15 @@ Tools return Python dicts; use their file_hash for expected_hash. Variables pers
 Do not reset a successful plan or repeat completed baseline checks. Continue the next unfinished action.
 All writes and tests must use these tools. Call final_answer only after current-file verification.
 '''
-        instructions += ('The Python action interpreter only imports: ' +
-                         ', '.join(self.agent.authorized_imports) + '.\n'
-                         'Use read_file/read_range/read_symbol/list_files/search_code for filesystem access, '
-                         'and run_command for subprocesses; os and pathlib are unavailable in action code.\n')
+        # The official system prompt already renders the actual import list.
+        # Keep the task-specific capability boundary concise to preserve the
+        # basic assignment's much smaller context budget.
+        instructions += ('os and pathlib are unavailable in action code; use file/command tools. '
+                         'Import allowed modules before using them.\n')
+        if self.agent._use_structured_outputs_internally:
+            instructions += ('When calling write_note, put the complete exact note text in the thought field, '
+                             'then pass that same text as one content string literal in code. This preserves '
+                             'a contiguous model-authored copy through JSON/Python escaping.\n')
         if self.contract.profile in {'source', 'paper'}:
             instructions += '''Read original evidence in batches. After each batch, write_note with a literal model-written summary
 and its evidence_ids. Notes are source-version-bound; never invent sources or note text.

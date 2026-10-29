@@ -151,16 +151,26 @@ class RequestAudit:
 
 
 class AuditedOpenAIModel(OpenAIModel):
-    """Only transport auditing extends the official model implementation."""
+    """Official SDK transport with auditing and DeepSeek response-format support."""
     def __init__(self, config, audit, api_key, transport=None):
         self.audit = audit
         self.action_stop_sequences = ['Observation:', 'Calling tools:']
+        self.action_response_format = None
         client = httpx.Client(timeout=httpx.Timeout(float(config.get("timeout", 210))),
                               transport=transport,
                               event_hooks={"request": [audit.request], "response": [audit.response]})
         super().__init__(model_id=config["model"], api_base=config["base_url"], api_key=api_key,
                          retry=False, client_kwargs={"max_retries": 0, "http_client": client},
                          max_tokens=4096, extra_body={"thinking": {"type": "disabled"}})
+
+    def _prepare_completion_kwargs(self, *args, **kwargs):
+        body = super()._prepare_completion_kwargs(*args, **kwargs)
+        # DeepSeek Chat Completions supports JSON mode, not json_schema. Keep
+        # CodeAgent's official thought/code prompt and parser; adapt only the
+        # provider parameter, without rewriting or repairing model responses.
+        if (body.get('response_format') or {}).get('type') == 'json_schema':
+            body['response_format'] = {'type': 'json_object'}
+        return body
 
     def generate(self, messages, **kwargs):
         self.audit.guard()
@@ -173,6 +183,7 @@ class AuditedOpenAIModel(OpenAIModel):
     def measure(self, messages):
         body = self._prepare_completion_kwargs(messages, model=self.model_id,
                                               stop_sequences=self.action_stop_sequences,
+                                              response_format=self.action_response_format,
                                               custom_role_conversions=self.custom_role_conversions,
                                               convert_images_to_image_urls=True)
         body.update(body.pop("extra_body", {}))

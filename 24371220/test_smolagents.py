@@ -36,8 +36,12 @@ def legacy_code(text):
     return '<code>\n' + text + '\n</code>'
 
 
-def code(text):
+def markdown_code(text):
     return '```python\n' + text + '\n```'
+
+
+def code(text):
+    return json.dumps({'thought': 'Execute the next action.', 'code': text}, ensure_ascii=False)
 
 
 def run_script(tmp_path, replies, config=None, profile='generic', setup=None, context_mode='evidence'):
@@ -55,7 +59,8 @@ def run_script(tmp_path, replies, config=None, profile='generic', setup=None, co
             item = item(calls[-1])
         if isinstance(item, httpx.Response):
             return item
-        return httpx.Response(200, json=item if isinstance(item, dict) else response(code(item)))
+        wrapper = code if cfg.get('use_structured_outputs_internally', True) else markdown_code
+        return httpx.Response(200, json=item if isinstance(item, dict) else response(wrapper(item)))
     rc, result = execute(spec, cfg, out, transport=httpx.MockTransport(handler), api_key='offline-test',
                          context_mode=context_mode)
     events = [json.loads(line) for line in (out / 'run.log').read_text().splitlines()]
@@ -95,8 +100,9 @@ def test_official_parser_recovers_and_records_error(tmp_path):
 def test_markdown_protocol_ignores_xml_marker_in_prose_and_matches_wire_size(tmp_path):
     # The real failed source response mentioned <code> in its explanation;
     # the XML parser treated that mention as the start of the executable body.
-    first = 'The previous <code> marker was only explanatory text.\n' + code(DONE + '\nvalue=41')
-    rc, result, calls, events = run_script(tmp_path, [response(first), "final_answer(str(value+1))"])
+    first = 'The previous <code> marker was only explanatory text.\n' + markdown_code(DONE + '\nvalue=41')
+    rc, result, calls, events = run_script(tmp_path, [response(first), "final_answer(str(value+1))"],
+                                         {'use_structured_outputs_internally': False})
     assert rc == 0 and result['answer'] == '42', result
     assert not any(e['event'] == 'agent_error' for e in events)
     assert all(call['stop'] == ['Observation:', 'Calling tools:'] for call in calls)
@@ -112,7 +118,7 @@ def test_dsml_failure_uses_upstream_recovery_without_a_second_action_parser(tmp_
     assert rc == 0, result
     errors = [e for e in events if e['event'] == 'agent_error']
     assert len(errors) == 1 and errors[0]['error_type'] == 'AgentParsingError'
-    assert contains(calls[1], '```python')
+    assert calls[1]['response_format'] == {'type': 'json_object'}
     assert not any(e.get('tool') == 'task_status' for e in events if e['event'] == 'tool_call')
 
 
@@ -135,8 +141,8 @@ def test_empty_truncated_response_has_distinct_classification(tmp_path):
     rc, result, calls, events = run_script(tmp_path, [response('', 'length'), DONE + "\nfinal_answer('ok')"])
     assert rc == 0, result
     assert any(e.get('classification') == 'truncated_empty' for e in events)
-    # Upstream accepts empty Python as a no-op; keep raw classification separate
-    # and make the next request explain it rather than forging a parser error.
+    # Raw truncation and the official parser error are separate diagnostics;
+    # the following request must retain the truncation classification.
     assert contains(calls[1], 'truncated_empty')
     assert len(calls) == 2
 
@@ -162,10 +168,31 @@ def test_actual_body_has_protocol_and_balanced_raw_audit(tmp_path):
     assert rc == 0, result
     assert calls[0]['max_tokens'] == 4096
     assert calls[0]['thinking'] == {'type': 'disabled'}
+    assert calls[0]['response_format'] == {'type': 'json_object'}
     assert 'extra_body' not in calls[0]
     assert [e['body'] for e in events if e['event'] == 'model_request'] == calls
     assert len(json.dumps(calls[0], ensure_ascii=False, separators=(',', ':'))) <= 32000
     assert len([e for e in events if e['event'] == 'model_response']) == 1
+    assert [e['estimated_body_chars'] for e in events if e['event'] == 'context_selection'] == [
+        e['chars'] for e in events if e['event'] == 'model_request']
+
+
+def test_structured_note_provenance_survives_json_and_python_escaping(tmp_path):
+    note = 'A model-written note with "quotes", an apostrophe\'s meaning, C:\\source, 中文 and a newline.\nKeep the exact wording.'
+    def setup(repo):
+        (repo / 'source.txt').write_text('Evidence: a small document for the note.\n')
+    def write_note(body):
+        action = (f"write_note(title='source note', content={note!r}, evidence_ids=r['evidence_ids'])\n" +
+                  DONE + "\nfinal_answer('Noted')")
+        return response(json.dumps({'thought': note, 'code': action}, ensure_ascii=False))
+    rc, result, calls, events = run_script(tmp_path, ["r=read_file(path='source.txt')", write_note], setup=setup)
+    assert rc == 0, result
+    assert not any(e['event'] == 'agent_error' for e in events)
+    recorded = [e for e in events if e['event'] == 'context_note']
+    assert len(recorded) == 1 and recorded[0]['content'] == note
+    # The course checks a contiguous raw or JSON-escaped copy, without parsing
+    # and evaluating Python string expressions from model output.
+    assert contains(next(e['response'] for e in events if e['event'] == 'model_response' and e['number'] == 2), note)
 
 
 def test_real_file_tools_pytest_and_final_checks(tmp_path):

@@ -1,0 +1,225 @@
+{
+  "commit": "87c6850",
+  "checks": [
+    {
+      "path": "agent.py",
+      "source": "87c6850",
+      "match": true
+    },
+    {
+      "path": "config.json",
+      "source": "87c6850",
+      "match": true
+    },
+    {
+      "path": "context_selection.py",
+      "source": "87c6850",
+      "match": true
+    },
+    {
+      "path": "course_agent/__init__.py",
+      "source": "87c6850",
+      "match": true
+    },
+    {
+      "path": "course_agent/audit.py",
+      "source": "87c6850",
+      "match": true
+    },
+    {
+      "path": "course_agent/cli.py",
+      "source": "87c6850",
+      "match": true
+    },
+    {
+      "path": "course_agent/context.py",
+      "source": "87c6850",
+      "match": true
+    },
+    {
+      "path": "course_agent/engine.py",
+      "source": "87c6850",
+      "match": true
+    },
+    {
+      "path": "course_agent/evidence.py",
+      "source": "87c6850",
+      "match": true
+    },
+    {
+      "path": "course_agent/policy.py",
+      "source": "87c6850",
+      "match": true
+    },
+    {
+      "path": "course_agent/progress.py",
+      "source": "87c6850",
+      "match": true
+    },
+    {
+      "path": "course_agent/recording.py",
+      "source": "87c6850",
+      "match": true
+    },
+    {
+      "path": "course_agent/session.py",
+      "source": "87c6850",
+      "match": true
+    },
+    {
+      "path": "course_agent/workspace.py",
+      "source": "87c6850",
+      "match": true
+    },
+    {
+      "path": "legacy_agent.py",
+      "source": "87c6850",
+      "match": true
+    },
+    {
+      "path": "requirements.in",
+      "source": "87c6850",
+      "match": true
+    },
+    {
+      "path": "requirements.txt",
+      "source": "87c6850",
+      "match": true
+    },
+    {
+      "path": "runtime.py",
+      "source": "87c6850",
+      "match": true
+    },
+    {
+      "path": "vendor/smolagents/LICENSE",
+      "source": "87c6850",
+      "match": true
+    },
+    {
+      "path": "vendor/smolagents/README.md",
+      "source": "87c6850",
+      "match": true
+    },
+    {
+      "path": "vendor/smolagents/UPSTREAM.json",
+      "source": "87c6850",
+      "match": true
+    },
+    {
+      "path": "vendor/smolagents/pyproject.toml",
+      "source": "87c6850",
+      "match": true
+    },
+    {
+      "path": "vendor/smolagents/src/smolagents/__init__.py",
+      "source": "87c6850",
+      "match": true
+    },
+    {
+      "path": "vendor/smolagents/src/smolagents/_function_type_hints_utils.py",
+      "source": "87c6850",
+      "match": true
+    },
+    {
+      "path": "vendor/smolagents/src/smolagents/agent_types.py",
+      "source": "87c6850",
+      "match": true
+    },
+    {
+      "path": "vendor/smolagents/src/smolagents/agents.py",
+      "source": "87c6850",
+      "match": true
+    },
+    {
+      "path": "vendor/smolagents/src/smolagents/cli.py",
+      "source": "87c6850",
+      "match": true
+    },
+    {
+      "path": "vendor/smolagents/src/smolagents/default_tools.py",
+      "source": "87c6850",
+      "match": true
+    },
+    {
+      "path": "vendor/smolagents/src/smolagents/gradio_ui.py",
+      "source": "87c6850",
+      "match": true
+    },
+    {
+      "path": "vendor/smolagents/src/smolagents/local_python_executor.py",
+      "source": "87c6850",
+      "match": true
+    },
+    {
+      "path": "vendor/smolagents/src/smolagents/mcp_client.py",
+      "source": "87c6850",
+      "match": true
+    },
+    {
+      "path": "vendor/smolagents/src/smolagents/memory.py",
+      "source": "87c6850",
+      "match": true
+    },
+    {
+      "path": "vendor/smolagents/src/smolagents/models.py",
+      "source": "87c6850",
+      "match": true
+    },
+    {
+      "path": "vendor/smolagents/src/smolagents/monitoring.py",
+      "source": "87c6850",
+      "match": true
+    },
+    {
+      "path": "vendor/smolagents/src/smolagents/prompts/code_agent.yaml",
+      "source": "87c6850",
+      "match": true
+    },
+    {
+      "path": "vendor/smolagents/src/smolagents/prompts/structured_code_agent.yaml",
+      "source": "87c6850",
+      "match": true
+    },
+    {
+      "path": "vendor/smolagents/src/smolagents/prompts/toolcalling_agent.yaml",
+      "source": "87c6850",
+      "match": true
+    },
+    {
+      "path": "vendor/smolagents/src/smolagents/remote_executors.py",
+      "source": "87c6850",
+      "match": true
+    },
+    {
+      "path": "vendor/smolagents/src/smolagents/serialization.py",
+      "source": "87c6850",
+      "match": true
+    },
+    {
+      "path": "vendor/smolagents/src/smolagents/tool_validation.py",
+      "source": "87c6850",
+      "match": true
+    },
+    {
+      "path": "vendor/smolagents/src/smolagents/tools.py",
+      "source": "87c6850",
+      "match": true
+    },
+    {
+      "path": "vendor/smolagents/src/smolagents/utils.py",
+      "source": "87c6850",
+      "match": true
+    },
+    {
+      "path": "vendor/smolagents/src/smolagents/vision_web_browser.py",
+      "source": "87c6850",
+      "match": true
+    },
+    {
+      "path": "verify_vendor.py",
+      "source": "87c6850",
+      "match": true
+    }
+  ]
+}

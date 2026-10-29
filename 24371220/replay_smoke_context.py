@@ -34,6 +34,7 @@ def main():
     start = next((e for e in events if e['event'] == 'run_start'), {})
     tags = start.get('code_block_tags', ['<code>', '</code>'])
     cfg['code_block_tags'] = tuple(tags)
+    cfg['use_structured_outputs_internally'] = start.get('use_structured_outputs_internally', False)
     native = Path(tempfile.mkdtemp(prefix='smoke-context-replay-'))
     shutil.copytree(archive / 'smoke-attempt/before', native / 'work')
     contract = load_task((native / 'work/task.md').read_text(encoding='utf-8'),

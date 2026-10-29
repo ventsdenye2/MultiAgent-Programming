@@ -41,9 +41,10 @@ Ubuntu 缺少 venv/ensurepip 时，先安装对应的 `python3.12-venv` 系统�
 
 源码/论文分别限制 20/40 次实际模型请求，单请求完整 JSON 最多 32,000 字符。首轮固定 deepseek-flash、4096 输出、关闭思考与自动重试。
 
-默认使用官方 `code_block_tags="markdown"`：模型以 Markdown Python 代码块产生动作，官方解析器和执行器负责处理。历史回放根据原记录恢复当时的代码块配置，不改写已归档的响应。允许导入的模块由执行器声明；文件和命令操作通过课程工具完成。
+默认开启官方 `use_structured_outputs_internally=True`：模型返回官方定义的 `thought/code` JSON，Python动作仍由官方解析器和执行器处理。DeepSeek Chat API通过 `response_format={"type":"json_object"}` 约束有效JSON；不宣称服务端严格校验JSON Schema。Markdown代码块配置保留给官方代码提取和历史回放。历史回放恢复原记录的输出模式，不改写已归档响应。允许导入的模块由执行器声明；文件和命令操作通过课程工具完成。
 
 笔记规则按任务类型确定：源码笔记为20～3000字符，记录 `context_note`；论文笔记为20～1500字符，必须指定五个主题之一，记录 `section_note`。可选笔记键不会改变任务类型。
+结构化模式写笔记时，`thought`保留笔记的完整原文，`code`把同一文字传给工具，保证课程检查能在真实响应中找到连续原文；不放宽原文、来源版本或先读后写的核验。
 
 ## 离线验证
 

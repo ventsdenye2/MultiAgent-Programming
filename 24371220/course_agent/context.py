@@ -54,16 +54,12 @@ class EvidenceContext:
             feedback += '\nRecent project tool results:\n' + clip(
                 json.dumps(self.store.recent_results[-4:], ensure_ascii=False), limits[1] // 2)
         output = step.model_output or ''
-        opening, closing = self.session.agent.code_block_tags
-        action = opening + '\n' + step.code_action + '\n' + closing if step.code_action else None
-        if action and output and len(output) <= limits[0]:
+        if step.code_action and output and len(output) <= limits[0]:
             previous = message(output, MessageRole.ASSISTANT)
-        elif action and len(action) <= limits[0]:
-            previous = message(action, MessageRole.ASSISTANT)
         else:
             # A clipped or invalid action is reference data, not an assistant
-            # example to imitate. Preserve complete code tags when using the
-            # assistant role, as upstream ActionStep.to_messages does.
+            # example to imitate. Preserve the actual complete model output
+            # for assistant history; never synthesize another action format.
             previous = message('Previous action excerpt (reference only):\n' +
                                clip(step.code_action or output, limits[0]))
         result = [previous, message('Latest execution feedback:\n' + feedback)]

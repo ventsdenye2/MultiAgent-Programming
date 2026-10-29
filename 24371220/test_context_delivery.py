@@ -36,7 +36,7 @@ def test_recorded_smoke_reaches_edit_and_passes_public_checks(tmp_path):
                         "update_plan(items=plan)\nfinal_answer('Fixed and verified')"))
     cfg = json.loads((ROOT / 'config.json').read_text(encoding='utf-8'))
     cfg.update(base_url='https://offline.invalid/v1', key_env='OFFLINE_TEST_KEY', max_steps=8,
-               code_block_tags=None)  # Preserve the saved run's official XML protocol.
+               code_block_tags=None, use_structured_outputs_internally=False)  # Preserve the saved XML protocol.
     contract = load_task((tmp_path / 'work/task.md').read_text(encoding='utf-8'), repo, cfg)
     calls = []
     def handler(request):
@@ -184,7 +184,7 @@ def test_recorded_plan_error_does_not_starve_source_or_restart_plan(tmp_path):
                         "update_plan(items=plan['items'])\nfinal_answer('Verified')"))
     cfg = json.loads((ROOT / 'config.json').read_text(encoding='utf-8'))
     cfg.update(base_url='https://offline.invalid/v1', key_env='OFFLINE_TEST_KEY', max_steps=9,
-               code_block_tags=None)
+               code_block_tags=None, use_structured_outputs_internally=False)
     contract = load_task((tmp_path / 'work/task.md').read_text(encoding='utf-8'), repo, cfg)
     calls = []
     def handler(request):
@@ -273,7 +273,7 @@ def test_recorded_missing_plan_is_retained_and_can_recover(tmp_path):
                      "update_plan(items=items)\nfinal_answer('Verified')")]
     cfg = json.loads((ROOT / 'config.json').read_text(encoding='utf-8'))
     cfg.update(base_url='https://offline.invalid/v1', key_env='OFFLINE_TEST_KEY', max_steps=8,
-               code_block_tags=None)
+               code_block_tags=None, use_structured_outputs_internally=False)
     contract = load_task((tmp_path / 'work/task.md').read_text(encoding='utf-8'), repo, cfg)
     calls = []
     def handler(request):
@@ -363,8 +363,8 @@ def test_assistant_history_contains_only_complete_code_actions(tmp_path):
         assert full[0].role == MessageRole.ASSISTANT
         assert full[0].content[0]['text'] == original
         parsed = context._recent(agent.memory, (len(code(action)), 80, 80))
-        assert parsed[0].role == MessageRole.ASSISTANT
-        assert parsed[0].content[0]['text'] == code(action)
+        assert parsed[0].role == MessageRole.USER
+        assert 'Previous action excerpt (reference only)' in parsed[0].content[0]['text']
     finally:
         model.close()
         log.close()

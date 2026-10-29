@@ -1,0 +1,154 @@
+{
+  "name": "smolagents",
+  "version": "1.26.0",
+  "commit": "12c1bc820eca50ace6f80a21d90426d41d74f845",
+  "repository": "https://github.com/huggingface/smolagents",
+  "license": "Apache-2.0",
+  "unmodified": true,
+  "files": [
+    {
+      "path": "LICENSE",
+      "git_blob": "261eeb9e9f8b2b4b0d119366dda99c6fd7d35c64",
+      "sha256": "c71d239df91726fc519c6eb72d318ec65820627232b2f796219e87dcf35d0ab4",
+      "bytes": 11357
+    },
+    {
+      "path": "README.md",
+      "git_blob": "bd56737d7cbf27c39d8066e461edf4ef8f69a06f",
+      "sha256": "07628fd537014c9e48fdbf1681113ef179d4016d18811a953ca353b7806ec35e",
+      "bytes": 14137
+    },
+    {
+      "path": "pyproject.toml",
+      "git_blob": "206bdd8e96ec2aa80fbc8cbd06faad683bcb2b56",
+      "sha256": "7b93594703c11e13c3d89a80fe81b4f6c60a4b6fa45b12691095dcfe45c2a41f",
+      "bytes": 2941
+    },
+    {
+      "path": "src/smolagents/__init__.py",
+      "git_blob": "178b854074ac0a95a6da8b7aad9a6ea9a7769038",
+      "sha256": "11b53a260cae0d0c3306d8ae6730309aa1928d9372e7dee8bc356c18994ebfda",
+      "bytes": 1102
+    },
+    {
+      "path": "src/smolagents/_function_type_hints_utils.py",
+      "git_blob": "e8102ead0d7e64c49ebaa95d69081ba373876e79",
+      "sha256": "9ce6ce943a6ce86d6bfc8f9df084761a927c5799efee0aa6e13b1d804374a438",
+      "bytes": 16007
+    },
+    {
+      "path": "src/smolagents/agent_types.py",
+      "git_blob": "10e643eecf7b70f2ae17fb73678e041e029f9368",
+      "sha256": "2a46ef484405d9a7f6316ae8608c3a9dda0f46fbdffedde8e5f94b0969ad9335",
+      "bytes": 9215
+    },
+    {
+      "path": "src/smolagents/agents.py",
+      "git_blob": "a8f6e52de0361a6c23c0aa5d5907180969f259b7",
+      "sha256": "da0da2e258c346e28d97b3584dfe58dcd203fc20fbde6c6533e333f9b1a06352",
+      "bytes": 80780
+    },
+    {
+      "path": "src/smolagents/cli.py",
+      "git_blob": "38bd4d043f2d5c5e871fa62ba291208c73a6279c",
+      "sha256": "c7cd04f6312242fbdb16917c48b9b5a672cb5a0652f9553c718b68dd3e2b5d62",
+      "bytes": 9658
+    },
+    {
+      "path": "src/smolagents/default_tools.py",
+      "git_blob": "c72679dc339ffe45309dd894470149ff2b30f232",
+      "sha256": "84e0bcb9c2aae16f493fd0f9553da4d4442bcfc7f832be840228c4b8a3f9f14c",
+      "bytes": 25804
+    },
+    {
+      "path": "src/smolagents/gradio_ui.py",
+      "git_blob": "95e04783a9e038cb85f2fef0bc405173bb22eb2b",
+      "sha256": "a3e601768f58523f59ee85e4770bab94b8ad1180184fa2c6b79a7234662d3590",
+      "bytes": 19092
+    },
+    {
+      "path": "src/smolagents/local_python_executor.py",
+      "git_blob": "8e150cd5cac433ed315bff1f8f5470149da68dd6",
+      "sha256": "41859e622bae8ad85ed861b7abef12b02f9106133a273c2f4d8a1e37a743d1ca",
+      "bytes": 68159
+    },
+    {
+      "path": "src/smolagents/mcp_client.py",
+      "git_blob": "9432185912f042c9dc026491969588bd39664e2a",
+      "sha256": "ec0041193c0ea16100f0d911aab12ff92ccb165eb27aebee76550855836f8603",
+      "bytes": 7123
+    },
+    {
+      "path": "src/smolagents/memory.py",
+      "git_blob": "3ce42b280c0aa1caee44189210719c0e18833719",
+      "sha256": "8089d5162069158bd548673b52fc4c2d15b91146ae29d503903cfde8f913418a",
+      "bytes": 12341
+    },
+    {
+      "path": "src/smolagents/models.py",
+      "git_blob": "b0aea59ca4f463e5a1fad2e05a7abc24f57a3237",
+      "sha256": "e3510666f0a36d1d09d25d9d9f2e9cb0e0c09edc47ed599b0e52445bddf146e7",
+      "bytes": 86054
+    },
+    {
+      "path": "src/smolagents/monitoring.py",
+      "git_blob": "43c95c4636cc60d7e7246ba96db507f9f24682f3",
+      "sha256": "bce3de91526054e0f6f0b795ecca4e374dac5166aa66514d3b621ac4394659fa",
+      "bytes": 9716
+    },
+    {
+      "path": "src/smolagents/prompts/code_agent.yaml",
+      "git_blob": "c81073a84a67d7c6f5ed03ded9f525c7944c9c1f",
+      "sha256": "28459ad8f3a0ffea3de76d6769d66253b54dcfcd8a86af5e806a2851ca2a4c03",
+      "bytes": 17052
+    },
+    {
+      "path": "src/smolagents/prompts/structured_code_agent.yaml",
+      "git_blob": "c3ad1fe80a6bb0da8bd03b0b70187048b2e7d4d9",
+      "sha256": "ccc44c1cc7277d619abb5982d4ec0ee9c78b428cfe1c458979ea457c7902838a",
+      "bytes": 15103
+    },
+    {
+      "path": "src/smolagents/prompts/toolcalling_agent.yaml",
+      "git_blob": "77708594d13748187d1d83ae50e3d3c74a2706d9",
+      "sha256": "28820f24906dd3ee3faa8160945e00529dda2a39c9fa8b3362093c0560c4b8f7",
+      "bytes": 10279
+    },
+    {
+      "path": "src/smolagents/remote_executors.py",
+      "git_blob": "1704a148b29bf864d2669fe0440e0799f616c64e",
+      "sha256": "d14480b4dc512605df941594bd37e08aa19a92c18913775e9af7c71d5c209ab9",
+      "bytes": 44941
+    },
+    {
+      "path": "src/smolagents/serialization.py",
+      "git_blob": "86cab99b41b613f26c390b94ae274008cc6d61ba",
+      "sha256": "1dea2a4e98136c822cad9d222e39e89cf2e680eca52b8bcdc022f1cb14e0344c",
+      "bytes": 21194
+    },
+    {
+      "path": "src/smolagents/tool_validation.py",
+      "git_blob": "0471fba1443a73eedd6323a4a31cc5ef0c8249f9",
+      "sha256": "f8655437dfaa30e3c05b49222d4495402358e022b743dd0b6a4c44e12ec1517c",
+      "bytes": 10699
+    },
+    {
+      "path": "src/smolagents/tools.py",
+      "git_blob": "931acfeccb6f2663b6c073bfa0fd8f0088c01eac",
+      "sha256": "0f7395444c1efa48d0995efacf07bc6b68e5bad75a4312b509604eb447aff5e8",
+      "bytes": 59873
+    },
+    {
+      "path": "src/smolagents/utils.py",
+      "git_blob": "69ade34311ce18217a008fb3a41cb0da11f0826d",
+      "sha256": "19263b4d418d5b69e3dfc3d0789aa2dc58ba6902bed2b0f9296b15057a837dc6",
+      "bytes": 21240
+    },
+    {
+      "path": "src/smolagents/vision_web_browser.py",
+      "git_blob": "a096cfb95692c5d688387cee8c28fcd2a0278525",
+      "sha256": "c7b2260468b7f95e86aa57d9106475184a5f39c30927ab8b6e9bafc0d3a2338d",
+      "bytes": 8700
+    }
+  ]
+}

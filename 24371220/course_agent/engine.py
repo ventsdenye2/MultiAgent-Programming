@@ -1,5 +1,6 @@
 """Small integration hooks; execution, parsing and recovery remain upstream."""
 from smolagents import CodeAgent
+from smolagents.agents import CODEAGENT_RESPONSE_FORMAT
 from smolagents.memory import ActionStep, FinalAnswerStep
 
 from .audit import BudgetExceeded
@@ -51,7 +52,7 @@ class CourseCodeAgent(CodeAgent):
         raise BudgetExceeded("MAX_STEPS_NO_EXTRA_REQUEST")
 
 
-def make_agent(model, session, context=None, code_block_tags='markdown'):
+def make_agent(model, session, context=None, code_block_tags='markdown', use_structured_outputs_internally=True):
     session.progress_monitor = ProgressMonitor(session)
 
     def record_step(step, agent):
@@ -69,6 +70,7 @@ def make_agent(model, session, context=None, code_block_tags='markdown'):
                             step_callbacks=[record_step], add_base_tools=False,
                             additional_authorized_imports=['json'],
                             code_block_tags=code_block_tags,
+                            use_structured_outputs_internally=use_structured_outputs_internally,
                             stream_outputs=False, max_print_outputs_length=1000000,
                             verbosity_level=0)
     session.agent = agent
@@ -78,4 +80,5 @@ def make_agent(model, session, context=None, code_block_tags='markdown'):
     model.action_stop_sequences = ['Observation:', 'Calling tools:']
     if agent.code_block_tags[1] not in agent.code_block_tags[0]:
         model.action_stop_sequences.append(agent.code_block_tags[1])
+    model.action_response_format = CODEAGENT_RESPONSE_FORMAT if use_structured_outputs_internally else None
     return agent

@@ -1,0 +1,56 @@
+............................F..........                                  [100%]
+=================================== FAILURES ===================================
+_______ test_recorded_plan_error_does_not_starve_source_or_restart_plan ________
+
+tmp_path = PosixPath('/tmp/smolagents-offline-4gr3b5jn/pytest/test_recorded_plan_error_does_0')
+
+    def test_recorded_plan_error_does_not_starve_source_or_restart_plan(tmp_path):
+        archived = ROOT / 'experiments/smolagents/smolagents-20261029-084305-472591'
+        shutil.copytree(archived / 'smoke-attempt/before', tmp_path / 'work')
+        repo, out = tmp_path / 'work/repo', tmp_path / 'run'
+        original = (repo / 'calc.py').read_text(encoding='utf-8')
+        events = [json.loads(line) for line in
+                  (archived / 'smoke-attempt/run/run.log').read_text(encoding='utf-8').splitlines()]
+        replies = [e['response']['choices'][0]['message']['content'] for e in events
+                   if e['event'] == 'model_response'][:6]
+        # The first six saved real replies include a plan-schema error and its
+        # successful correction. The continuation is explicitly offline/simulated.
+        replies.append(legacy_code("import json\n"
+                            "print(json.dumps({'stage':'editing'}))\n"
+                            "replace_text(path='calc.py', old_text='return price * discount / 100', "
+                            "new_text='return price * discount', expected_hash=calc['file_hash'])\n"
+                            "run_command(argv=['python','-m','pytest','-q'])\n"
+                            "for item in plan['items']: item['status']='done'\n"
+                            "update_plan(items=plan['items'])\nfinal_answer('Verified')"))
+        cfg = json.loads((ROOT / 'config.json').read_text(encoding='utf-8'))
+        cfg.update(base_url='https://offline.invalid/v1', key_env='OFFLINE_TEST_KEY', max_steps=9,
+                   code_block_tags=None, use_structured_outputs_internally=False)
+        contract = load_task((tmp_path / 'work/task.md').read_text(encoding='utf-8'), repo, cfg)
+        calls = []
+        def handler(request):
+            body = json.loads(request.content)
+            calls.append(body)
+            if len(calls) == 5:
+                assert not contains(body, 'Each plan item requires'), 'A corrected schema error is not current'
+            if len(calls) == 7:
+                assert contains(body, original), 'A past plan error must not starve the required small source'
+            assert request_size(body)['course_content_chars'] <= 15000
+            return httpx.Response(200, json=response(replies[len(calls) - 1]))
+        rc, result = execute(contract, cfg, out, transport=httpx.MockTransport(handler), api_key='offline-test')
+>       assert rc == 0, result
+E       AssertionError: {'context_mode': 'evidence', 'engine': 'smolagents', 'reason': 'AgentGenerationError: Error in generating model output...uested change', 'verify current files: python -m pytest -q', 'finish all plan items after their work and checks'], ...}
+E       assert 1 == 0
+
+test_context_delivery.py:200: AssertionError
+----------------------------- Captured stdout call -----------------------------
+Code execution failed at line 'plan = update_plan(items=[["Read calc.py and 
+locate the discount defect", "doing"], ["Run baseline pytest to capture 
+failures", "done"], ["Fix calc.py", "todo"], ["Run full pytest to verify all 
+tests pass", "todo"]])' due to: ValueError: Each plan item requires a nonempty 
+title and todo/doing/done status
+Error in generating model output:
+Connection error.
+- generated xml file: /mnt/d/Muiti-Agent Programing/experiments/code-agent-smolagents/24371220/experiments/smolagents/offline-20261029-102513/junit.xml -
+=========================== short test summary info ============================
+FAILED test_context_delivery.py::test_recorded_plan_error_does_not_starve_source_or_restart_plan
+1 failed, 38 passed in 136.75s (0:02:16)

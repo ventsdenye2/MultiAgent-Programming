@@ -1,0 +1,15 @@
+{
+  "status": "completed",
+  "engine": "smolagents",
+  "upstream_version": "1.26.0",
+  "context_mode": "evidence",
+  "reason": null,
+  "usage": {
+    "requests": 6,
+    "complete": true,
+    "prompt_tokens": 738,
+    "completion_tokens": 270
+  },
+  "answer": "Fixed and verified",
+  "remaining": []
+}
