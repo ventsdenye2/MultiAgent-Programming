@@ -1,6 +1,6 @@
 # 24371220：迷你编码智能体（基础版本）
 
-> **版本说明：**已有通过记录对应 legacy。v2 首轮实践02真实自测为 0/6，已定位并修复部分运行时缺陷，尚待真实复测；使用 v2 不应解读为已通过课程任务。见[首轮复盘](experiments/long-context/v2-20261028-173033/REVIEW.md)及[修复验证](docs/runtime-fixes.md)。
+> **版本说明：**已有通过记录对应 legacy。v2 已完成运行可靠性修复与新一轮真实复测，源码题 0/1、论文题 0/5，尚未通过课程任务。210 秒等待与原生目录 PDF 读取已验证；剩余问题涉及动作协议、跨文件证据门禁及批量召回超限。见[最新修复与复盘](docs/evaluation-reliability.md)、[首轮复盘](experiments/long-context/v2-20261028-173033/REVIEW.md)及[运行时修复](docs/runtime-fixes.md)。
 
 实现四项基础能力，以及 Diagnostic-Driven Context Selection and Compression 特色功能。报告和对照实验位于本目录及 experiments/feature/comparison01/。
 使用标准库直接调用 Chat Completions，自行实现消息组织、JSON 动作解析、计划和执行循环，不使用 Agent 框架。
@@ -34,7 +34,7 @@ read -rsp 'DeepSeek API Key: ' DEEPSEEK_API_KEY; echo
 export DEEPSEEK_API_KEY
 ```
 
-默认最多 60 轮，温度 0，单次输出预算 4096 token，网络超时 90 秒，工具命令超时 120 秒。预算耗尽、模型失败或验证失败返回非零。
+默认最多 60 轮，温度 0，单次输出预算 4096 token。legacy 网络超时保持 90 秒；v2 网络等待上限为 210 秒，同时受整轮剩余时间限制。工具命令超时 120 秒。预算耗尽、模型失败或验证失败返回非零。
 
 ## 使用
 
@@ -91,7 +91,11 @@ python -X utf8 -m pytest -q test_agent.py tests
 
 上述回归不需要模型密钥，也不会调用付费 API。
 
-实践02正式自测可在 Windows 双击 `run_long_context_v2.cmd`（当前工作区路径），或在 WSL 执行 `bash run_long_context_v2.sh`。脚本在本机终端隐蔽读取配置指定的密钥，不保存密钥；显式启用 v2/evidence，先跑一次源码题，再跑一次论文题，分别最多 20/40 次模型请求。配置/API等导致源码题未完成时停止，不自动重试，不启动可选效率排名。每次结果保存在新的 `experiments/long-context/v2-时间戳/`，含源码哈希协议及原始课程产物。需要 WSL Python 3.12、pytest、GNU patch、pdftotext 和项目临时目录的 tmpfs 挂载权限。
+实践02正式自测可在 Windows 双击 `run_long_context_v2.cmd`，或在 WSL 执行 `bash run_long_context_v2.sh`。先执行 `bash run_long_context_v2.sh --preflight-only` 可只检查环境、源码及三次 PDF 提取，不读取密钥或调用模型。正式运行也会先通过同样预检，再从进程环境或工作区 `.local-secrets/code-agent.env` 读取密钥；不复制密钥文件。
+
+评测器、材料和 Agent 快照在 WSL 的 `~/.local/state/code-agent/evaluations/` 原生持久化目录运行，无需 sudo/tmpfs 挂载。课程材料与评测器保持原始字节，协议保存 SHA-256 和配置。显式启用 v2/evidence，每轮源码题最多 20 次、论文题最多 40 次模型请求，不自动重试或运行效率排名。源码题基础设施失败时停止后续付费阶段，普通功能失败则继续论文题。
+
+结果在原生目录持续保存，结束或异常时归档至新的 `experiments/long-context/v2-时间戳/`；原生目录保留，归档失败时从终端给出的原生路径恢复。需要 WSL Python 3.12、pytest、GNU patch 和 pdftotext。离线历史动作回放使用 `replay_long_context.py --help`，其用量是模拟值，不可计入付费统计或课程评分。
 
 ## 验证
 

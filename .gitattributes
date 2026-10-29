@@ -9,3 +9,4 @@
 # 实验原始证据按字节保存，避免自动转换历史日志和补丁
 24371220/experiments/public/** -text -whitespace
 24371220/experiments/feature/** -text -whitespace
+24371220/experiments/long-context/** -text -whitespace

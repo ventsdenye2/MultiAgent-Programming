@@ -1,0 +1,82 @@
+{
+  "status": "incomplete",
+  "reason": "MODEL_BUDGET_EXHAUSTED",
+  "summary": null,
+  "evaluation_status": "not_run",
+  "steps": 20,
+  "usage": {
+    "complete": true,
+    "requests": 20,
+    "input_tokens": 177571,
+    "output_tokens": 12137,
+    "total_tokens": 189708,
+    "attempted_requests": 20
+  },
+  "state": {
+    "status": "incomplete",
+    "phase": "explore",
+    "plan": [
+      {
+        "title": "读取三个目标文件全文并定位相关配置、格式化与统计消费代码",
+        "status": "doing"
+      },
+      {
+        "title": "执行初始完整 pytest 并记录基线",
+        "status": "todo"
+      },
+      {
+        "title": "修改 environ.py 增加受限整型配置及刷新兼容",
+        "status": "todo"
+      },
+      {
+        "title": "修改 logger.py 实现消息预算及默认初始化接入",
+        "status": "todo"
+      },
+      {
+        "title": "修改 stats_logger.py 为队列消费日志附加 keep_full_message",
+        "status": "todo"
+      },
+      {
+        "title": "运行完整 pytest、生成 run.log 与 patch.diff 并复核",
+        "status": "todo"
+      }
+    ],
+    "read_files": [
+      "deepinfer/engine/stats_logger.py",
+      "deepinfer/environ.py",
+      "deepinfer/logger.py"
+    ],
+    "writes": 0,
+    "workspace_revision": 0,
+    "baseline": {
+      "python -m pytest -q": {
+        "rc": 1,
+        "fingerprint": {
+          "deepinfer/engine/stats_logger.py": "9ef93c3930d6dd8d889d4ba69558a85459c2210ae0714d5073c3b4328c8e7cb9",
+          "deepinfer/environ.py": "fe2c531989c419f0b51b169a07f5ed826dcec7f95c0c5bc3a351805923c4f218",
+          "deepinfer/logger.py": "5b8f8d9947de692353609c1fc2851097d24f9b6ba6004dce1dbfa394dc6d3ec8"
+        },
+        "revision": 0
+      }
+    },
+    "verification": {
+      "python -m pytest -q": {
+        "rc": 1,
+        "fingerprint": {
+          "deepinfer/engine/stats_logger.py": "9ef93c3930d6dd8d889d4ba69558a85459c2210ae0714d5073c3b4328c8e7cb9",
+          "deepinfer/environ.py": "fe2c531989c419f0b51b169a07f5ed826dcec7f95c0c5bc3a351805923c4f218",
+          "deepinfer/logger.py": "5b8f8d9947de692353609c1fc2851097d24f9b6ba6004dce1dbfa394dc6d3ec8"
+        },
+        "revision": 0
+      }
+    },
+    "focus_paths": [
+      "deepinfer/engine/stats_logger.py"
+    ]
+  },
+  "artifacts": [
+    "run.log",
+    "patch.diff",
+    "evidence.json"
+  ]
+}

@@ -1,0 +1,15 @@
+命令：["/mnt/d/Muiti-Agent Programing/agents/code-agent/24371220/.venv/bin/python", "/home/ventsdenye/.local/state/code-agent/evaluations/run-nh47wiy_/results/source/submission/agent.py", "--task", "/home/ventsdenye/.local/state/code-agent/evaluations/run-nh47wiy_/course/公开任务/题目2/task.md", "--repo", "/home/ventsdenye/.local/state/code-agent/evaluations/run-nh47wiy_/results/workspace/DeepInfer", "--model", "deepseek-flash", "--auto"]
+{
+  "status": "incomplete",
+  "reason": "MODEL_BUDGET_EXHAUSTED",
+  "summary": null,
+  "usage": {
+    "complete": true,
+    "requests": 20,
+    "input_tokens": 177571,
+    "output_tokens": 12137,
+    "total_tokens": 189708,
+    "attempted_requests": 20
+  },
+  "evaluation_status": "not_run"
+}

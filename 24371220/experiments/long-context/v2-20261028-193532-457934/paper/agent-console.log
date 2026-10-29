@@ -1,0 +1,15 @@
+命令：["/mnt/d/Muiti-Agent Programing/agents/code-agent/24371220/.venv/bin/python", "/home/ventsdenye/.local/state/code-agent/evaluations/run-nh47wiy_/results/paper/submission/agent.py", "--task", "/home/ventsdenye/.local/state/code-agent/evaluations/run-nh47wiy_/course/公开任务/题目1/task.md", "--repo", "/home/ventsdenye/.local/state/code-agent/evaluations/run-nh47wiy_/results/paper/repo", "--model", "deepseek-flash", "--auto"]
+{
+  "status": "incomplete",
+  "reason": "必要上下文 required:ev-000027 超过硬限制 (39762 > 32000)",
+  "summary": null,
+  "usage": {
+    "complete": true,
+    "requests": 38,
+    "input_tokens": 313137,
+    "output_tokens": 44200,
+    "total_tokens": 357337,
+    "attempted_requests": 38
+  },
+  "evaluation_status": "not_run"
+}

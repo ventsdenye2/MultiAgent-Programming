@@ -1,0 +1,9 @@
+{
+  "location": "project-local tmpfs",
+  "copy_seconds": 0.15,
+  "elapsed_seconds": 0.39,
+  "rc": 0,
+  "stdout_bytes": 294602,
+  "page_separators": 76,
+  "stderr": ""
+}

@@ -1,0 +1,15 @@
+命令：["/mnt/d/Muiti-Agent Programing/agents/code-agent/24371220/.venv/bin/python", "/mnt/d/Muiti-Agent Programing/agents/code-agent/24371220/experiments/long-context/v2-20261028-190246/source/submission/agent.py", "--task", "/mnt/d/Muiti-Agent Programing/materials/long-context/公开任务/题目2/task.md", "--repo", "/mnt/d/Muiti-Agent Programing/agents/code-agent/24371220/experiments/long-context/v2-20261028-190246/workspace/DeepInfer", "--model", "deepseek-flash", "--auto"]
+{
+  "status": "incomplete",
+  "reason": "MODEL_REQUEST_FAILED: timed out",
+  "summary": null,
+  "usage": {
+    "complete": false,
+    "requests": 5,
+    "input_tokens": null,
+    "output_tokens": null,
+    "total_tokens": null,
+    "attempted_requests": 6
+  },
+  "evaluation_status": "not_run"
+}

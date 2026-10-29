@@ -1,7 +1,41 @@
 """Offline ModelClient request, budget, and token-usage checks."""
 import pytest
+import io
+import json
 
 from codeagent.model import ModelClient, body_size, effective_body
+
+
+@pytest.mark.parametrize('remaining,expected', [(None, 210), (12, 12)])
+@pytest.mark.parametrize('fail', [False, True])
+def test_http_timeout_and_accounting(monkeypatch, remaining, expected, fail):
+    events, calls = [], []
+    clock = [100.0]
+    monkeypatch.setenv('TEST_KEY', 'fake-offline')
+    monkeypatch.setattr('codeagent.model.time.monotonic', lambda: clock[0])
+    def open_request(request, timeout):
+        calls.append(timeout)
+        clock[0] += 2
+        if fail:
+            raise TimeoutError('simulated timeout')
+        return io.BytesIO(json.dumps(good_response()).encode())
+    monkeypatch.setattr('codeagent.model.urllib.request.urlopen', open_request)
+    client = ModelClient({'model':'fake', 'base_url':'http://offline.invalid', 'key_env':'TEST_KEY'},
+                         lambda e, **k: events.append((e,k)),
+                         deadline=None if remaining is None else 100 + remaining)
+    body = client.prepare([{'role':'user','content':'test'}])
+    if fail:
+        with pytest.raises(RuntimeError, match='MODEL_REQUEST_FAILED'):
+            client.send(body)
+        assert client.summary()['input_tokens'] is None
+        end = next(k for e,k in events if e == 'model_error')
+        assert end['usage_confirmed'] is False
+    else:
+        client.send(body)
+        end = next(k for e,k in events if e == 'model_response')
+    assert calls == [expected] and client.calls == 1
+    assert end['elapsed_seconds'] == 2 and end['timeout_seconds'] == expected
+    assert end['remaining_seconds'] == (None if remaining is None else remaining-2)
 
 
 def good_response(content="ok", prompt=7, completion=3):

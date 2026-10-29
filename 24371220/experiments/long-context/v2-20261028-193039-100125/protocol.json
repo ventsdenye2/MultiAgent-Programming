@@ -1,0 +1,102 @@
+{
+  "status": "preflight_passed",
+  "native_run": "/home/ventsdenye/.local/state/code-agent/evaluations/run-5rxc18mj",
+  "archive": "/mnt/d/Muiti-Agent Programing/agents/code-agent/24371220/experiments/long-context/v2-20261028-193039-100125",
+  "max_model_requests": {
+    "source": 20,
+    "paper": 40
+  },
+  "automatic_retries": false,
+  "preflight_only": true,
+  "results": {},
+  "course_sha256": {
+    ".gitignore": "bf00729b636c71eae76b90296275df76cc03293b2d1bdbd5b81243bcf73f2a23",
+    "README.md": "51f7d6a0472041407c20f7f8cb2ce499ad6dab8bfbf9e0fd40b6845b2b174303",
+    "eval_deepinfer.py": "6c92bf811ff06bfbad9d41485036a29702d25b00c26a48cd1ede6bf312d5f53c",
+    "eval_efficiency.py": "7762d0cde32f9e3f103cd29993925514a4658a21a16734fc42bdba485d80b4ba",
+    "eval_paper.py": "ab3d4093c7084548792ee45bfac268b93e9ee213d064c80bdb6048d7bc0d83d7",
+    "prepare.py": "a4058e34e67fe37ad26abc80863e5fae02bb4ccba0f5bf417b79428866fb9051",
+    "rank_efficiency.py": "6f991e27e6a71d9ee73ccfb1256ba3c30fc3d86a9b5deba47e4cff884d4d6970",
+    "requirements.txt": "b8abe3dded025ee4f6676554cea66de39bc1b6e07816b1f074ffc5ed9a9a649c",
+    "tools/__init__.py": "ec59c7cd3707fe5c22eadbdd1d6bc4624f70160e788ea8b92e96635ca50f2e8c",
+    "tools/check_logger.py": "0a0af58ba90329fb0eb1b1a586d43f4e35690002e3c6ee8a582421d4c501b839",
+    "tools/common.py": "7d6e8db8cad8867e5c4960f1d0e35cb159f2d890c47f50a978763b3d3e674223",
+    "tools/deepinfer.py": "9ec144e0627fe28e0193149a3b16cc7996bb5d67d35a2aa29cb643d80b906d85",
+    "tools/development.py": "ce37bd184fdb5416758f03d3fb94de15026311125a8c746f77fb586b0b7d7e1b",
+    "tools/load_logger.py": "bc6dba3d9a369dfc5768df1de5556e738639e2b0cd4204c1236654942b8dd2d1",
+    "tools/paper.py": "69b3bf2ae93a2caaa70d9828add6f017b60f87515223100188098dd23ff71236",
+    "tools/proxy.py": "b601c4d7e00ec2837beadd2550109159cdea73d8b94bd5826382e0f0b8eea1ca",
+    "tools/source_context.py": "5f80b30c5a40fc5968a6bf392b4ab94fe80de6fc8506b6229af549d8c3539cd2",
+    "tools/test_logger.py": "faa8753c7e9d503309b2e5e1f953fdeaf296d46426d95cac70671c83cf604b9f",
+    "tools/test_logging_config.py": "3db0482752a6f16523c5939429494bfd29aa4c5be611d72d89619302241d49bd",
+    "公开任务/题目1/repo/paper.json": "06555c84cc484e6dcef2a1488dcc63cceb470aa6bbed2a1e471759e72425d095",
+    "公开任务/题目1/repo/paper.pdf": "b4767423c79db69ae7138f4c0aed7733af6385e0a370da21ad7d6fe029d7fb8c",
+    "公开任务/题目1/repo/read_pdf.py": "1887ddc34f91f82c0c465697a7571e8e69043f70147346c8f76d94d27d34a72e",
+    "公开任务/题目1/repo/report.json": "ca3d163bab055381827226140568f3bef7eaac187cebd76878e0b63e9e442356",
+    "公开任务/题目1/repo/test_report.py": "19b61aab979ac4d22a24412bc5e1f119a13a21649a126aeadb7b28d72d252fa2",
+    "公开任务/题目1/task.md": "232f850bd33e74574723cb41cb70a0c6261583ee352ae6f8044801a2b195f08d",
+    "公开任务/题目1/来源与校验.json": "527f5a46f0563a37a05ba20cdc817e029cd6ce3c6c0f543d3ef6a963fd81d89d",
+    "公开任务/题目1/来源与许可.md": "f3f86d4bbe33204264157e586db7740fc73bc55e515976661d383fe35b0e6ada",
+    "公开任务/题目2/DeepInfer-774ce244.tar.gz": "c9abab9e0b1ef08a9e76b213c8aa72dfc002aefa72db479e7a6e6938c1d6987c",
+    "公开任务/题目2/read_source.py": "a904c4c49180041bcfd4c92dcdc2015495fb078b15f264af4a010dc53ea1c261",
+    "公开任务/题目2/task.md": "81bc1fb32f5347bee3b20559ed1dc3f2f1150c0e845eac814ef260438afe5294",
+    "公开任务/题目2/来源与校验.json": "172f7dc2347abd0c4a9805ba698341ebf90159d18bb72698256a8a15d290e201",
+    "公开任务/题目2/来源与许可.md": "a3daa60094a7fbed4a143b80876a49c8d04a67dbde8cdaca7f36f26eae929307",
+    "说明/日志与产物规范.md": "0c1f377adfc14614d8765e2e6d230abdd613a71c343c178c5c2683540f14b775",
+    "题目/实践02-长论文阅读与开源代码修改.md": "cbd2a5ae9a7eab76aa8d47a653d4912ff5665ff11c2ab919e3754e8b3c7f66ad"
+  },
+  "agent_sha256": {
+    "agent.py": "b7b2c4c4b9d785c349592378fb72717c4b5b251f7236655b183224b026589918",
+    "build_report.py": "fedb163006f918753492b640deaeb81de8012d5a46d2eab0ab92014d5c47d8ba",
+    "codeagent/__init__.py": "381ba9f1d4c2de74fd058e57f5e77b51e4fc9cae4326b28fc60a89a60d67fd36",
+    "codeagent/cli.py": "4ced35c4cddd46910921c06342a5d3d34afcd3d904addecad8395bd1c0955e98",
+    "codeagent/context.py": "283babefa61a7bd3e93e3526b70b0ecc94c3e092645127ea5f488a6fc968776e",
+    "codeagent/controller.py": "a76c43f13442236f9c709a8c984a248689a20a5a87fb567d3902d4d1a983d458",
+    "codeagent/evidence.py": "83928083b6bcd230a8ad1b5348be00377ae45275b7bfa9c39111229034b439a8",
+    "codeagent/executor.py": "4be9b60ea6791440d98f6df4eb10faeab039b0511bfd21d6b018bf378730bd41",
+    "codeagent/model.py": "5667c2e6ca3f10b056ef8942c3c2f2e4f0fa097394161594e24455bbdc9a9347",
+    "codeagent/policies.py": "923b958285db3c9775e361706a41457e184f0bb821a2f67e2df40c566d9f0b5d",
+    "codeagent/recording.py": "95e76f97d4f44a48b7e7e2a79be19b0f308bc4d286d87ed72dc009f801428b67",
+    "codeagent/state.py": "7a989158eb082bf2934b999c05a6d9200238acf083ae6dbe2ec80dabfc59a7d9",
+    "codeagent/workspace.py": "277b281a92b308b60c339f24dc518243f8ad8693a12f72dd68acf2ff24e8218f",
+    "config.json": "c55c2c7e741cd99dc14b65e1be2d964ae14b0ec24fc9d252ec0ca346e1e00c20",
+    "context_selection.py": "e9e84a0027872c55519f24fdbea2e59915819095bca1298d6c6d3ec7a4d9f953",
+    "evaluate_long_context_v2.py": "705bae866125b7b1926f745841b1271649457da59a4d332ca5363bf2624dbd4f",
+    "experiment.py": "792693ac30876fa0a066b7d6d55b8fdd85d698143dcabf048163763257682390",
+    "replay_long_context.py": "a52196add18e3d303c061ed7e26f766795a5563af1497e68b9dcc77394a3a41d",
+    "runtime.py": "9d42154f636e399d4f1cd7626bc2b35d83f4f9658af90bde861cc195355266a3",
+    "setup_wsl.py": "727bb87901369ca961b7bbcc66c0f6e661181e4c018826e15669cf0d8233c691",
+    "test_agent.py": "62bc8ddfdfb12cfc683b495b459cd2accc1c1744014ca705333266e4bbdc57cb"
+  },
+  "config": {
+    "model": "deepseek-flash",
+    "base_url": "https://api.deepseek.com",
+    "key_env": "DEEPSEEK_API_KEY",
+    "max_steps": 60,
+    "context_chars": 15000,
+    "max_tokens": 4096,
+    "temperature": 0,
+    "request_timeout": 210
+  },
+  "preflight": {
+    "source_baseline_exit": 1,
+    "pdf": [
+      {
+        "seconds": 0.6171549770000127,
+        "pages": 76,
+        "text_sha256": "df1e063a3277cda707a88f688b48f5d1b279ffb4cafbb4a892b82a451d214ba8"
+      },
+      {
+        "seconds": 1.3660850470000128,
+        "pages": 76,
+        "text_sha256": "df1e063a3277cda707a88f688b48f5d1b279ffb4cafbb4a892b82a451d214ba8"
+      },
+      {
+        "seconds": 0.960169953000019,
+        "pages": 76,
+        "text_sha256": "df1e063a3277cda707a88f688b48f5d1b279ffb4cafbb4a892b82a451d214ba8"
+      }
+    ],
+    "status": "passed"
+  }
+}

@@ -56,7 +56,17 @@ class ModelClient:
             raise ValueError("CONTEXT_BUDGET_EXCEEDED")
         self.calls += 1
         request_id = f"request-{self.calls:04d}"
-        self.log("model_request", request_id=request_id, body=body)
+        started = time.monotonic()
+        remaining = None if self.deadline is None else max(0, self.deadline - started)
+        timeout = float(self.config.get("request_timeout", 210))
+        if remaining is not None:
+            timeout = min(timeout, remaining)
+        self.log("model_request", request_id=request_id, body=body,
+                 timeout_seconds=timeout, remaining_seconds=remaining)
+        def timing():
+            now = time.monotonic()
+            return {"elapsed_seconds": now - started, "timeout_seconds": timeout,
+                    "remaining_seconds": None if self.deadline is None else max(0, self.deadline - now)}
         try:
             if self.transport is not None:
                 response = self.transport(body)
@@ -68,18 +78,15 @@ class ModelClient:
                     self.config["base_url"].rstrip("/") + "/chat/completions",
                     json.dumps(body, ensure_ascii=False, separators=(",", ":")).encode("utf-8"),
                     {"Content-Type": "application/json", "Authorization": "Bearer " + secret})
-                timeout = float(self.config.get("request_timeout", 90))
-                if self.deadline is not None:
-                    timeout = min(timeout, max(.1, self.deadline - time.monotonic()))
                 with urllib.request.urlopen(request, timeout=timeout) as stream:
                     response = json.load(stream)
         except Exception as exc:
             detail = exc.read().decode("utf-8", "replace") if isinstance(exc, urllib.error.HTTPError) else str(exc)
             self.usage["complete"] = False
-            self.log("model_error", request_id=request_id, error=detail)
+            self.log("model_error", request_id=request_id, error=detail, usage_confirmed=False, **timing())
             raise RuntimeError("MODEL_REQUEST_FAILED: " + detail) from exc
         # Preserve raw API response before validation, including missing or invalid usage.
-        self.log("model_response", request_id=request_id, response=response)
+        self.log("model_response", request_id=request_id, response=response, **timing())
         usage = response.get("usage", {}) if isinstance(response, dict) else {}
         self.log("usage", request_id=request_id,
                  actual_model=response.get("model") if isinstance(response, dict) else None, usage=usage)

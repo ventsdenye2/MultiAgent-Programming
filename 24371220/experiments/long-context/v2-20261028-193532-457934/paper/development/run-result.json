@@ -1,0 +1,75 @@
+{
+  "status": "incomplete",
+  "reason": "必要上下文 required:ev-000027 超过硬限制 (39762 > 32000)",
+  "summary": null,
+  "evaluation_status": "not_run",
+  "steps": 39,
+  "usage": {
+    "complete": true,
+    "requests": 38,
+    "input_tokens": 313137,
+    "output_tokens": 44200,
+    "total_tokens": 357337,
+    "attempted_requests": 38
+  },
+  "state": {
+    "status": "incomplete",
+    "phase": "explore",
+    "plan": [
+      {
+        "title": "检查工作副本、测试与报告初始结构",
+        "status": "done"
+      },
+      {
+        "title": "分批读取 PDF 第1-52页并记录五主题笔记",
+        "status": "doing"
+      },
+      {
+        "title": "核对主题问题、引文与页码",
+        "status": "todo"
+      },
+      {
+        "title": "归并五份笔记并填写 report.json",
+        "status": "todo"
+      },
+      {
+        "title": "运行 pytest 并完整验证报告",
+        "status": "todo"
+      }
+    ],
+    "read_files": [
+      "paper.json",
+      "read_pdf.py",
+      "report.json",
+      "test_report.py"
+    ],
+    "writes": 0,
+    "workspace_revision": 0,
+    "baseline": {
+      "python -m pytest -q": {
+        "rc": 1,
+        "fingerprint": {
+          "report.json": "ca3d163bab055381827226140568f3bef7eaac187cebd76878e0b63e9e442356"
+        },
+        "revision": 0
+      }
+    },
+    "verification": {
+      "python -m pytest -q": {
+        "rc": 1,
+        "fingerprint": {
+          "report.json": "ca3d163bab055381827226140568f3bef7eaac187cebd76878e0b63e9e442356"
+        },
+        "revision": 0
+      }
+    },
+    "focus_paths": [
+      "report.json"
+    ]
+  },
+  "artifacts": [
+    "run.log",
+    "patch.diff",
+    "evidence.json"
+  ]
+}
