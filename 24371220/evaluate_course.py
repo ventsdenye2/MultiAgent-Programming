@@ -133,12 +133,13 @@ def copy_submission(root, target):
     return fingerprint
 
 
-def execute(root, native, archive, preflight_only=True, stage='all'):
+def execute(root, native, archive, preflight_only=True, stage='all', request_limit=None):
     out = native / "results"
     out.mkdir()
     protocol = {"status": "preparing", "native_run": str(native), "archive": str(archive),
                 "max_model_requests": {"source": 20, "paper": 40}, "automatic_retries": False,
-                "preflight_only": preflight_only, "stage": stage, "results": {}}
+                "preflight_only": preflight_only, "stage": stage, "results": {},
+                "request_limit": request_limit}
     env = os.environ.copy()
     env.update(CODE_AGENT_ENGINE="smolagents", MINI_CONTEXT_MODE="evidence",
                TMPDIR=str(native / "tmp"), PYTHONDONTWRITEBYTECODE="1")
@@ -167,6 +168,10 @@ def execute(root, native, archive, preflight_only=True, stage='all'):
         save(out / "protocol.json", protocol)
         if preflight_only:
             return 0
+        if request_limit is not None:
+            budget = out / 'request-budget.json'
+            save(budget, {'limit': request_limit, 'used': 0})
+            env['CODE_AGENT_REQUEST_BUDGET_FILE'] = str(budget)
         credentials(root, config, env)
         stages = [
             ("source", ["eval_deepinfer.py", "--agent", agent / "agent.py",
@@ -242,7 +247,10 @@ def main():
     parser.add_argument("--preflight-only", action="store_true")
     parser.add_argument('--run-paid', action='store_true', help='Explicitly enable real provider requests')
     parser.add_argument('--stage', choices=['smoke', 'basic', 'source', 'paper', 'all'], default='smoke')
+    parser.add_argument('--request-limit', type=int, help='Shared request cap across this run, including every basic task')
     args = parser.parse_args()
+    if args.request_limit is not None and args.request_limit < 1:
+        parser.error('--request-limit must be positive')
     if sys.platform != "linux":
         parser.error("Run using WSL")
     root = Path(__file__).resolve().parent
@@ -262,7 +270,7 @@ def main():
     stamp = datetime.datetime.now().strftime("smolagents-%Y%m%d-%H%M%S-%f")
     print("Native run: " + str(native), flush=True)
     return execute(root, native, root / "experiments/smolagents" / stamp,
-                   args.preflight_only or not args.run_paid, args.stage)
+                   args.preflight_only or not args.run_paid, args.stage, args.request_limit)
 
 
 if __name__ == "__main__":

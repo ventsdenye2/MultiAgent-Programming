@@ -9,10 +9,11 @@ import pytest
 from course_agent.audit import BudgetExceeded, contains, request_size
 from course_agent.cli import execute
 from smolagents.memory import ActionStep, TaskStep
+from smolagents.models import MessageRole
 from smolagents.monitoring import Timing
 from smolagents.utils import AgentExecutionError
 from course_agent.policy import load_task
-from test_smolagents import make_session, response, code
+from test_smolagents import make_session, response, code, run_script, DONE
 
 
 ROOT = Path(__file__).resolve().parent
@@ -290,3 +291,79 @@ def test_recorded_missing_plan_is_retained_and_can_recover(tmp_path):
     rc, result = execute(contract, cfg, out, transport=httpx.MockTransport(handler), api_key='offline-test')
     assert rc == 0, result
     assert len(calls) == 5
+
+
+def test_project_tools_bind_positional_and_keyword_arguments(tmp_path):
+    session, context, agent, model, log = make_session(tmp_path)
+    try:
+        (session.contract.repo / 'a.py').write_text('value = 1\n')
+        tools = {tool.name:tool for tool in session.tools()}
+        assert tools['read_file']('a.py')['content'] == 'value = 1\n'
+        plan = [{'title':'Read and verify', 'status':'doing'}]
+        assert tools['update_plan'](plan)['items'] == plan
+        with pytest.raises(TypeError, match='multiple values'):
+            tools['read_file']('a.py', path='a.py')
+        with pytest.raises(TypeError, match='positional arguments'):
+            tools['update_plan'](plan, 'unexpected')
+    finally:
+        model.close()
+        log.close()
+
+
+def test_verified_changes_remain_visible_until_final_answer(tmp_path):
+    def setup(repo):
+        (repo / 'calc.py').write_text('def answer():\n    return 0\n')
+        (repo / 'test_calc.py').write_text('from calc import answer\ndef test_answer():\n    assert answer() == 42\n')
+    def finish(body):
+        assert contains(body, '"baseline_done": 1')
+        assert contains(body, '"changed_files": ["calc.py"]')
+        assert contains(body, '"verified_current": 1')
+        assert contains(body, 'Changes and current-file tests are complete')
+        return "update_plan([{'title':'Fix and verify','status':'done'}])\nfinal_answer('Verified')"
+    rc, result, calls, events = run_script(tmp_path, [
+        "update_plan([{'title':'Fix and verify','status':'doing'}])\n"
+        "run_command(['python','-m','pytest','-q'], '.')\nr=read_file('calc.py')",
+        "write_file('calc.py', 'def answer():\\n    return 42\\n', r['file_hash'])",
+        "run_command(['python','-m','pytest','-q'], '.')",
+        finish,
+    ], {'read_only':False, 'editable':['calc.py'], 'context_chars':15000}, profile='basic', setup=setup)
+    assert rc == 0, result
+    assert len(calls) == 4
+    assert [e['rc'] for e in events if e['event'] == 'command_result'] == [1, 0]
+
+
+def test_shared_request_cap_applies_across_task_runs(tmp_path, monkeypatch):
+    budget = tmp_path / 'budget.json'
+    budget.write_text(json.dumps({'limit':2, 'used':0}))
+    monkeypatch.setenv('CODE_AGENT_REQUEST_BUDGET_FILE', str(budget))
+    for index in range(3):
+        root = tmp_path / str(index)
+        root.mkdir()
+        rc, result, calls, events = run_script(root, [DONE + "\nfinal_answer('ok')"])
+        if index < 2:
+            assert rc == 0 and len(calls) == 1, result
+        else:
+            assert rc != 0 and not calls
+            assert result['reason'] == 'RUN_REQUEST_BUDGET'
+            assert result['usage']['requests'] == 0
+    assert json.loads(budget.read_text()) == {'limit':2, 'used':2}
+
+
+def test_assistant_history_contains_only_complete_code_actions(tmp_path):
+    session, context, agent, model, log = make_session(tmp_path)
+    try:
+        action = 'values = list(range(50))\nprint(values)'
+        original = 'I will inspect these values.\n' + code(action)
+        agent.memory.steps.append(ActionStep(step_number=1, timing=Timing(start_time=0,end_time=1),
+                                            code_action=action, model_output=original, observations='result'))
+        short = context._recent(agent.memory, (20, 80, 80))
+        assert all(m.role != MessageRole.ASSISTANT for m in short)
+        full = context._recent(agent.memory, (1000, 80, 80))
+        assert full[0].role == MessageRole.ASSISTANT
+        assert full[0].content[0]['text'] == original
+        parsed = context._recent(agent.memory, (len(code(action)), 80, 80))
+        assert parsed[0].role == MessageRole.ASSISTANT
+        assert parsed[0].content[0]['text'] == code(action)
+    finally:
+        model.close()
+        log.close()

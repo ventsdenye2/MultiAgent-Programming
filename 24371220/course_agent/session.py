@@ -38,7 +38,15 @@ class CourseTool(Tool):
                            'additionalProperties': False}
         super().__init__()
 
-    def forward(self, **kwargs):
+    def forward(self, *args, **kwargs):
+        # Official Tool.__call__ forwards ordinary Python positional arguments.
+        # Bind those using the same parameter order advertised in the prompt.
+        if len(args) > len(self.inputs):
+            raise TypeError(f'{self.name} accepts at most {len(self.inputs)} positional arguments')
+        for key, value in zip(self.inputs, args):
+            if key in kwargs:
+                raise TypeError(f'{self.name} received multiple values for {key}')
+            kwargs[key] = value
         arguments = {k: v for k, v in kwargs.items() if v is not None}
         WorkspaceTools._validate_schema_value(arguments, self.parameters)
         return self.session.invoke(self.name, arguments)

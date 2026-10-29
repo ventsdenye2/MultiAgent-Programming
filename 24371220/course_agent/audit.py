@@ -1,5 +1,6 @@
 """Audit the actual SDK HTTP body; no second model transport or retry loop."""
 import json
+import os
 import time
 
 import httpx
@@ -44,6 +45,26 @@ class BudgetExceeded(RuntimeError):
     pass
 
 
+def reserve_request(path):
+    """A native-run budget shared by all sequential task subprocesses."""
+    import fcntl
+    with open(path, 'r+', encoding='utf-8') as stream:
+        fcntl.flock(stream, fcntl.LOCK_EX)
+        data = json.load(stream)
+        limit, used = data.get('limit'), data.get('used')
+        if type(limit) is not int or type(used) is not int or limit < 1 or used < 0:
+            raise BudgetExceeded('RUN_REQUEST_BUDGET_INVALID')
+        if used >= limit:
+            raise BudgetExceeded('RUN_REQUEST_BUDGET')
+        data['used'] += 1
+        stream.seek(0)
+        json.dump(data, stream)
+        stream.truncate()
+        stream.flush()
+        os.fsync(stream.fileno())
+        return data
+
+
 class RequestAudit:
     def __init__(self, contract, log, evidence=None):
         self.contract, self.log, self.evidence = contract, log, evidence
@@ -55,6 +76,7 @@ class RequestAudit:
         self.last_response = None
         self.stop_reason = None
         self.last_classification = None
+        self.request_budget_path = os.environ.get('CODE_AGENT_REQUEST_BUDGET_FILE')
 
     def guard(self):
         if self.calls >= self.contract.max_calls:
@@ -74,6 +96,13 @@ class RequestAudit:
             self.stop_reason = "REQUEST_CHAR_BUDGET"
             self.log("request_blocked", **size)
             raise BudgetExceeded(self.stop_reason)
+        if self.request_budget_path:
+            try:
+                reservation = reserve_request(self.request_budget_path)
+            except (BudgetExceeded, OSError, ValueError) as exc:
+                self.stop_reason = str(exc) if isinstance(exc, BudgetExceeded) else 'RUN_REQUEST_BUDGET_INVALID'
+                raise BudgetExceeded(self.stop_reason) from exc
+            self.log('request_budget', **reservation)
         self.calls += 1
         self.bodies.append(body)
         self.log("model_request", number=self.calls, body=body, **size)

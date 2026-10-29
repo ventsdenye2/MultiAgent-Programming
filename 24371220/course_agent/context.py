@@ -55,9 +55,19 @@ class EvidenceContext:
         if self.store.recent_results:
             feedback += '\nRecent project tool results:\n' + clip(
                 json.dumps(self.store.recent_results[-4:], ensure_ascii=False), limits[1] // 2)
-        result = [message('Latest action:\n' + clip(step.code_action or step.model_output or '', limits[0]),
-                          MessageRole.ASSISTANT),
-                  message('Latest execution feedback:\n' + feedback)]
+        output = step.model_output or ''
+        action = '<code>\n' + step.code_action + '\n</code>' if step.code_action else None
+        if action and len(output) <= limits[0]:
+            previous = message(output, MessageRole.ASSISTANT)
+        elif action and len(action) <= limits[0]:
+            previous = message(action, MessageRole.ASSISTANT)
+        else:
+            # A clipped or invalid action is reference data, not an assistant
+            # example to imitate. Preserve complete code tags when using the
+            # assistant role, as upstream ActionStep.to_messages does.
+            previous = message('Previous action excerpt (reference only):\n' +
+                               clip(step.code_action or output, limits[0]))
+        result = [previous, message('Latest execution feedback:\n' + feedback)]
         error_step = step if step.error else None
         if error_step:
             # Errors are reserved before document selection. Never drop the
@@ -70,25 +80,31 @@ class EvidenceContext:
         """A sending projection, never a second copy of tool results."""
         status = self.session.status(compact=True)
         unseen = [eid for eid, item in self.store.items.items() if item.valid and eid not in self.store.exposed]
-        data = {'next_requirement': status['remaining'][0] if status['remaining'] else 'final_answer when ready',
+        versions = self.session.versions()
+        verified = sum(self.session.verified.get(tuple(cmd)) == versions
+                       for cmd in self.session.contract.verify_commands)
+        data = {'next_requirement': clip(status['remaining'][0], 180) if status['remaining'] else 'final_answer when ready',
                 'remaining_count': len(status['remaining']), 'requests_left': status['requests_left'],
-                'unseen_evidence_count': len(unseen), 'queued_recall_count': len(self.store.pending),
-                'plan_items': len(status['plan'])}
+                'baseline_done': len(self.session.baselines),
+                'changed_files': sorted(self.session.writes), 'verified_current': verified}
+        if status['remaining'] == ['finish all plan items after their work and checks']:
+            data['next_requirement'] = 'Changes and current-file tests are complete. Mark the existing plan done, then final_answer.'
+        optional = {'unseen_evidence_count': len(unseen), 'queued_recall_count': len(self.store.pending)}
         if unseen or self.store.pending:
-            data['delivery'] = 'Pending originals are sent automatically below; do not reread unchanged files.'
+            optional['delivery'] = 'Pending originals are sent below; do not reread unchanged files.'
         if self.stalled_requests >= 2:
-            data['no_progress_requests'] = self.stalled_requests
-            data['recent_tools'] = [x['tool'] for x in self.store.recent_results[-3:]]
+            optional['no_progress_requests'] = self.stalled_requests
         if 'last_response_classification' in status:
             data['last_response_classification'] = status['last_response_classification']
         if status['requests_left'] <= 6:
-            data['delivery_reserve'] = 'Complete notes/changes, verify, then final_answer.'
-        # Keep actionable blockers and response diagnostics at the front even
-        # when plan titles or user-controlled paths are very large.
-        if 'last_response_classification' in data:
-            data = {'last_response_classification': data.pop('last_response_classification'), **data}
+            optional['delivery_reserve'] = 'Complete notes/changes, verify, then final_answer.'
+        for key, value in optional.items():
+            if len(json.dumps({**data, key:value}, ensure_ascii=False)) <= limit:
+                data[key] = value
+        # Required workflow facts remain intact; never clip JSON in the middle
+        # or omit proof of changes/tests merely to make the projection shorter.
         return message('Course progress (new evidence below can satisfy pending items):\n' +
-                       clip(json.dumps(data, ensure_ascii=False), limit))
+                       json.dumps(data, ensure_ascii=False))
 
     def _part(self, eid, messages, model):
         """Fit an ordinary-file range; PDF pages and source mechanisms stay whole."""
@@ -124,7 +140,7 @@ class EvidenceContext:
                                  json.dumps(self.session.plan, ensure_ascii=False)))
         progress = repr((self.store.full_reads, sorted(self.store.exposed), self.store.received_ranges,
                          self.store.notes, self.session.written_versions, self.session.verified,
-                         sorted(self.session.baselines)))
+                         sorted(self.session.baselines), not self.session.status(compact=True)['remaining']))
         self.stalled_requests = self.stalled_requests + 1 if progress == self.progress_signature else 0
         self.progress_signature = progress
         if self.stalled_requests >= 6:

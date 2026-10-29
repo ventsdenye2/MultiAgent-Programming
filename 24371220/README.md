@@ -65,6 +65,8 @@ Ubuntu 缺少 venv/ensurepip 时，先安装对应的 `python3.12-venv` 系统�
 
 smoke 为基础第 1 题；basic 为基础五题。结果归档在 `experiments/smolagents/smolagents-*/`，原生目录也保留。过程检查、功能得分和真实用量分别查看，不把离线测试通过记为课程通过。
 
+可追加 `--request-limit N`，将当前整批真实请求限制在已核账的剩余额度内；基础五题共享这个计数，各题原有上限仍生效。结果中保存 `request-budget.json`。评测器拒绝同一项目并发运行；Agent 连续六个动作没有新增阅读、笔记、修改或验证时提前退出，保留失败轨迹。
+
 ## 文件职责
 
 | 文件 | 职责 |

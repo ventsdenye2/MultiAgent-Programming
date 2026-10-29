@@ -1,0 +1,23 @@
+【产物自检未通过】case01_bug_fix：请查看下方 JSON 的 errors 和 process.failed_checks。
+{
+  "ok": false,
+  "case": "case01_bug_fix",
+  "changed": [
+    "calc.py"
+  ],
+  "agent_exit_code": 1,
+  "patch_matches": true,
+  "errors": [
+    "agent 非正常结束，退出码为 1"
+  ],
+  "process": {
+    "checks": {
+      "observable_write": true,
+      "baseline_test": true,
+      "post_tests": true
+    },
+    "passed": true,
+    "failed_checks": [],
+    "max_request_chars": 14727
+  }
+}

@@ -1,0 +1,40 @@
+.............................F.                                          [100%]
+=================================== FAILURES ===================================
+___________ test_verified_changes_remain_visible_until_final_answer ____________
+
+tmp_path = PosixPath('/tmp/smolagents-offline-0h7nq0ve/pytest/test_verified_changes_remain_v0')
+
+    def test_verified_changes_remain_visible_until_final_answer(tmp_path):
+        def setup(repo):
+            (repo / 'calc.py').write_text('def answer():\n    return 0\n')
+            (repo / 'test_calc.py').write_text('from calc import answer\ndef test_answer():\n    assert answer() == 42\n')
+        def finish(body):
+            assert contains(body, '"baseline_done": 1')
+            assert contains(body, '"changed_files": ["calc.py"]')
+            assert contains(body, '"verified_current": 1')
+            assert contains(body, 'Changes and current-file tests are complete')
+            return "update_plan([{'title':'Fix and verify','status':'done'}])\nfinal_answer('Verified')"
+        rc, result, calls, events = run_script(tmp_path, [
+            "update_plan([{'title':'Fix and verify','status':'doing'}])\n"
+            "run_command(['python','-m','pytest','-q'], '.')\nr=read_file('calc.py')",
+            "write_file('calc.py', 'def answer():\\n    return 42\\n', r['file_hash'])",
+            "run_command(['python','-m','pytest','-q'], '.')",
+            finish,
+        ], {'read_only':False, 'editable':['calc.py'], 'context_chars':15000}, profile='basic', setup=setup)
+>       assert rc == 0, result
+E       AssertionError: {'context_mode': 'evidence', 'engine': 'smolagents', 'reason': 'AgentGenerationError: Error in generating model output:
+E         Connection error.', 'remaining': ['finish all plan items after their work and checks'], ...}
+E       assert 1 == 0
+
+test_context_delivery.py:329: AssertionError
+----------------------------- Captured stdout call -----------------------------
+Code parsing failed on line 1 due to: SyntaxError: invalid syntax (<unknown>, 
+line 1)
+<code>
+ ^
+Error in generating model output:
+Connection error.
+- generated xml file: /mnt/d/Muiti-Agent Programing/experiments/code-agent-smolagents/24371220/experiments/smolagents/offline-20261029-091414/junit.xml -
+=========================== short test summary info ============================
+FAILED test_context_delivery.py::test_verified_changes_remain_visible_until_final_answer
+1 failed, 30 passed in 253.73s (0:04:13)
