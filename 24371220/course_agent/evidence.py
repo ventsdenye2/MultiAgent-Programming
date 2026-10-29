@@ -128,6 +128,14 @@ class EvidenceStore:
                                'file_hash': self.workspace.current_hash(source)}))
         if ids:
             result['evidence_ids'] = ids
+            # A tool read is an explicit demand for originals. Deduplication
+            # preserves stable evidence ids, not permission to hide the read
+            # behind an older note. Actual HTTP exposure acknowledges it.
+            self.request_originals(ids)
+            result['delivery'] = 'Originals queued for the next model request; large batches may span requests.'
+            if name == 'read_file' and self.contract.profile == 'source' and result.get('path') in SOURCE_UNITS:
+                result['evidence_scope'] = ('Complete required mechanisms. Full file stays in this Python result '
+                                            'and run.log; use read_range/read_symbol for other regions.')
         signature = (name, json.dumps(arguments, sort_keys=True, ensure_ascii=False))
         self.repeats = self.repeats + 1 if signature == self._signature else 0
         self._signature = signature
@@ -269,18 +277,23 @@ class EvidenceStore:
             self.log('context_note', sources=sources, content=content)
         return {'note_id': key, 'sources': sources, 'chars': len(content)}
 
+    def request_originals(self, evidence_ids):
+        ids = list(dict.fromkeys(evidence_ids))
+        if any(eid not in self.items or not self.items[eid].valid for eid in ids):
+            raise ValueError('Requested evidence is missing or stale')
+        for eid in ids:
+            if eid not in self.pending:
+                self.pending.append(eid)
+                self.recall_ranges[eid] = []
+
     def recall(self, evidence_ids, capacity):
+        self.request_originals(evidence_ids)
         ready, queued, used = [], [], 0
         for eid in dict.fromkeys(evidence_ids):
-            if eid not in self.items or not self.items[eid].valid:
-                raise ValueError('Evidence is missing or stale: ' + eid)
             cost = len(json.dumps(self.items[eid].text, ensure_ascii=False)) + 200
             (ready if used + cost <= capacity else queued).append(eid)
             if used + cost <= capacity:
                 used += cost
-            if eid not in self.pending:
-                self.pending.append(eid)
-                self.recall_ranges[eid] = []
         return {'scheduled': ready, 'pending': queued, 'capacity_chars': capacity,
                 'message': 'The selector confirms each actual batch; remaining items stay queued.'}
 

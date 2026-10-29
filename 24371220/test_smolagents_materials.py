@@ -100,6 +100,24 @@ def test_real_three_file_preedit_coverage_and_source_notes(tmp_path, build_sessi
         before = len(session.evidence.items)
         session.invoke('read_file', {'path': rel})
         assert len(session.evidence.items) == before
+    # A new read explicitly asks for the same originals even though valid
+    # notes already represent them. Only actual HTTP delivery clears demand.
+    requested = set(session.evidence.pending)
+    assert requested == all_ids
+    messages = context.build(agent.memory, model)
+    session.evidence.mark_exposed({'messages': []}, response(code('print(1)')), number + 2)
+    assert set(session.evidence.pending) == requested
+    delivered = set()
+    for replay_number in range(number + 3, number + 10):
+        messages = context.build(agent.memory, model)
+        body = {'messages': [m.dict() for m in messages]}
+        session.evidence.mark_exposed(body, response(code('print(1)')), replay_number)
+        delivered |= session.evidence.current & requested
+        assert all(contains(body, note['content']) for note in session.evidence.notes.values())
+        if not session.evidence.pending:
+            break
+    assert delivered == requested
+    assert not session.evidence.pending
     (repo / targets[0]).write_text((repo / targets[0]).read_text() + '\n# version changed\n')
     session.evidence.refresh()
     assert not session.evidence.notes[targets[0]]['valid']
