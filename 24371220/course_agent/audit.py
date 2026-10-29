@@ -159,9 +159,15 @@ class AuditedOpenAIModel(OpenAIModel):
         client = httpx.Client(timeout=httpx.Timeout(float(config.get("timeout", 210))),
                               transport=transport,
                               event_hooks={"request": [audit.request], "response": [audit.response]})
+        sampling = {key: config[key] for key in
+                    ('max_tokens', 'temperature', 'top_p', 'reasoning_effort') if key in config}
+        if 'thinking' in config:
+            if config['thinking'] not in {'enabled', 'disabled'}:
+                raise ValueError('thinking must be enabled or disabled')
+            sampling['extra_body'] = {'thinking': {'type': config['thinking']}}
         super().__init__(model_id=config["model"], api_base=config["base_url"], api_key=api_key,
                          retry=False, client_kwargs={"max_retries": 0, "http_client": client},
-                         max_tokens=4096, extra_body={"thinking": {"type": "disabled"}})
+                         **sampling)
 
     def _prepare_completion_kwargs(self, *args, **kwargs):
         body = super()._prepare_completion_kwargs(*args, **kwargs)

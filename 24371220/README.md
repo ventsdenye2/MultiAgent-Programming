@@ -39,7 +39,7 @@ Ubuntu 缺少 venv/ensurepip 时，先安装对应的 `python3.12-venv` 系统�
 - `memory.json`：完整官方步骤记忆。
 - `evidence.json`：来源、版本、范围、原文、笔记和实际呈现记录。
 
-源码/论文分别限制 20/40 次实际模型请求，单请求完整 JSON 最多 32,000 字符。首轮固定 deepseek-flash、4096 输出、关闭思考与自动重试。
+源码/论文分别限制 20/40 次实际模型请求，单请求完整 JSON 最多 32,000 字符。当前两题配置为 deepseek-flash、16384 输出上限、thinking enabled、reasoning_effort high；这些是本项目的运行选择，不是题目1、2的硬性限制。采样参数从 config.json 传给官方客户端，未设置的参数沿用服务端默认。只有题目3排名复测由课程代理强制4096及关闭thinking。仍禁用自动重试，避免不可核对的额外请求。
 
 默认开启官方 `use_structured_outputs_internally=True`：模型返回官方定义的 `thought/code` JSON，Python动作仍由官方解析器和执行器处理。DeepSeek Chat API通过 `response_format={"type":"json_object"}` 约束有效JSON；不宣称服务端严格校验JSON Schema。Markdown代码块配置保留给官方代码提取和历史回放。历史回放恢复原记录的输出模式，不改写已归档响应。允许导入的模块由执行器声明；文件和命令操作通过课程工具完成。
 

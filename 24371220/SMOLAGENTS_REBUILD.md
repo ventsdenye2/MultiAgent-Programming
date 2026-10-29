@@ -75,7 +75,7 @@ flowchart TD
 
 ## 模型预算与日志
 
-首轮协议固定 `deepseek-flash`，输出上限 4096，`thinking.type=disabled`。关闭框架重试和 SDK 重试；关闭额外规划请求与运行总结请求。网络等待为配置中的 210 秒，原生运行器保留课程代理的独立超时口径。
+历史首轮使用 `deepseek-flash`、4096输出和关闭thinking，但这不是题目1、2的课程限制。客户端现通过官方 OpenAIModel 参数读取 config.json 的 max_tokens、thinking、reasoning_effort、temperature、top_p；未配置项交由服务端决定。当前两题设置为16384输出上限、thinking enabled、reasoning_effort high。题目3才由课程转发器施加统一采样参数。关闭框架/SDK自动重试及额外规划、总结请求；网络等待仍为配置中的210秒。
 
 HTTP 请求钩子读取 SDK 实际构造的 JSON，合并后的 `thinking` 字段也在其中。字符数按课程要求的紧凑 JSON、`ensure_ascii=False` 计算；源码最多 20 次、论文最多 40 次，长上下文每次最多 32,000 字符。基础题采用课程评测器对 content 的序列化口径，默认限制为 15,000，低于课程 16,000 上限。选择器和实际发送钩子共用计量函数；历史 `content_chars` 诊断字段保留含义，新增 `course_content_chars` 表示课程口径。
 

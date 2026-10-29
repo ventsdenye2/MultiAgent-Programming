@@ -163,16 +163,31 @@ def test_no_sdk_or_framework_network_retry(tmp_path):
     assert len([e for e in events if e['event'] == 'model_error']) == 1
 
 
-def test_actual_body_has_protocol_and_balanced_raw_audit(tmp_path):
-    rc, result, calls, events = run_script(tmp_path, [DONE + "\nfinal_answer('ok')"])
+@pytest.mark.parametrize('sampling', [
+    {},
+    {'max_tokens': 8192, 'thinking': 'disabled', 'temperature': 0},
+    {'max_tokens': 16384, 'thinking': 'enabled', 'reasoning_effort': 'high'},
+])
+def test_actual_body_has_protocol_and_balanced_raw_audit(tmp_path, sampling):
+    reply = response(code(DONE + "\nfinal_answer('ok')"))
+    reply['choices'][0]['message']['reasoning_content'] = 'Synthetic provider reasoning for transport validation.'
+    rc, result, calls, events = run_script(tmp_path, [reply], sampling)
     assert rc == 0, result
-    assert calls[0]['max_tokens'] == 4096
-    assert calls[0]['thinking'] == {'type': 'disabled'}
+    for key in ('max_tokens', 'temperature', 'reasoning_effort'):
+        if key in sampling:
+            assert calls[0][key] == sampling[key]
+        else:
+            assert key not in calls[0]
+    if 'thinking' in sampling:
+        assert calls[0]['thinking'] == {'type': sampling['thinking']}
+    else:
+        assert 'thinking' not in calls[0]
     assert calls[0]['response_format'] == {'type': 'json_object'}
     assert 'extra_body' not in calls[0]
     assert [e['body'] for e in events if e['event'] == 'model_request'] == calls
     assert len(json.dumps(calls[0], ensure_ascii=False, separators=(',', ':'))) <= 32000
     assert len([e for e in events if e['event'] == 'model_response']) == 1
+    assert next(e['response'] for e in events if e['event'] == 'model_response') == reply
     assert [e['estimated_body_chars'] for e in events if e['event'] == 'context_selection'] == [
         e['chars'] for e in events if e['event'] == 'model_request']
 

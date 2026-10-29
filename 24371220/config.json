@@ -4,8 +4,9 @@
   "key_env": "DEEPSEEK_API_KEY",
   "max_steps": 60,
   "context_chars": 15000,
-  "max_tokens": 4096,
-  "temperature": 0,
+  "max_tokens": 16384,
+  "thinking": "enabled",
+  "reasoning_effort": "high",
   "timeout": 210,
   "context_chars_smol": 30000,
   "request_chars": 32000

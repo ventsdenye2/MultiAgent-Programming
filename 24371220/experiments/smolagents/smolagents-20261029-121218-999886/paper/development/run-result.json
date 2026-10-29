@@ -1,0 +1,21 @@
+{
+  "status": "failed",
+  "engine": "smolagents",
+  "upstream_version": "1.26.0",
+  "context_mode": "evidence",
+  "reason": "MAX_STEPS_NO_EXTRA_REQUEST",
+  "usage": {
+    "requests": 40,
+    "complete": true,
+    "prompt_tokens": 310799,
+    "completion_tokens": 6136
+  },
+  "remaining": [
+    "write_note for the received PDF batch before reading further: 35,38,41",
+    "PDF pages not yet sent: 39,43,44,45,46,47,48,49,50,51,52",
+    "write/reuse final section note: outlook",
+    "make the requested change",
+    "verify current files: python -m pytest -q",
+    "finish all plan items after their work and checks"
+  ]
+}

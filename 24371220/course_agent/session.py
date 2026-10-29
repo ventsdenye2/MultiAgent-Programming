@@ -150,7 +150,7 @@ class CourseSession:
                 else 'read full files once; summarize complete mechanisms; edit; verify'}
         if self.audit and self.audit.last_classification not in {None, 'ok'}:
             data['last_response_classification'] = self.audit.last_classification
-            data['response_recovery'] = 'Previous body was empty or truncated; produce a complete valid code action within 4096 output tokens.'
+            data['response_recovery'] = 'Previous body was empty or truncated; produce one complete valid action within the configured output budget.'
         if self.evidence.repeats >= 2:
             data['stalled'] = 'Repeated unchanged action. Use the missing items above; inspect recent error and pending evidence.'
         if not compact:
