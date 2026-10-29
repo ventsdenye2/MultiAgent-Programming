@@ -1,6 +1,7 @@
 """Native WSL course runner. Default: offline preflight. Paid runs require --run-paid."""
 import argparse
 import datetime
+import fcntl
 import hashlib
 import json
 import os
@@ -247,6 +248,13 @@ def main():
     root = Path(__file__).resolve().parent
     native_base = Path.home() / ".local/state/code-agent/evaluations"
     native_base.mkdir(parents=True, exist_ok=True)
+    # One paid evaluator per project: concurrent starts can otherwise silently
+    # double the user's request spend, even though each individual run is bounded.
+    lock = (root / 'experiments/smolagents/.evaluation.lock').open('a+')
+    try:
+        fcntl.flock(lock, fcntl.LOCK_EX | fcntl.LOCK_NB)
+    except BlockingIOError:
+        raise SystemExit('Another evaluation is active; no new run or model request started')
     native = Path(tempfile.mkdtemp(prefix="run-", dir=native_base))
     fs = subprocess.check_output(["stat", "-f", "-c", "%T", str(native)], text=True).strip()
     if fs not in {"ext2/ext3", "tmpfs", "btrfs", "xfs"}:

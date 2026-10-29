@@ -1,0 +1,135 @@
+{
+  "stage": "smoke",
+  "protocol_status": "completed",
+  "stage_results": {
+    "smoke": {
+      "agent": 1,
+      "process": 1,
+      "functional": 1
+    }
+  },
+  "runs": [
+    {
+      "path": "experiments\\smolagents\\smolagents-20261029-084305-472591\\smoke-attempt\\run\\run.log",
+      "requests": 60,
+      "responses": 60,
+      "model_errors": 0,
+      "usage_complete": true,
+      "known_prompt_tokens": 207756,
+      "known_completion_tokens": 4460,
+      "known_total_tokens": 212216,
+      "cache_hit_tokens": 184192,
+      "cache_miss_tokens": 23564,
+      "max_request_chars": 15114,
+      "response_classes": {
+        "ok": 60
+      },
+      "counts": {
+        "snapshot": 1,
+        "run_start": 1,
+        "file_read": 9,
+        "context_selection": 60,
+        "model_request": 60,
+        "model_response": 60,
+        "usage": 60,
+        "context_exposure": 60,
+        "tool_call": 60,
+        "plan": 29,
+        "tool_result": 58,
+        "agent_step": 60,
+        "command_result": 2,
+        "context_clip": 16,
+        "tool_error": 2,
+        "agent_error": 7,
+        "evidence": 2,
+        "context_drop": 53,
+        "run_error": 1,
+        "run_result": 1
+      },
+      "commands": [
+        {
+          "argv": [
+            "/mnt/d/Muiti-Agent Programing/experiments/code-agent-smolagents/24371220/.venv/bin/python",
+            "-m",
+            "pytest",
+            "-q"
+          ],
+          "rc": 1,
+          "timed_out": false
+        },
+        {
+          "argv": [
+            "/mnt/d/Muiti-Agent Programing/experiments/code-agent-smolagents/24371220/.venv/bin/python",
+            "-m",
+            "pytest",
+            "-q"
+          ],
+          "rc": 1,
+          "timed_out": false
+        }
+      ],
+      "recent_actions": [
+        {
+          "event": "tool_call",
+          "tool": "task_status",
+          "error_type": null,
+          "error": null
+        },
+        {
+          "event": "tool_call",
+          "tool": "task_status",
+          "error_type": null,
+          "error": null
+        },
+        {
+          "event": "tool_call",
+          "tool": "task_status",
+          "error_type": null,
+          "error": null
+        },
+        {
+          "event": "tool_call",
+          "tool": "task_status",
+          "error_type": null,
+          "error": null
+        },
+        {
+          "event": "tool_call",
+          "tool": "task_status",
+          "error_type": null,
+          "error": null
+        },
+        {
+          "event": "tool_call",
+          "tool": "task_status",
+          "error_type": null,
+          "error": null
+        }
+      ],
+      "result": {
+        "status": "failed",
+        "engine": "smolagents",
+        "upstream_version": "1.26.0",
+        "context_mode": "evidence",
+        "reason": "MAX_STEPS_NO_EXTRA_REQUEST",
+        "usage": {
+          "requests": 60,
+          "complete": true,
+          "prompt_tokens": 207756,
+          "completion_tokens": 4460
+        },
+        "remaining": [
+          "verify current files: python -m pytest -q",
+          "make the requested change",
+          "finish all plan items after their work and checks"
+        ]
+      },
+      "invalid_lines": 0
+    }
+  ],
+  "total_requests": 60,
+  "known_prompt_tokens": 207756,
+  "known_completion_tokens": 4460,
+  "known_total_tokens": 212216,
+  "usage_complete": true
+}

@@ -4,7 +4,7 @@ import json
 from smolagents.memory import ActionStep, TaskStep
 from smolagents.models import ChatMessage, MessageRole
 
-from .audit import strings
+from .audit import BudgetExceeded, strings
 
 
 def message(text, role=MessageRole.USER):
@@ -58,11 +58,11 @@ class EvidenceContext:
         result = [message('Latest action:\n' + clip(step.code_action or step.model_output or '', limits[0]),
                           MessageRole.ASSISTANT),
                   message('Latest execution feedback:\n' + feedback)]
-        error_step = next((s for s in reversed(actions) if s.error), None)
+        error_step = step if step.error else None
         if error_step:
             # Errors are reserved before document selection. Never drop the
             # entire failing step to make room for another source excerpt.
-            result.append(message('Most recent error (check whether subsequent work resolved it):\n' +
+            result.append(message('Current action failed; correct this error and continue:\n' +
                                   clip(str(error_step.error), limits[2])))
         return result
 
@@ -73,7 +73,7 @@ class EvidenceContext:
         data = {'next_requirement': status['remaining'][0] if status['remaining'] else 'final_answer when ready',
                 'remaining_count': len(status['remaining']), 'requests_left': status['requests_left'],
                 'unseen_evidence_count': len(unseen), 'queued_recall_count': len(self.store.pending),
-                'plan': [[clip(i['title'], 60), i['status']] for i in status['plan']]}
+                'plan': status['plan']}
         if unseen or self.store.pending:
             data['delivery'] = 'Pending originals are sent automatically below; do not reread unchanged files.'
         if self.stalled_requests >= 2:
@@ -87,6 +87,9 @@ class EvidenceContext:
         # when plan titles or user-controlled paths are very large.
         if 'last_response_classification' in data:
             data = {'last_response_classification': data.pop('last_response_classification'), **data}
+        if len(json.dumps(data, ensure_ascii=False)) > limit:
+            data.pop('plan')
+            data['plan_items'] = len(status['plan'])
         return message('Course progress (new evidence below can satisfy pending items):\n' +
                        clip(json.dumps(data, ensure_ascii=False), limit))
 
@@ -118,12 +121,18 @@ class EvidenceContext:
             if isinstance(step, TaskStep):
                 fixed.extend(step.to_messages())
         progress = repr((self.store.full_reads, sorted(self.store.exposed), self.store.received_ranges,
-                         self.store.notes, sorted(self.session.writes), self.session.verified, self.session.plan))
+                         self.store.notes, self.session.written_versions, self.session.verified,
+                         sorted(self.session.baselines)))
         self.stalled_requests = self.stalled_requests + 1 if progress == self.progress_signature else 0
         self.progress_signature = progress
+        if self.stalled_requests >= 6:
+            self.log('context_blocked', reason='no_progress', consecutive_requests=self.stalled_requests)
+            raise BudgetExceeded('NO_PROGRESS: six actions without new reading, notes, changes or verification')
         prefix = recent = None
         minimum = None
-        for status_limit, limits in ((500, (120, 240, 500)), (300, (80, 160, 256))):
+        # Start with the smallest usable frame. A larger frame that merely fits
+        # must not consume the source reservation before evidence is considered.
+        for status_limit, limits in ((300, (80, 160, 256)),):
             trial_prefix, trial_recent = fixed + [self._status(status_limit)], self._recent(memory, limits)
             if self.fits(trial_prefix + trial_recent, model):
                 prefix, recent, minimum = trial_prefix, trial_recent, limits

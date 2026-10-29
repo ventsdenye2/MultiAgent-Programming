@@ -1,0 +1,6 @@
+【副本创建成功】case01_bug_fix：接下来进入 run 目录启动智能体。
+{
+  "prepared": "/home/ventsdenye/.local/state/code-agent/evaluations/run-48r4moq6/results/smoke-attempt",
+  "case": "case01_bug_fix",
+  "next": "在 run 目录启动自己的 agent；完成后用 --attempt 检查"
+}

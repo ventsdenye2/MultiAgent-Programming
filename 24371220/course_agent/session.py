@@ -12,7 +12,9 @@ from .workspace import TOOL_SPECS, WorkspaceTools
 
 EXTRA_TOOLS = {
     'update_plan': ('Set the task plan; preserve titles/order and update todo/doing/done.',
-                    {'items': {'type': 'array'}}, ['items']),
+                    {'items': {'type': 'array', 'description':
+                               'List of objects, e.g. [{"title":"Read sources","status":"doing"}]. '
+                               'Each status is todo, doing or done; retain existing titles/order.'}}, ['items']),
     'write_note': ('Save a literal model-written note grounded in previously exposed evidence. Paper notes need section.',
                    {'title': {'type': 'string'}, 'content': {'type': 'string'},
                     'evidence_ids': {'type': 'array'}, 'section': {'type': 'string'}},
@@ -28,7 +30,7 @@ class CourseTool(Tool):
 
     def __init__(self, session, name, description, properties, required):
         self.session, self.name, self.description = session, name, description
-        self.inputs = {key: {'type': value['type'], 'description': key.replace('_', ' '),
+        self.inputs = {key: {'type': value['type'], 'description': value.get('description', key.replace('_', ' ')),
                              **({'nullable': True} if key not in required else {})}
                        for key, value in properties.items()}
         self.output_type = 'object'
@@ -79,14 +81,14 @@ class CourseSession:
         versions = self.versions()
         missing += ['baseline: ' + ' '.join(cmd) for cmd in self.contract.verify_commands
                     if tuple(cmd) not in self.baselines]
-        missing += ['verify current files: ' + ' '.join(cmd) for cmd in self.contract.verify_commands
-                    if self.verified.get(tuple(cmd)) != versions]
         if self.contract.require_write:
             targets = self.contract.editable if self.contract.profile == 'source' else set()
             if targets - self.writes:
                 missing.append('remaining source changes: ' + ', '.join(sorted(targets - self.writes)))
             elif not self.writes:
                 missing.append('make the requested change')
+        missing += ['verify current files: ' + ' '.join(cmd) for cmd in self.contract.verify_commands
+                    if self.verified.get(tuple(cmd)) != versions]
         if not self.plan or any(item['status'] != 'done' for item in self.plan):
             missing.append('finish all plan items after their work and checks')
         data = {'plan': self.plan, 'remaining': missing, 'changed_files': sorted(self.writes),
@@ -244,16 +246,24 @@ class CourseSession:
         return True
 
     def task_prompt(self):
-        return self.contract.text + '\n\nCourse execution contract:\n' + json.dumps(self.contract.view(), ensure_ascii=False) + '''
+        instructions = '''
 Use update_plan before editing, run baseline checks, then read the required files with read_file.
 Tools return Python dicts; use their file_hash for expected_hash. Variables persist across actions.
-Read original evidence in batches. After each batch, write_note with a literal model-written summary
-and its evidence_ids. Notes are source-version-bound; never invent sources or note text.
-For source tasks, read_file all three files first, then read/reuse complete mechanisms from all three
-before the first edit. A source note may replace original text only after its mechanisms were exposed.
-For paper tasks, cover every required page and update five section notes incrementally; section must
-be overview/reasoning/tool_use/multi_agent/outlook. After full coverage reuse all five notes together,
-write report.json, run the final tests and mark the plan done. Do not keep rereading unchanged pages.
+Do not reset a successful plan or repeat completed baseline checks. Continue the next unfinished action.
 All writes and tests must use these tools. Call final_answer only after current-file verification.
-The course checks and task_status share the same prerequisites as the context selector.
 '''
+        if self.contract.profile in {'source', 'paper'}:
+            instructions += '''Read original evidence in batches. After each batch, write_note with a literal model-written summary
+and its evidence_ids. Notes are source-version-bound; never invent sources or note text.
+'''
+        if self.contract.profile == 'source':
+            instructions += '''Read all three files with read_file first, then read/reuse complete mechanisms from all three
+before the first edit. A source note may replace original text only after its mechanisms were exposed.
+'''
+        elif self.contract.profile == 'paper':
+            instructions += '''Cover every required page and update five section notes incrementally; section must be
+overview/reasoning/tool_use/multi_agent/outlook. After full coverage reuse all five notes together,
+write report.json, run the final tests and mark the plan done. Do not reread unchanged pages.
+'''
+        return (self.contract.text + '\n\nCourse execution contract:\n' +
+                json.dumps(self.contract.view(), ensure_ascii=False) + instructions)

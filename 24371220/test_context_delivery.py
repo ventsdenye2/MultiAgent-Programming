@@ -6,7 +6,7 @@ import shutil
 import httpx
 import pytest
 
-from course_agent.audit import contains, request_size
+from course_agent.audit import BudgetExceeded, contains, request_size
 from course_agent.cli import execute
 from smolagents.memory import ActionStep, TaskStep
 from smolagents.monitoring import Timing
@@ -135,11 +135,13 @@ def test_repeated_large_feedback_never_grows_fixed_status(tmp_path):
         agent.memory.steps.append(ActionStep(step_number=1, timing=Timing(start_time=0, end_time=1),
                                             code_action='read_file(path="a.py")', observations='huge log\n' * 10000,
                                             error=AgentExecutionError(error, agent.logger)))
-        for _ in range(8):
+        for _ in range(6):
             messages = context.build(agent.memory, model)
             assert model.measure(messages)['course_content_chars'] <= 15000
             assert contains({'messages': [m.dict() for m in messages]}, error)
-        assert context.stalled_requests >= 2
+        with pytest.raises(BudgetExceeded, match='NO_PROGRESS'):
+            context.build(agent.memory, model)
+        assert context.stalled_requests == 6
     finally:
         model.close()
         log.close()
@@ -160,3 +162,92 @@ def test_long_command_summary_is_observable_without_model_print(tmp_path):
     finally:
         model.close()
         log.close()
+
+
+def test_recorded_plan_error_does_not_starve_source_or_restart_plan(tmp_path):
+    archived = ROOT / 'experiments/smolagents/smolagents-20261029-084305-472591'
+    shutil.copytree(archived / 'smoke-attempt/before', tmp_path / 'work')
+    repo, out = tmp_path / 'work/repo', tmp_path / 'run'
+    original = (repo / 'calc.py').read_text(encoding='utf-8')
+    events = [json.loads(line) for line in
+              (archived / 'smoke-attempt/run/run.log').read_text(encoding='utf-8').splitlines()]
+    replies = [e['response']['choices'][0]['message']['content'] for e in events
+               if e['event'] == 'model_response'][:6]
+    # The first six saved real replies include a plan-schema error and its
+    # successful correction. The continuation is explicitly offline/simulated.
+    replies.append(code("import json\n"
+                        "print(json.dumps({'stage':'editing'}))\n"
+                        "replace_text(path='calc.py', old_text='return price * discount / 100', "
+                        "new_text='return price * discount', expected_hash=calc['file_hash'])\n"
+                        "run_command(argv=['python','-m','pytest','-q'])\n"
+                        "for item in plan['items']: item['status']='done'\n"
+                        "update_plan(items=plan['items'])\nfinal_answer('Verified')"))
+    cfg = json.loads((ROOT / 'config.json').read_text(encoding='utf-8'))
+    cfg.update(base_url='https://offline.invalid/v1', key_env='OFFLINE_TEST_KEY', max_steps=9)
+    contract = load_task((tmp_path / 'work/task.md').read_text(encoding='utf-8'), repo, cfg)
+    calls = []
+    def handler(request):
+        body = json.loads(request.content)
+        calls.append(body)
+        if len(calls) == 5:
+            assert not contains(body, 'Each plan item requires'), 'A corrected schema error is not current'
+        if len(calls) == 7:
+            assert contains(body, original), 'A past plan error must not starve the required small source'
+        assert request_size(body)['course_content_chars'] <= 15000
+        return httpx.Response(200, json=response(replies[len(calls) - 1]))
+    rc, result = execute(contract, cfg, out, transport=httpx.MockTransport(handler), api_key='offline-test')
+    assert rc == 0, result
+    assert len(calls) == 7
+    assert 'return price * discount / 100' not in (repo / 'calc.py').read_text(encoding='utf-8')
+
+
+def test_plan_churn_stops_before_spending_full_call_budget(tmp_path):
+    repo = tmp_path / 'repo'
+    repo.mkdir()
+    (repo / 'a.py').write_text('value = 1\n')
+    cfg = {'base_url':'https://offline.invalid/v1', 'key_env':'OFFLINE_TEST_KEY',
+           'model':'test-model', 'max_steps':20, 'editable':['a.py'], 'verify_commands':[]}
+    contract = load_task('Update a.py', repo, cfg)
+    calls = []
+    def handler(request):
+        calls.append(json.loads(request.content))
+        status = 'doing' if len(calls) % 2 else 'todo'
+        reply = code("update_plan(items=[{'title':'Read and edit','status':'" + status + "'}])")
+        return httpx.Response(200, json=response(reply))
+    rc, result = execute(contract, cfg, tmp_path / 'run', transport=httpx.MockTransport(handler), api_key='offline-test')
+    assert rc != 0 and 'NO_PROGRESS' in result['reason']
+    assert len(calls) == 6
+    assert result['usage']['requests'] == 6
+
+
+def test_ready_to_edit_status_precedes_post_change_verification(tmp_path):
+    session, context, agent, model, log = make_session(tmp_path, profile='basic', config={
+        'read_only': False, 'editable': ['a.py'], 'context_chars': 15000})
+    try:
+        (session.contract.repo / 'a.py').write_text('value = 1\n')
+        session.invoke('update_plan', {'items': [{'title':'Edit and verify', 'status':'doing'}]})
+        session.invoke('read_file', {'path':'a.py'})
+        agent.memory.steps.append(TaskStep(session.task_prompt()))
+        messages = context.build(agent.memory, model)
+        session.evidence.mark_exposed({'messages':[m.dict() for m in messages]}, response(code('print(1)')), 1)
+        session.baselines.add(('python','-m','pytest','-q'))
+        remaining = session.status()['remaining']
+        assert remaining[0] == 'make the requested change'
+        assert remaining[1] == 'verify current files: python -m pytest -q'
+    finally:
+        model.close()
+        log.close()
+
+
+def test_concurrent_evaluation_is_rejected_before_preflight():
+    import fcntl
+    import subprocess
+    import sys
+    lockfile = ROOT / 'experiments/smolagents/.evaluation.lock'
+    with lockfile.open('a+') as locked:
+        fcntl.flock(locked, fcntl.LOCK_EX | fcntl.LOCK_NB)
+        result = subprocess.run([sys.executable, 'evaluate_course.py', '--preflight-only'],
+                                cwd=ROOT, capture_output=True, text=True, timeout=30)
+    assert result.returncode != 0
+    assert 'Another evaluation is active' in result.stderr
+    assert 'Native run:' not in result.stdout

@@ -1,0 +1,50 @@
+{
+  "evidence": [
+    {
+      "id": "ev-dd051fd22c3195f8bfe3",
+      "source": "calc.py",
+      "version": "aad13f2140c58346d5e61d79e16aa34ec0d6e130ced9a30a3574e6c07a8cb0d3",
+      "locator": "lines:1-23",
+      "text": "\"\"\"简单的价格计算模块。\"\"\"\n\nTAX_RATE = 0.13\n\n\ndef add_tax(price):\n    \"\"\"含税价 = 价格 * (1 + 税率)。\"\"\"\n    return price * (1 + TAX_RATE)\n\n\ndef apply_discount(price, discount):\n    \"\"\"打折：discount 为折扣率，如 0.8 表示八折。\"\"\"\n    return price * discount / 100\n\n\ndef total(prices):\n    \"\"\"合计含税总价。\"\"\"\n    return add_tax(sum(prices))\n\n\ndef split_bill(amount, n):\n    \"\"\"n 人 AA，每人应付（保留两位小数）。\"\"\"\n    return round(amount / n, 2)\n",
+      "required": false,
+      "page": null,
+      "valid": true,
+      "atomic": false
+    },
+    {
+      "id": "ev-cc010c146ba1527a2f19",
+      "source": "calc.py",
+      "version": "aad13f2140c58346d5e61d79e16aa34ec0d6e130ced9a30a3574e6c07a8cb0d3",
+      "locator": "lines:14-23",
+      "text": "\n\ndef total(prices):\n    \"\"\"合计含税总价。\"\"\"\n    return add_tax(sum(prices))\n\n\ndef split_bill(amount, n):\n    \"\"\"n 人 AA，每人应付（保留两位小数）。\"\"\"\n    return round(amount / n, 2)\n",
+      "required": false,
+      "page": null,
+      "valid": true,
+      "atomic": false
+    }
+  ],
+  "notes": {},
+  "exposed": [
+    "ev-cc010c146ba1527a2f19",
+    "ev-dd051fd22c3195f8bfe3"
+  ],
+  "received_ranges": {
+    "ev-dd051fd22c3195f8bfe3": [
+      [
+        0,
+        396
+      ]
+    ],
+    "ev-cc010c146ba1527a2f19": [
+      [
+        0,
+        163
+      ]
+    ]
+  },
+  "full_read_ids": {
+    "calc.py": [
+      "ev-dd051fd22c3195f8bfe3"
+    ]
+  }
+}

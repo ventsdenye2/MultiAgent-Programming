@@ -1,0 +1,67 @@
+FF.....FFF.                                                              [100%]
+=================================== FAILURES ===================================
+_____________________________ test_apply_discount ______________________________
+
+    def test_apply_discount():
+>       assert apply_discount(200, 0.8) == 160
+E       assert 1.6 == 160
+E        +  where 1.6 = apply_discount(200, 0.8)
+
+test_calc.py:5: AssertionError
+________________________ test_apply_discount_full_price ________________________
+
+    def test_apply_discount_full_price():
+>       assert apply_discount(99.9, 1.0) == 99.9
+E       assert 0.9990000000000001 == 99.9
+E        +  where 0.9990000000000001 = apply_discount(99.9, 1.0)
+
+test_calc.py:9: AssertionError
+________________________ test_discount_general[80-0.5] _________________________
+
+price = 80, rate = 0.5
+
+    @pytest.mark.parametrize("price,rate", [(0, .8), (200, 0), (80, .5), (12.5, .9), (200, 1)])
+    def test_discount_general(price, rate):
+>       assert apply_discount(price, rate) == pytest.approx(price * rate)
+E       assert 0.4 == 40.0 ± 4.0e-05
+E         
+E         comparison failed
+E         Obtained: 0.4
+E         Expected: 40.0 ± 4.0e-05
+
+test_calc_edges.py:7: AssertionError
+_______________________ test_discount_general[12.5-0.9] ________________________
+
+price = 12.5, rate = 0.9
+
+    @pytest.mark.parametrize("price,rate", [(0, .8), (200, 0), (80, .5), (12.5, .9), (200, 1)])
+    def test_discount_general(price, rate):
+>       assert apply_discount(price, rate) == pytest.approx(price * rate)
+E       assert 0.1125 == 11.25 ± 1.1e-05
+E         
+E         comparison failed
+E         Obtained: 0.1125
+E         Expected: 11.25 ± 1.1e-05
+
+test_calc_edges.py:7: AssertionError
+_________________________ test_discount_general[200-1] _________________________
+
+price = 200, rate = 1
+
+    @pytest.mark.parametrize("price,rate", [(0, .8), (200, 0), (80, .5), (12.5, .9), (200, 1)])
+    def test_discount_general(price, rate):
+>       assert apply_discount(price, rate) == pytest.approx(price * rate)
+E       assert 2.0 == 200 ± 2.0e-04
+E         
+E         comparison failed
+E         Obtained: 2.0
+E         Expected: 200 ± 2.0e-04
+
+test_calc_edges.py:7: AssertionError
+=========================== short test summary info ============================
+FAILED test_calc.py::test_apply_discount - assert 1.6 == 160
+FAILED test_calc.py::test_apply_discount_full_price - assert 0.99900000000000...
+FAILED test_calc_edges.py::test_discount_general[80-0.5] - assert 0.4 == 40.0...
+FAILED test_calc_edges.py::test_discount_general[12.5-0.9] - assert 0.1125 ==...
+FAILED test_calc_edges.py::test_discount_general[200-1] - assert 2.0 == 200 ±...
+5 failed, 6 passed in 1.18s

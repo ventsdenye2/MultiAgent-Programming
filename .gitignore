@@ -24,3 +24,4 @@
 **/.pytest-smol*/
 24371220/experiments/offline-tmp*/
 24371220/experiments/smolagents/**/workspace/
+24371220/experiments/smolagents/.evaluation.lock

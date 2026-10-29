@@ -34,6 +34,7 @@ def make_agent(model, session, context=None):
                             max_steps=session.contract.max_calls, planning_interval=None,
                             final_answer_checks=[session.check_final],
                             step_callbacks=[record_step], add_base_tools=False,
+                            additional_authorized_imports=['json'],
                             stream_outputs=False, max_print_outputs_length=1000000,
                             verbosity_level=0)
     session.agent = agent
