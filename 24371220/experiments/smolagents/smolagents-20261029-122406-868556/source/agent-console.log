@@ -1,0 +1,19 @@
+命令：["/mnt/d/Muiti-Agent Programing/experiments/code-agent-smolagents/24371220/.venv/bin/python", "/home/ventsdenye/.local/state/code-agent/evaluations/run-a1bk93mr/results/source/submission/agent.py", "--task", "/home/ventsdenye/.local/state/code-agent/evaluations/run-a1bk93mr/course/公开任务/题目2/task.md", "--repo", "/home/ventsdenye/.local/state/code-agent/evaluations/run-a1bk93mr/results/workspace/DeepInfer", "--model", "deepseek-flash", "--auto"]
+Error in code parsing:
+Extra data: line 3 column 1 (char 418)
+Make sure to provide correct code blobs.
+Error in code parsing:
+Expecting value: line 7 column 18 (char 177)
+Make sure to provide correct code blobs.
+Error in code parsing:
+Extra data: line 3 column 1 (char 314)
+Make sure to provide correct code blobs.
+Error in code parsing:
+Expecting value: line 7 column 18 (char 93)
+Make sure to provide correct code blobs.
+Error in code parsing:
+Expecting value: line 7 column 18 (char 93)
+Make sure to provide correct code blobs.
+Code execution failed at line 'assert old_fmt in lc, 'old format method not 
+found'' due to: AssertionError: old format method not found
+{"status": "failed", "engine": "smolagents", "upstream_version": "1.26.0", "context_mode": "evidence", "reason": "MAX_STEPS_NO_EXTRA_REQUEST", "usage": {"requests": 20, "complete": true, "prompt_tokens": 137730, "completion_tokens": 36620}, "remaining": ["remaining source changes: deepinfer/engine/stats_logger.py, deepinfer/environ.py, deepinfer/logger.py", "verify current files: python -m pytest -q", "finish all plan items after their work and checks"]}
