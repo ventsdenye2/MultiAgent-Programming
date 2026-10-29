@@ -21,7 +21,7 @@ EXTRA_TOOLS = {
                    ['title', 'content', 'evidence_ids']),
     'recall': ('Queue evidence ids; batches are bounded and overflow remains pending.',
                {'evidence_ids': {'type': 'array'}}, ['evidence_ids']),
-    'task_status': ('Show remaining reading, notes, changes and verification, plus evidence ids.', {}, []),
+    'task_status': ('Show the current plan, remaining reading, notes, changes and verification, plus evidence ids.', {}, []),
 }
 
 
@@ -136,7 +136,8 @@ class CourseSession:
                or i.get('status') not in {'todo', 'doing', 'done'} for i in items):
             raise ValueError('Each plan item requires a nonempty title and todo/doing/done status')
         if self.plan and [i['title'] for i in self.plan] != [i['title'] for i in items]:
-            raise ValueError('Preserve plan titles and order')
+            raise ValueError("Preserve plan titles and order. Retrieve items = task_status()['plan']; "
+                             "change only each item's status, then call update_plan(items=items).")
         if self.two_stage and self.plan and self.plan[0]['status'] != 'done' and items[0]['status'] == 'done':
             if not self.writes or not self.last_test:
                 raise ValueError('Run the intermediate full test after the first subtask before marking it done')

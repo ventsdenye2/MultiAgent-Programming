@@ -1,0 +1,125 @@
+{
+  "stage": "smoke",
+  "protocol_status": "completed",
+  "stage_results": {
+    "smoke": {
+      "agent": 1,
+      "process": 1,
+      "functional": 1
+    }
+  },
+  "runs": [
+    {
+      "path": "experiments\\smolagents\\smolagents-20261029-085636-296737\\smoke-attempt\\run\\run.log",
+      "requests": 8,
+      "responses": 8,
+      "model_errors": 0,
+      "usage_complete": true,
+      "known_prompt_tokens": 26723,
+      "known_completion_tokens": 705,
+      "known_total_tokens": 27428,
+      "cache_hit_tokens": 22272,
+      "cache_miss_tokens": 4451,
+      "max_request_chars": 14595,
+      "response_classes": {
+        "ok": 8
+      },
+      "counts": {
+        "snapshot": 1,
+        "run_start": 1,
+        "file_read": 1,
+        "context_selection": 8,
+        "model_request": 8,
+        "model_response": 8,
+        "usage": 8,
+        "context_exposure": 8,
+        "tool_call": 9,
+        "plan": 1,
+        "tool_result": 3,
+        "agent_step": 9,
+        "command_result": 1,
+        "context_clip": 2,
+        "tool_error": 6,
+        "agent_error": 6,
+        "context_blocked": 1,
+        "run_error": 1,
+        "run_result": 1
+      },
+      "commands": [
+        {
+          "argv": [
+            "/mnt/d/Muiti-Agent Programing/experiments/code-agent-smolagents/24371220/.venv/bin/python",
+            "-m",
+            "pytest",
+            "-q"
+          ],
+          "rc": 1,
+          "timed_out": false
+        }
+      ],
+      "recent_actions": [
+        {
+          "event": "tool_call",
+          "tool": "update_plan",
+          "error_type": null,
+          "error": null
+        },
+        {
+          "event": "tool_error",
+          "tool": "update_plan",
+          "error_type": "ValueError",
+          "error": "Preserve plan titles and order"
+        },
+        {
+          "event": "agent_error",
+          "tool": null,
+          "error_type": "AgentExecutionError",
+          "error": "Code execution failed at line 'plan = update_plan(items=[\n    {\"title\": \"Run baseline python -m pytest -q\", \"status\": \"done\"},\n    {\"title\": \"Read calc.py\", \"status\": \"doing\"},\n    {\"title\": \"Fix defect in calc.py\", \"status\": \"todo\"},\n    {\"title\": \"Re-run full pytest and verify\", \"status\": \"todo\"},\n])' due to: ValueError: Preserve plan titles and order"
+        },
+        {
+          "event": "tool_call",
+          "tool": "update_plan",
+          "error_type": null,
+          "error": null
+        },
+        {
+          "event": "tool_error",
+          "tool": "update_plan",
+          "error_type": "ValueError",
+          "error": "Preserve plan titles and order"
+        },
+        {
+          "event": "agent_error",
+          "tool": null,
+          "error_type": "AgentExecutionError",
+          "error": "Code execution failed at line 'plan = update_plan(items=[\n    {\"title\": \"Run baseline python -m pytest -q\", \"status\": \"done\"},\n    {\"title\": \"Read calc.py\", \"status\": \"doing\"},\n    {\"title\": \"Fix defect in calc.py\", \"status\": \"todo\"},\n    {\"title\": \"Re-run full pytest and verify\", \"status\": \"todo\"},\n])' due to: ValueError: Preserve plan titles and order"
+        }
+      ],
+      "result": {
+        "status": "failed",
+        "engine": "smolagents",
+        "upstream_version": "1.26.0",
+        "context_mode": "evidence",
+        "reason": "NO_PROGRESS: six actions without new reading, notes, changes or verification",
+        "usage": {
+          "requests": 8,
+          "complete": true,
+          "prompt_tokens": 26723,
+          "completion_tokens": 705
+        },
+        "remaining": [
+          "read_file: calc.py",
+          "make the requested change",
+          "verify current files: python -m pytest -q",
+          "finish all plan items after their work and checks"
+        ]
+      },
+      "invalid_lines": 0
+    }
+  ],
+  "total_requests": 8,
+  "known_prompt_tokens": 26723,
+  "known_completion_tokens": 705,
+  "known_total_tokens": 27428,
+  "usage_complete": true
+}

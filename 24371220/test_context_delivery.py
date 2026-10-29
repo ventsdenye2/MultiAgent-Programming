@@ -251,3 +251,42 @@ def test_concurrent_evaluation_is_rejected_before_preflight():
     assert result.returncode != 0
     assert 'Another evaluation is active' in result.stderr
     assert 'Native run:' not in result.stdout
+
+
+def test_recorded_missing_plan_is_retained_and_can_recover(tmp_path):
+    archived = ROOT / 'experiments/smolagents/smolagents-20261029-085636-296737'
+    shutil.copytree(archived / 'smoke-attempt/before', tmp_path / 'work')
+    repo, out = tmp_path / 'work/repo', tmp_path / 'run'
+    original = (repo / 'calc.py').read_text(encoding='utf-8')
+    events = [json.loads(line) for line in
+              (archived / 'smoke-attempt/run/run.log').read_text(encoding='utf-8').splitlines()]
+    plan = next(e['items'] for e in events if e['event'] == 'plan')
+    replies = [e['response']['choices'][0]['message']['content'] for e in events
+               if e['event'] == 'model_response'][:3]
+    replies += [code("items = task_status()['plan']\nitems[0]['status']='done'\n"
+                     "update_plan(items=items)\ncalc = read_file(path='calc.py')"),
+                code("replace_text(path='calc.py', old_text='return price * discount / 100', "
+                     "new_text='return price * discount', expected_hash=calc['file_hash'])\n"
+                     "run_command(argv=['python','-m','pytest','-q'])\n"
+                     "for item in items: item['status']='done'\n"
+                     "update_plan(items=items)\nfinal_answer('Verified')")]
+    cfg = json.loads((ROOT / 'config.json').read_text(encoding='utf-8'))
+    cfg.update(base_url='https://offline.invalid/v1', key_env='OFFLINE_TEST_KEY', max_steps=8)
+    contract = load_task((tmp_path / 'work/task.md').read_text(encoding='utf-8'), repo, cfg)
+    calls = []
+    def handler(request):
+        body = json.loads(request.content)
+        calls.append(body)
+        if len(calls) > 1:
+            assert contains(body, 'Current plan; retain these exact titles and order')
+            for item in plan:
+                assert contains(body, item['title'])
+        if len(calls) == 4:
+            assert contains(body, "task_status()['plan']")
+        if len(calls) == 5:
+            assert contains(body, original)
+        assert request_size(body)['course_content_chars'] <= 15000
+        return httpx.Response(200, json=response(replies[len(calls) - 1]))
+    rc, result = execute(contract, cfg, out, transport=httpx.MockTransport(handler), api_key='offline-test')
+    assert rc == 0, result
+    assert len(calls) == 5

@@ -73,7 +73,7 @@ class EvidenceContext:
         data = {'next_requirement': status['remaining'][0] if status['remaining'] else 'final_answer when ready',
                 'remaining_count': len(status['remaining']), 'requests_left': status['requests_left'],
                 'unseen_evidence_count': len(unseen), 'queued_recall_count': len(self.store.pending),
-                'plan': status['plan']}
+                'plan_items': len(status['plan'])}
         if unseen or self.store.pending:
             data['delivery'] = 'Pending originals are sent automatically below; do not reread unchanged files.'
         if self.stalled_requests >= 2:
@@ -87,9 +87,6 @@ class EvidenceContext:
         # when plan titles or user-controlled paths are very large.
         if 'last_response_classification' in data:
             data = {'last_response_classification': data.pop('last_response_classification'), **data}
-        if len(json.dumps(data, ensure_ascii=False)) > limit:
-            data.pop('plan')
-            data['plan_items'] = len(status['plan'])
         return message('Course progress (new evidence below can satisfy pending items):\n' +
                        clip(json.dumps(data, ensure_ascii=False), limit))
 
@@ -120,6 +117,11 @@ class EvidenceContext:
         for step in memory.steps:
             if isinstance(step, TaskStep):
                 fixed.extend(step.to_messages())
+        if self.session.plan:
+            # The plan API requires exact titles/order. This is required control
+            # state, not optional feedback: never hide it while enforcing it.
+            fixed.append(message('Current plan; retain these exact titles and order, update status only:\n' +
+                                 json.dumps(self.session.plan, ensure_ascii=False)))
         progress = repr((self.store.full_reads, sorted(self.store.exposed), self.store.received_ranges,
                          self.store.notes, self.session.written_versions, self.session.verified,
                          sorted(self.session.baselines)))
