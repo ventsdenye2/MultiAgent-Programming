@@ -1,0 +1,75 @@
+FFFFF                                                                    [100%]
+=================================== FAILURES ===================================
+_______________________ test_aggregate_returns_and_order _______________________
+
+    def test_aggregate_returns_and_order():
+>       assert summarize('sku,quantity,unit_price\na,2,0.10\nb,1,3\na,-1,0.10\n') == [
+            {'sku': 'a', 'quantity': 1, 'revenue': '0.10'},
+            {'sku': 'b', 'quantity': 1, 'revenue': '3.00'}]
+E       AssertionError: assert [{'quantity':..., 'sku': 'a'}] == [{'quantity':..., 'sku': 'b'}]
+E         
+E         At index 0 diff: {'sku': 'a', 'quantity': 2, 'revenue': '0.2'} != {'sku': 'a', 'quantity': 1, 'revenue': '0.10'}
+E         Left contains one more item: {'quantity': -1, 'revenue': '-0.1', 'sku': 'a'}
+E         Use -v to get more diff
+
+test_ledger.py:6: AssertionError
+__________________________ test_round_only_after_sum ___________________________
+
+    def test_round_only_after_sum():
+>       assert summarize('sku,quantity,unit_price\na,1,0.005\na,1,0.005\n')[0]['revenue'] == '0.01'
+E       AssertionError: assert '0.005' == '0.01'
+E         
+E         - 0.01
+E         + 0.005
+
+test_ledger.py:12: AssertionError
+________________________________ test_invalid[] ________________________________
+
+text = ''
+
+    @pytest.mark.parametrize('text', ['', 'sku,quantity\na,1\n', 'sku,quantity,unit_price\na,1,NaN\n'])
+    def test_invalid(text):
+>       with pytest.raises(ValueError):
+E       Failed: DID NOT RAISE <class 'ValueError'>
+
+test_ledger.py:17: Failed
+______________________ test_invalid[sku,quantity\na,1\n] _______________________
+
+text = 'sku,quantity\na,1\n'
+
+    @pytest.mark.parametrize('text', ['', 'sku,quantity\na,1\n', 'sku,quantity,unit_price\na,1,NaN\n'])
+    def test_invalid(text):
+        with pytest.raises(ValueError):
+>           summarize(text)
+
+test_ledger.py:18: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+text = 'sku,quantity\na,1\n'
+
+    def summarize(text):
+        return [{'sku': row['sku'], 'quantity': int(row['quantity']),
+>                'revenue': str(float(row['unit_price']) * int(row['quantity']))}
+                                      ^^^^^^^^^^^^^^^^^
+                for row in csv.DictReader(io.StringIO(text))]
+E       KeyError: 'unit_price'
+
+ledger.py:7: KeyError
+_______________ test_invalid[sku,quantity,unit_price\na,1,NaN\n] _______________
+
+text = 'sku,quantity,unit_price\na,1,NaN\n'
+
+    @pytest.mark.parametrize('text', ['', 'sku,quantity\na,1\n', 'sku,quantity,unit_price\na,1,NaN\n'])
+    def test_invalid(text):
+>       with pytest.raises(ValueError):
+E       Failed: DID NOT RAISE <class 'ValueError'>
+
+test_ledger.py:17: Failed
+- generated xml file: /mnt/d/Muiti-Agent Programing/experiments/code-agent-smolagents/24371220/stability_tasks/validation-20261030-110226-974671/csv_ledger-initial-visible.xml -
+=========================== short test summary info ============================
+FAILED test_ledger.py::test_aggregate_returns_and_order - AssertionError: ass...
+FAILED test_ledger.py::test_round_only_after_sum - AssertionError: assert '0....
+FAILED test_ledger.py::test_invalid[] - Failed: DID NOT RAISE <class 'ValueEr...
+FAILED test_ledger.py::test_invalid[sku,quantity\na,1\n] - KeyError: 'unit_pr...
+FAILED test_ledger.py::test_invalid[sku,quantity,unit_price\na,1,NaN\n] - Fai...
+5 failed in 2.16s

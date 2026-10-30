@@ -1,0 +1,199 @@
+FFFFFFFFFF.FFF                                                           [100%]
+=================================== FAILURES ===================================
+_______________ test_expiration_at_exact_deadline_and_invalidate _______________
+
+    def test_expiration_at_exact_deadline_and_invalidate():
+        now = [0]
+        cache = TTLCache(lambda: now[0])
+        assert cache.get('x', lambda: 1, 5) == 1
+        now[0] = 4
+        assert cache.get('x', lambda: 2, 100) == 1
+        now[0] = 5
+>       assert cache.get('x', lambda: 3, 5) == 3
+E       AssertionError: assert 1 == 3
+E        +  where 1 = get('x', <function test_expiration_at_exact_deadline_and_invalidate.<locals>.<lambda> at 0x7fb0a181c180>, 5)
+E        +    where get = <cache.TTLCache object at 0x7fb0a19873b0>.get
+
+test_cache.py:12: AssertionError
+________________________ test_zero_ttl_and_invalid_ttl _________________________
+
+    def test_zero_ttl_and_invalid_ttl():
+        cache = TTLCache(lambda: 0)
+        assert cache.get('x', lambda: 1, 0) == 1
+>       assert cache.get('x', lambda: 2, 0) == 2
+E       AssertionError: assert 1 == 2
+E        +  where 1 = get('x', <function test_zero_ttl_and_invalid_ttl.<locals>.<lambda> at 0x7fb0a181c720>, 0)
+E        +    where get = <cache.TTLCache object at 0x7fb0a1985a30>.get
+
+test_cache.py:20: AssertionError
+_________________________ test_invalidate_during_load __________________________
+
+    def test_invalidate_during_load():
+        cache = TTLCache(lambda: 0)
+        def load():
+            cache.invalidate('x')
+            return 1
+        assert cache.get('x', load, 10) == 1
+>       assert cache.get('x', lambda: 2, 10) == 2
+E       AssertionError: assert 1 == 2
+E        +  where 1 = get('x', <function test_invalidate_during_load.<locals>.<lambda> at 0x7fb0a181cb80>, 10)
+E        +    where get = <cache.TTLCache object at 0x7fb0a19bb020>.get
+
+test_cache.py:31: AssertionError
+____________ test_none_and_completion_time_and_hit_does_not_extend _____________
+
+    def test_none_and_completion_time_and_hit_does_not_extend():
+        now = [0]
+        cache = TTLCache(lambda: now[0])
+        calls = []
+        def load():
+            calls.append(1)
+            now[0] = 10
+            return None
+        assert cache.get('x', load, 5) is None
+        now[0] = 14
+        assert cache.get('x', lambda: 9, 100) is None
+        assert calls == [1]
+        now[0] = 15
+>       assert cache.get('x', lambda: 7, 1) == 7
+E       AssertionError: assert None == 7
+E        +  where None = get('x', <function test_none_and_completion_time_and_hit_does_not_extend.<locals>.<lambda> at 0x7fb0a181cd60>, 1)
+E        +    where get = <cache.TTLCache object at 0x7fb0a1987fb0>.get
+
+test_heldout.py:18: AssertionError
+________________ test_validation_precedes_hits_and_loads[True] _________________
+
+ttl = True
+
+    @pytest.mark.parametrize('ttl', [True, None, '3', float('inf'), float('nan'), -0.1])
+    def test_validation_precedes_hits_and_loads(ttl):
+        cache = TTLCache(lambda: 0)
+        cache.get('x', lambda: 1, 10)
+        def forbidden():
+            raise AssertionError('loader must not run')
+>       with pytest.raises(ValueError):
+E       Failed: DID NOT RAISE <class 'ValueError'>
+
+test_heldout.py:27: Failed
+________________ test_validation_precedes_hits_and_loads[None] _________________
+
+ttl = None
+
+    @pytest.mark.parametrize('ttl', [True, None, '3', float('inf'), float('nan'), -0.1])
+    def test_validation_precedes_hits_and_loads(ttl):
+        cache = TTLCache(lambda: 0)
+        cache.get('x', lambda: 1, 10)
+        def forbidden():
+            raise AssertionError('loader must not run')
+>       with pytest.raises(ValueError):
+E       Failed: DID NOT RAISE <class 'ValueError'>
+
+test_heldout.py:27: Failed
+__________________ test_validation_precedes_hits_and_loads[3] __________________
+
+ttl = '3'
+
+    @pytest.mark.parametrize('ttl', [True, None, '3', float('inf'), float('nan'), -0.1])
+    def test_validation_precedes_hits_and_loads(ttl):
+        cache = TTLCache(lambda: 0)
+        cache.get('x', lambda: 1, 10)
+        def forbidden():
+            raise AssertionError('loader must not run')
+>       with pytest.raises(ValueError):
+E       Failed: DID NOT RAISE <class 'ValueError'>
+
+test_heldout.py:27: Failed
+_________________ test_validation_precedes_hits_and_loads[inf] _________________
+
+ttl = inf
+
+    @pytest.mark.parametrize('ttl', [True, None, '3', float('inf'), float('nan'), -0.1])
+    def test_validation_precedes_hits_and_loads(ttl):
+        cache = TTLCache(lambda: 0)
+        cache.get('x', lambda: 1, 10)
+        def forbidden():
+            raise AssertionError('loader must not run')
+>       with pytest.raises(ValueError):
+E       Failed: DID NOT RAISE <class 'ValueError'>
+
+test_heldout.py:27: Failed
+_________________ test_validation_precedes_hits_and_loads[nan] _________________
+
+ttl = nan
+
+    @pytest.mark.parametrize('ttl', [True, None, '3', float('inf'), float('nan'), -0.1])
+    def test_validation_precedes_hits_and_loads(ttl):
+        cache = TTLCache(lambda: 0)
+        cache.get('x', lambda: 1, 10)
+        def forbidden():
+            raise AssertionError('loader must not run')
+>       with pytest.raises(ValueError):
+E       Failed: DID NOT RAISE <class 'ValueError'>
+
+test_heldout.py:27: Failed
+________________ test_validation_precedes_hits_and_loads[-0.1] _________________
+
+ttl = -0.1
+
+    @pytest.mark.parametrize('ttl', [True, None, '3', float('inf'), float('nan'), -0.1])
+    def test_validation_precedes_hits_and_loads(ttl):
+        cache = TTLCache(lambda: 0)
+        cache.get('x', lambda: 1, 10)
+        def forbidden():
+            raise AssertionError('loader must not run')
+>       with pytest.raises(ValueError):
+E       Failed: DID NOT RAISE <class 'ValueError'>
+
+test_heldout.py:27: Failed
+____________ test_zero_bypasses_existing_entry_without_replacing_it ____________
+
+    def test_zero_bypasses_existing_entry_without_replacing_it():
+        cache = TTLCache(lambda: 0)
+        assert cache.get('x', lambda: 1, 10) == 1
+>       assert cache.get('x', lambda: 2, 0) == 2
+E       AssertionError: assert 1 == 2
+E        +  where 1 = get('x', <function test_zero_bypasses_existing_entry_without_replacing_it.<locals>.<lambda> at 0x7fb0a181dd00>, 0)
+E        +    where get = <cache.TTLCache object at 0x7fb0a1801e20>.get
+
+test_heldout.py:43: AssertionError
+______________ test_clear_during_load_and_other_key_invalidation _______________
+
+    def test_clear_during_load_and_other_key_invalidation():
+        cache = TTLCache(lambda: 0)
+        def clear_load():
+            cache.clear()
+            return 1
+        assert cache.get('x', clear_load, 10) == 1
+>       assert cache.get('x', lambda: 2, 10) == 2
+E       AssertionError: assert 1 == 2
+E        +  where 1 = get('x', <function test_clear_during_load_and_other_key_invalidation.<locals>.<lambda> at 0x7fb0a181e200>, 10)
+E        +    where get = <cache.TTLCache object at 0x7fb0a1802750>.get
+
+test_heldout.py:53: AssertionError
+_______ test_reentrant_same_key_after_invalidation_and_other_key_nesting _______
+
+    def test_reentrant_same_key_after_invalidation_and_other_key_nesting():
+        cache = TTLCache(lambda: 0)
+        def recurse():
+            cache.invalidate('x')
+            return cache.get('x', lambda: 9, 1)
+>       with pytest.raises(RuntimeError):
+E       Failed: DID NOT RAISE <class 'RuntimeError'>
+
+test_heldout.py:68: Failed
+- generated xml file: /mnt/d/Muiti-Agent Programing/experiments/code-agent-smolagents/24371220/stability_tasks/validation-20261030-110226-974671/ttl_cache-initial-combined.xml -
+=========================== short test summary info ============================
+FAILED test_cache.py::test_expiration_at_exact_deadline_and_invalidate - Asse...
+FAILED test_cache.py::test_zero_ttl_and_invalid_ttl - AssertionError: assert ...
+FAILED test_cache.py::test_invalidate_during_load - AssertionError: assert 1 ...
+FAILED test_heldout.py::test_none_and_completion_time_and_hit_does_not_extend
+FAILED test_heldout.py::test_validation_precedes_hits_and_loads[True] - Faile...
+FAILED test_heldout.py::test_validation_precedes_hits_and_loads[None] - Faile...
+FAILED test_heldout.py::test_validation_precedes_hits_and_loads[3] - Failed: ...
+FAILED test_heldout.py::test_validation_precedes_hits_and_loads[inf] - Failed...
+FAILED test_heldout.py::test_validation_precedes_hits_and_loads[nan] - Failed...
+FAILED test_heldout.py::test_validation_precedes_hits_and_loads[-0.1] - Faile...
+FAILED test_heldout.py::test_zero_bypasses_existing_entry_without_replacing_it
+FAILED test_heldout.py::test_clear_during_load_and_other_key_invalidation - A...
+FAILED test_heldout.py::test_reentrant_same_key_after_invalidation_and_other_key_nesting
+13 failed, 1 passed in 2.51s

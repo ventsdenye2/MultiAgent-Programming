@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="0" failures="3" skipped="0" tests="3" time="2.495" timestamp="2026-10-30T11:04:29.719468+08:00" hostname="VENTSDENYE5"><testcase classname="test_cache" name="test_expiration_at_exact_deadline_and_invalidate" time="0.001"><failure message="AssertionError: assert 1 == 3&#10; +  where 1 = get('x', &lt;function test_expiration_at_exact_deadline_and_invalidate.&lt;locals&gt;.&lt;lambda&gt; at 0x7f6d6cd57420&gt;, 5)&#10; +    where get = &lt;cache.TTLCache object at 0x7f6d6cd0e0c0&gt;.get">def test_expiration_at_exact_deadline_and_invalidate():
+        now = [0]
+        cache = TTLCache(lambda: now[0])
+        assert cache.get('x', lambda: 1, 5) == 1
+        now[0] = 4
+        assert cache.get('x', lambda: 2, 100) == 1
+        now[0] = 5
+&gt;       assert cache.get('x', lambda: 3, 5) == 3
+E       AssertionError: assert 1 == 3
+E        +  where 1 = get('x', &lt;function test_expiration_at_exact_deadline_and_invalidate.&lt;locals&gt;.&lt;lambda&gt; at 0x7f6d6cd57420&gt;, 5)
+E        +    where get = &lt;cache.TTLCache object at 0x7f6d6cd0e0c0&gt;.get
+
+test_cache.py:12: AssertionError</failure></testcase><testcase classname="test_cache" name="test_zero_ttl_and_invalid_ttl" time="0.001"><failure message="AssertionError: assert 1 == 2&#10; +  where 1 = get('x', &lt;function test_zero_ttl_and_invalid_ttl.&lt;locals&gt;.&lt;lambda&gt; at 0x7f6d6cd57ba0&gt;, 0)&#10; +    where get = &lt;cache.TTLCache object at 0x7f6d6cd0ddf0&gt;.get">def test_zero_ttl_and_invalid_ttl():
+        cache = TTLCache(lambda: 0)
+        assert cache.get('x', lambda: 1, 0) == 1
+&gt;       assert cache.get('x', lambda: 2, 0) == 2
+E       AssertionError: assert 1 == 2
+E        +  where 1 = get('x', &lt;function test_zero_ttl_and_invalid_ttl.&lt;locals&gt;.&lt;lambda&gt; at 0x7f6d6cd57ba0&gt;, 0)
+E        +    where get = &lt;cache.TTLCache object at 0x7f6d6cd0ddf0&gt;.get
+
+test_cache.py:20: AssertionError</failure></testcase><testcase classname="test_cache" name="test_invalidate_during_load" time="0.000"><failure message="AssertionError: assert 1 == 2&#10; +  where 1 = get('x', &lt;function test_invalidate_during_load.&lt;locals&gt;.&lt;lambda&gt; at 0x7f6d6cb1c040&gt;, 10)&#10; +    where get = &lt;cache.TTLCache object at 0x7f6d6cd0ce90&gt;.get">def test_invalidate_during_load():
+        cache = TTLCache(lambda: 0)
+        def load():
+            cache.invalidate('x')
+            return 1
+        assert cache.get('x', load, 10) == 1
+&gt;       assert cache.get('x', lambda: 2, 10) == 2
+E       AssertionError: assert 1 == 2
+E        +  where 1 = get('x', &lt;function test_invalidate_during_load.&lt;locals&gt;.&lt;lambda&gt; at 0x7f6d6cb1c040&gt;, 10)
+E        +    where get = &lt;cache.TTLCache object at 0x7f6d6cd0ce90&gt;.get
+
+test_cache.py:31: AssertionError</failure></testcase></testsuite></testsuites>

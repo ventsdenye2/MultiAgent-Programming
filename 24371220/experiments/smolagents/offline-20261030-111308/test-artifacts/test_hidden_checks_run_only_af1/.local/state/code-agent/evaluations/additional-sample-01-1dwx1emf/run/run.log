@@ -1,0 +1,2 @@
+{"event": "model_request", "number": 1, "body": {"messages": []}}
+{"event": "model_response", "number": 1, "response": {"usage": {"prompt_tokens": 10, "completion_tokens": 5, "total_tokens": 15}}}

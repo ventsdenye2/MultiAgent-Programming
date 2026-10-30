@@ -1,0 +1,13 @@
+{
+  "schema_version": 1,
+  "max_requests_per_run": 20,
+  "profile": "generic",
+  "verify_commands": [["python", "-m", "pytest", "-q"]],
+  "tasks": [
+    {"id": "config_layers", "editable": ["merge.py", "settings.py"]},
+    {"id": "csv_ledger", "editable": ["ledger.py"]},
+    {"id": "unicode_words", "editable": ["words.py"]},
+    {"id": "dependency_paths", "editable": ["paths.py", "graph.py"]},
+    {"id": "ttl_cache", "editable": ["cache.py"]}
+  ]
+}

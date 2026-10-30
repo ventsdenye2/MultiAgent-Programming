@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="0" failures="6" skipped="0" tests="6" time="2.667" timestamp="2026-10-30T11:02:31.265257+08:00" hostname="VENTSDENYE5"><testcase classname="test_config" name="test_nested_merge_and_independent_tree" time="0.001"><failure message="AssertionError: assert {'network': {'timeout': 5}} == {'network': {...'timeout': 5}}&#10;  &#10;  Differing items:&#10;  {'network': {'timeout': 5}} != {'network': {'hosts': ['a'], 'timeout': 5}}&#10;  Use -v to get more diff">def test_nested_merge_and_independent_tree():
+        first = {'network': {'timeout': 3, 'hosts': ['a']}}
+        result = merge_layers(first, {'network': {'timeout': 5}})
+&gt;       assert result == {'network': {'timeout': 5, 'hosts': ['a']}}
+E       AssertionError: assert {'network': {'timeout': 5}} == {'network': {...'timeout': 5}}
+E         
+E         Differing items:
+E         {'network': {'timeout': 5}} != {'network': {'hosts': ['a'], 'timeout': 5}}
+E         Use -v to get more diff
+
+test_config.py:9: AssertionError</failure></testcase><testcase classname="test_config" name="test_environment_is_last_layer" time="0.001"><failure message="AssertionError: assert {'network': {'timeout': 2}} == {'debug': Fal...timeout': 12}}&#10;  &#10;  Differing items:&#10;  {'network': {'timeout': 2}} != {'network': {'timeout': 12}}&#10;  Right contains 1 more item:&#10;  {'debug': False}&#10;  Use -v to get more diff">def test_environment_is_last_layer():
+&gt;       assert build_config({'network': {'timeout': 2}}, {},
+                            {'APP_TIMEOUT': ' +12 ', 'APP_DEBUG': 'FALSE'}) == {
+                                'network': {'timeout': 12}, 'debug': False}
+E       AssertionError: assert {'network': {'timeout': 2}} == {'debug': Fal...timeout': 12}}
+E         
+E         Differing items:
+E         {'network': {'timeout': 2}} != {'network': {'timeout': 12}}
+E         Right contains 1 more item:
+E         {'debug': False}
+E         Use -v to get more diff
+
+test_config.py:15: AssertionError</failure></testcase><testcase classname="test_config" name="test_bad_timeout[0]" time="0.001"><failure message="Failed: DID NOT RAISE &lt;class 'ValueError'&gt;">value = '0'
+
+    @pytest.mark.parametrize('value', ['0', '-2', '1.2', 'no'])
+    def test_bad_timeout(value):
+&gt;       with pytest.raises(ValueError):
+E       Failed: DID NOT RAISE &lt;class 'ValueError'&gt;
+
+test_config.py:22: Failed</failure></testcase><testcase classname="test_config" name="test_bad_timeout[-2]" time="0.001"><failure message="Failed: DID NOT RAISE &lt;class 'ValueError'&gt;">value = '-2'
+
+    @pytest.mark.parametrize('value', ['0', '-2', '1.2', 'no'])
+    def test_bad_timeout(value):
+&gt;       with pytest.raises(ValueError):
+E       Failed: DID NOT RAISE &lt;class 'ValueError'&gt;
+
+test_config.py:22: Failed</failure></testcase><testcase classname="test_config" name="test_bad_timeout[1.2]" time="0.001"><failure message="Failed: DID NOT RAISE &lt;class 'ValueError'&gt;">value = '1.2'
+
+    @pytest.mark.parametrize('value', ['0', '-2', '1.2', 'no'])
+    def test_bad_timeout(value):
+&gt;       with pytest.raises(ValueError):
+E       Failed: DID NOT RAISE &lt;class 'ValueError'&gt;
+
+test_config.py:22: Failed</failure></testcase><testcase classname="test_config" name="test_bad_timeout[no]" time="0.000"><failure message="Failed: DID NOT RAISE &lt;class 'ValueError'&gt;">value = 'no'
+
+    @pytest.mark.parametrize('value', ['0', '-2', '1.2', 'no'])
+    def test_bad_timeout(value):
+&gt;       with pytest.raises(ValueError):
+E       Failed: DID NOT RAISE &lt;class 'ValueError'&gt;
+
+test_config.py:22: Failed</failure></testcase></testsuite></testsuites>

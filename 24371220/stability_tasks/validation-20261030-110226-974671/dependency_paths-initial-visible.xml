@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="0" failures="3" skipped="0" tests="3" time="2.380" timestamp="2026-10-30T11:03:19.068990+08:00" hostname="VENTSDENYE5"><testcase classname="test_graph" name="test_canonical_and_escape" time="0.001"><failure message="AssertionError: assert 'a//b/../c' == 'a/c'&#10;  &#10;  - a/c&#10;  + a//b/../c">def test_canonical_and_escape():
+&gt;       assert canonical_path('a//b/../c') == 'a/c'
+E       AssertionError: assert 'a//b/../c' == 'a/c'
+E         
+E         - a/c
+E         + a//b/../c
+
+test_graph.py:7: AssertionError</failure></testcase><testcase classname="test_graph" name="test_topological_order_uses_ready_priority" time="0.001"><failure message="AssertionError: assert ['a', 'b', 'z'] == ['b', 'z', 'a']&#10;  &#10;  At index 0 diff: 'a' != 'b'&#10;  Use -v to get more diff">def test_topological_order_uses_ready_priority():
+&gt;       assert build_order({'a': ['z'], 'b': [], 'z': []}) == ['b', 'z', 'a']
+E       AssertionError: assert ['a', 'b', 'z'] == ['b', 'z', 'a']
+E         
+E         At index 0 diff: 'a' != 'b'
+E         Use -v to get more diff
+
+test_graph.py:13: AssertionError</failure></testcase><testcase classname="test_graph" name="test_cycle" time="0.001"><failure message="Failed: DID NOT RAISE &lt;class 'ValueError'&gt;">def test_cycle():
+&gt;       with pytest.raises(ValueError):
+E       Failed: DID NOT RAISE &lt;class 'ValueError'&gt;
+
+test_graph.py:17: Failed</failure></testcase></testsuite></testsuites>

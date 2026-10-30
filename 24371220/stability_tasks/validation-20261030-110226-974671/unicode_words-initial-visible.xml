@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="0" failures="3" skipped="0" tests="3" time="2.289" timestamp="2026-10-30T11:03:02.751380+08:00" hostname="VENTSDENYE5"><testcase classname="test_words" name="test_canonical_equivalence_and_casefold" time="0.001"><failure message="AssertionError: assert [('caf', 1), ...'strasse', 1)] == [('café', 2), ('strasse', 2)]&#10;  &#10;  At index 0 diff: ('caf', 1) != ('café', 2)&#10;  Left contains 3 more items, first extra item: ('stra', 1)&#10;  Use -v to get more diff">def test_canonical_equivalence_and_casefold():
+&gt;       assert word_counts('Café CAFE\u0301 Straße STRASSE') == [('café', 2), ('strasse', 2)]
+E       AssertionError: assert [('caf', 1), ...'strasse', 1)] == [('café', 2), ('strasse', 2)]
+E         
+E         At index 0 diff: ('caf', 1) != ('café', 2)
+E         Left contains 3 more items, first extra item: ('stra', 1)
+E         Use -v to get more diff
+
+test_words.py:6: AssertionError</failure></testcase><testcase classname="test_words" name="test_scripts_numbers_and_boundaries" time="0.001"><failure message="AssertionError: assert [('a', 2), ('b', 2)] == [('中文', 2), (... 2), ('b', 2)]&#10;  &#10;  At index 0 diff: ('a', 2) != ('中文', 2)&#10;  Right contains 2 more items, first extra item: ('a', 2)&#10;  Use -v to get more diff">def test_scripts_numbers_and_boundaries():
+&gt;       assert word_counts('中文 中文 １２ a_b a-b') == [('中文', 2), ('１２', 1), ('a', 2), ('b', 2)]
+E       AssertionError: assert [('a', 2), ('b', 2)] == [('中文', 2), (... 2), ('b', 2)]
+E         
+E         At index 0 diff: ('a', 2) != ('中文', 2)
+E         Right contains 2 more items, first extra item: ('a', 2)
+E         Use -v to get more diff
+
+test_words.py:10: AssertionError</failure></testcase><testcase classname="test_words" name="test_input_type" time="0.000"><failure message="AttributeError: 'NoneType' object has no attribute 'lower'">def test_input_type():
+        with pytest.raises(TypeError):
+&gt;           word_counts(None)
+
+test_words.py:15: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+text = None
+
+    def word_counts(text):
+        counts = {}
+&gt;       for word in re.findall(r'[a-z]+', text.lower()):
+                                          ^^^^^^^^^^
+E       AttributeError: 'NoneType' object has no attribute 'lower'
+
+words.py:6: AttributeError</failure></testcase></testsuite></testsuites>

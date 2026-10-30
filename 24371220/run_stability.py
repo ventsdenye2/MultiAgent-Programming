@@ -131,7 +131,8 @@ def main():
     print('STUDY ' + str(study), flush=True)
     assert_baseline(root, study)
     if args.phase == 'additional':
-        raise SystemExit('Additional harness is prepared separately after task oracle validation; no requests started')
+        from additional_stability import run
+        return run(root, study)
     consecutive_infra = 0
     for number in range(1, 11):
         for task, cap in [('source', 20), ('paper', 40)]:

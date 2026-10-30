@@ -1,0 +1,143 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="0" failures="13" skipped="0" tests="14" time="2.512" timestamp="2026-10-30T11:03:39.606837+08:00" hostname="VENTSDENYE5"><testcase classname="test_cache" name="test_expiration_at_exact_deadline_and_invalidate" time="0.001"><failure message="AssertionError: assert 1 == 3&#10; +  where 1 = get('x', &lt;function test_expiration_at_exact_deadline_and_invalidate.&lt;locals&gt;.&lt;lambda&gt; at 0x7fb0a181c180&gt;, 5)&#10; +    where get = &lt;cache.TTLCache object at 0x7fb0a19873b0&gt;.get">def test_expiration_at_exact_deadline_and_invalidate():
+        now = [0]
+        cache = TTLCache(lambda: now[0])
+        assert cache.get('x', lambda: 1, 5) == 1
+        now[0] = 4
+        assert cache.get('x', lambda: 2, 100) == 1
+        now[0] = 5
+&gt;       assert cache.get('x', lambda: 3, 5) == 3
+E       AssertionError: assert 1 == 3
+E        +  where 1 = get('x', &lt;function test_expiration_at_exact_deadline_and_invalidate.&lt;locals&gt;.&lt;lambda&gt; at 0x7fb0a181c180&gt;, 5)
+E        +    where get = &lt;cache.TTLCache object at 0x7fb0a19873b0&gt;.get
+
+test_cache.py:12: AssertionError</failure></testcase><testcase classname="test_cache" name="test_zero_ttl_and_invalid_ttl" time="0.000"><failure message="AssertionError: assert 1 == 2&#10; +  where 1 = get('x', &lt;function test_zero_ttl_and_invalid_ttl.&lt;locals&gt;.&lt;lambda&gt; at 0x7fb0a181c720&gt;, 0)&#10; +    where get = &lt;cache.TTLCache object at 0x7fb0a1985a30&gt;.get">def test_zero_ttl_and_invalid_ttl():
+        cache = TTLCache(lambda: 0)
+        assert cache.get('x', lambda: 1, 0) == 1
+&gt;       assert cache.get('x', lambda: 2, 0) == 2
+E       AssertionError: assert 1 == 2
+E        +  where 1 = get('x', &lt;function test_zero_ttl_and_invalid_ttl.&lt;locals&gt;.&lt;lambda&gt; at 0x7fb0a181c720&gt;, 0)
+E        +    where get = &lt;cache.TTLCache object at 0x7fb0a1985a30&gt;.get
+
+test_cache.py:20: AssertionError</failure></testcase><testcase classname="test_cache" name="test_invalidate_during_load" time="0.000"><failure message="AssertionError: assert 1 == 2&#10; +  where 1 = get('x', &lt;function test_invalidate_during_load.&lt;locals&gt;.&lt;lambda&gt; at 0x7fb0a181cb80&gt;, 10)&#10; +    where get = &lt;cache.TTLCache object at 0x7fb0a19bb020&gt;.get">def test_invalidate_during_load():
+        cache = TTLCache(lambda: 0)
+        def load():
+            cache.invalidate('x')
+            return 1
+        assert cache.get('x', load, 10) == 1
+&gt;       assert cache.get('x', lambda: 2, 10) == 2
+E       AssertionError: assert 1 == 2
+E        +  where 1 = get('x', &lt;function test_invalidate_during_load.&lt;locals&gt;.&lt;lambda&gt; at 0x7fb0a181cb80&gt;, 10)
+E        +    where get = &lt;cache.TTLCache object at 0x7fb0a19bb020&gt;.get
+
+test_cache.py:31: AssertionError</failure></testcase><testcase classname="test_heldout" name="test_none_and_completion_time_and_hit_does_not_extend" time="0.000"><failure message="AssertionError: assert None == 7&#10; +  where None = get('x', &lt;function test_none_and_completion_time_and_hit_does_not_extend.&lt;locals&gt;.&lt;lambda&gt; at 0x7fb0a181cd60&gt;, 1)&#10; +    where get = &lt;cache.TTLCache object at 0x7fb0a1987fb0&gt;.get">def test_none_and_completion_time_and_hit_does_not_extend():
+        now = [0]
+        cache = TTLCache(lambda: now[0])
+        calls = []
+        def load():
+            calls.append(1)
+            now[0] = 10
+            return None
+        assert cache.get('x', load, 5) is None
+        now[0] = 14
+        assert cache.get('x', lambda: 9, 100) is None
+        assert calls == [1]
+        now[0] = 15
+&gt;       assert cache.get('x', lambda: 7, 1) == 7
+E       AssertionError: assert None == 7
+E        +  where None = get('x', &lt;function test_none_and_completion_time_and_hit_does_not_extend.&lt;locals&gt;.&lt;lambda&gt; at 0x7fb0a181cd60&gt;, 1)
+E        +    where get = &lt;cache.TTLCache object at 0x7fb0a1987fb0&gt;.get
+
+test_heldout.py:18: AssertionError</failure></testcase><testcase classname="test_heldout" name="test_validation_precedes_hits_and_loads[True]" time="0.000"><failure message="Failed: DID NOT RAISE &lt;class 'ValueError'&gt;">ttl = True
+
+    @pytest.mark.parametrize('ttl', [True, None, '3', float('inf'), float('nan'), -0.1])
+    def test_validation_precedes_hits_and_loads(ttl):
+        cache = TTLCache(lambda: 0)
+        cache.get('x', lambda: 1, 10)
+        def forbidden():
+            raise AssertionError('loader must not run')
+&gt;       with pytest.raises(ValueError):
+E       Failed: DID NOT RAISE &lt;class 'ValueError'&gt;
+
+test_heldout.py:27: Failed</failure></testcase><testcase classname="test_heldout" name="test_validation_precedes_hits_and_loads[None]" time="0.000"><failure message="Failed: DID NOT RAISE &lt;class 'ValueError'&gt;">ttl = None
+
+    @pytest.mark.parametrize('ttl', [True, None, '3', float('inf'), float('nan'), -0.1])
+    def test_validation_precedes_hits_and_loads(ttl):
+        cache = TTLCache(lambda: 0)
+        cache.get('x', lambda: 1, 10)
+        def forbidden():
+            raise AssertionError('loader must not run')
+&gt;       with pytest.raises(ValueError):
+E       Failed: DID NOT RAISE &lt;class 'ValueError'&gt;
+
+test_heldout.py:27: Failed</failure></testcase><testcase classname="test_heldout" name="test_validation_precedes_hits_and_loads[3]" time="0.000"><failure message="Failed: DID NOT RAISE &lt;class 'ValueError'&gt;">ttl = '3'
+
+    @pytest.mark.parametrize('ttl', [True, None, '3', float('inf'), float('nan'), -0.1])
+    def test_validation_precedes_hits_and_loads(ttl):
+        cache = TTLCache(lambda: 0)
+        cache.get('x', lambda: 1, 10)
+        def forbidden():
+            raise AssertionError('loader must not run')
+&gt;       with pytest.raises(ValueError):
+E       Failed: DID NOT RAISE &lt;class 'ValueError'&gt;
+
+test_heldout.py:27: Failed</failure></testcase><testcase classname="test_heldout" name="test_validation_precedes_hits_and_loads[inf]" time="0.001"><failure message="Failed: DID NOT RAISE &lt;class 'ValueError'&gt;">ttl = inf
+
+    @pytest.mark.parametrize('ttl', [True, None, '3', float('inf'), float('nan'), -0.1])
+    def test_validation_precedes_hits_and_loads(ttl):
+        cache = TTLCache(lambda: 0)
+        cache.get('x', lambda: 1, 10)
+        def forbidden():
+            raise AssertionError('loader must not run')
+&gt;       with pytest.raises(ValueError):
+E       Failed: DID NOT RAISE &lt;class 'ValueError'&gt;
+
+test_heldout.py:27: Failed</failure></testcase><testcase classname="test_heldout" name="test_validation_precedes_hits_and_loads[nan]" time="0.000"><failure message="Failed: DID NOT RAISE &lt;class 'ValueError'&gt;">ttl = nan
+
+    @pytest.mark.parametrize('ttl', [True, None, '3', float('inf'), float('nan'), -0.1])
+    def test_validation_precedes_hits_and_loads(ttl):
+        cache = TTLCache(lambda: 0)
+        cache.get('x', lambda: 1, 10)
+        def forbidden():
+            raise AssertionError('loader must not run')
+&gt;       with pytest.raises(ValueError):
+E       Failed: DID NOT RAISE &lt;class 'ValueError'&gt;
+
+test_heldout.py:27: Failed</failure></testcase><testcase classname="test_heldout" name="test_validation_precedes_hits_and_loads[-0.1]" time="0.000"><failure message="Failed: DID NOT RAISE &lt;class 'ValueError'&gt;">ttl = -0.1
+
+    @pytest.mark.parametrize('ttl', [True, None, '3', float('inf'), float('nan'), -0.1])
+    def test_validation_precedes_hits_and_loads(ttl):
+        cache = TTLCache(lambda: 0)
+        cache.get('x', lambda: 1, 10)
+        def forbidden():
+            raise AssertionError('loader must not run')
+&gt;       with pytest.raises(ValueError):
+E       Failed: DID NOT RAISE &lt;class 'ValueError'&gt;
+
+test_heldout.py:27: Failed</failure></testcase><testcase classname="test_heldout" name="test_loader_failure_is_not_cached_and_guard_recovers" time="0.000" /><testcase classname="test_heldout" name="test_zero_bypasses_existing_entry_without_replacing_it" time="0.000"><failure message="AssertionError: assert 1 == 2&#10; +  where 1 = get('x', &lt;function test_zero_bypasses_existing_entry_without_replacing_it.&lt;locals&gt;.&lt;lambda&gt; at 0x7fb0a181dd00&gt;, 0)&#10; +    where get = &lt;cache.TTLCache object at 0x7fb0a1801e20&gt;.get">def test_zero_bypasses_existing_entry_without_replacing_it():
+        cache = TTLCache(lambda: 0)
+        assert cache.get('x', lambda: 1, 10) == 1
+&gt;       assert cache.get('x', lambda: 2, 0) == 2
+E       AssertionError: assert 1 == 2
+E        +  where 1 = get('x', &lt;function test_zero_bypasses_existing_entry_without_replacing_it.&lt;locals&gt;.&lt;lambda&gt; at 0x7fb0a181dd00&gt;, 0)
+E        +    where get = &lt;cache.TTLCache object at 0x7fb0a1801e20&gt;.get
+
+test_heldout.py:43: AssertionError</failure></testcase><testcase classname="test_heldout" name="test_clear_during_load_and_other_key_invalidation" time="0.000"><failure message="AssertionError: assert 1 == 2&#10; +  where 1 = get('x', &lt;function test_clear_during_load_and_other_key_invalidation.&lt;locals&gt;.&lt;lambda&gt; at 0x7fb0a181e200&gt;, 10)&#10; +    where get = &lt;cache.TTLCache object at 0x7fb0a1802750&gt;.get">def test_clear_during_load_and_other_key_invalidation():
+        cache = TTLCache(lambda: 0)
+        def clear_load():
+            cache.clear()
+            return 1
+        assert cache.get('x', clear_load, 10) == 1
+&gt;       assert cache.get('x', lambda: 2, 10) == 2
+E       AssertionError: assert 1 == 2
+E        +  where 1 = get('x', &lt;function test_clear_during_load_and_other_key_invalidation.&lt;locals&gt;.&lt;lambda&gt; at 0x7fb0a181e200&gt;, 10)
+E        +    where get = &lt;cache.TTLCache object at 0x7fb0a1802750&gt;.get
+
+test_heldout.py:53: AssertionError</failure></testcase><testcase classname="test_heldout" name="test_reentrant_same_key_after_invalidation_and_other_key_nesting" time="0.001"><failure message="Failed: DID NOT RAISE &lt;class 'RuntimeError'&gt;">def test_reentrant_same_key_after_invalidation_and_other_key_nesting():
+        cache = TTLCache(lambda: 0)
+        def recurse():
+            cache.invalidate('x')
+            return cache.get('x', lambda: 9, 1)
+&gt;       with pytest.raises(RuntimeError):
+E       Failed: DID NOT RAISE &lt;class 'RuntimeError'&gt;
+
+test_heldout.py:68: Failed</failure></testcase></testsuite></testsuites>

@@ -1,0 +1,35 @@
+FFF                                                                      [100%]
+=================================== FAILURES ===================================
+__________________________ test_canonical_and_escape ___________________________
+
+    def test_canonical_and_escape():
+>       assert canonical_path('a//b/../c') == 'a/c'
+E       AssertionError: assert 'a//b/../c' == 'a/c'
+E         
+E         - a/c
+E         + a//b/../c
+
+test_graph.py:7: AssertionError
+__________________ test_topological_order_uses_ready_priority __________________
+
+    def test_topological_order_uses_ready_priority():
+>       assert build_order({'a': ['z'], 'b': [], 'z': []}) == ['b', 'z', 'a']
+E       AssertionError: assert ['a', 'b', 'z'] == ['b', 'z', 'a']
+E         
+E         At index 0 diff: 'a' != 'b'
+E         Use -v to get more diff
+
+test_graph.py:13: AssertionError
+__________________________________ test_cycle __________________________________
+
+    def test_cycle():
+>       with pytest.raises(ValueError):
+E       Failed: DID NOT RAISE <class 'ValueError'>
+
+test_graph.py:17: Failed
+- generated xml file: /mnt/d/Muiti-Agent Programing/experiments/code-agent-smolagents/24371220/stability_tasks/validation-20261030-110226-974671/dependency_paths-initial-visible.xml -
+=========================== short test summary info ============================
+FAILED test_graph.py::test_canonical_and_escape - AssertionError: assert 'a//...
+FAILED test_graph.py::test_topological_order_uses_ready_priority - AssertionE...
+FAILED test_graph.py::test_cycle - Failed: DID NOT RAISE <class 'ValueError'>
+3 failed in 2.38s

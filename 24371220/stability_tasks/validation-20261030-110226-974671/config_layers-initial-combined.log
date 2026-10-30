@@ -1,0 +1,195 @@
+FFFFFF.FF.FFFFFFF                                                        [100%]
+=================================== FAILURES ===================================
+____________________ test_nested_merge_and_independent_tree ____________________
+
+    def test_nested_merge_and_independent_tree():
+        first = {'network': {'timeout': 3, 'hosts': ['a']}}
+        result = merge_layers(first, {'network': {'timeout': 5}})
+>       assert result == {'network': {'timeout': 5, 'hosts': ['a']}}
+E       AssertionError: assert {'network': {'timeout': 5}} == {'network': {...'timeout': 5}}
+E         
+E         Differing items:
+E         {'network': {'timeout': 5}} != {'network': {'hosts': ['a'], 'timeout': 5}}
+E         Use -v to get more diff
+
+test_config.py:9: AssertionError
+________________________ test_environment_is_last_layer ________________________
+
+    def test_environment_is_last_layer():
+>       assert build_config({'network': {'timeout': 2}}, {},
+                            {'APP_TIMEOUT': ' +12 ', 'APP_DEBUG': 'FALSE'}) == {
+                                'network': {'timeout': 12}, 'debug': False}
+E       AssertionError: assert {'network': {'timeout': 2}} == {'debug': Fal...timeout': 12}}
+E         
+E         Differing items:
+E         {'network': {'timeout': 2}} != {'network': {'timeout': 12}}
+E         Right contains 1 more item:
+E         {'debug': False}
+E         Use -v to get more diff
+
+test_config.py:15: AssertionError
+_____________________________ test_bad_timeout[0] ______________________________
+
+value = '0'
+
+    @pytest.mark.parametrize('value', ['0', '-2', '1.2', 'no'])
+    def test_bad_timeout(value):
+>       with pytest.raises(ValueError):
+E       Failed: DID NOT RAISE <class 'ValueError'>
+
+test_config.py:22: Failed
+_____________________________ test_bad_timeout[-2] _____________________________
+
+value = '-2'
+
+    @pytest.mark.parametrize('value', ['0', '-2', '1.2', 'no'])
+    def test_bad_timeout(value):
+>       with pytest.raises(ValueError):
+E       Failed: DID NOT RAISE <class 'ValueError'>
+
+test_config.py:22: Failed
+____________________________ test_bad_timeout[1.2] _____________________________
+
+value = '1.2'
+
+    @pytest.mark.parametrize('value', ['0', '-2', '1.2', 'no'])
+    def test_bad_timeout(value):
+>       with pytest.raises(ValueError):
+E       Failed: DID NOT RAISE <class 'ValueError'>
+
+test_config.py:22: Failed
+_____________________________ test_bad_timeout[no] _____________________________
+
+value = 'no'
+
+    @pytest.mark.parametrize('value', ['0', '-2', '1.2', 'no'])
+    def test_bad_timeout(value):
+>       with pytest.raises(ValueError):
+E       Failed: DID NOT RAISE <class 'ValueError'>
+
+test_config.py:22: Failed
+________________________ test_later_tree_is_also_copied ________________________
+
+    def test_later_tree_is_also_copied():
+        second = {'x': [{'y': []}]}
+        result = merge_layers({}, second)
+        result['x'][0]['y'].append(1)
+>       assert second == {'x': [{'y': []}]}
+E       AssertionError: assert {'x': [{'y': [1]}]} == {'x': [{'y': []}]}
+E         
+E         Differing items:
+E         {'x': [{'y': [1]}]} != {'x': [{'y': []}]}
+E         Use -v to get more diff
+
+test_heldout.py:16: AssertionError
+___________________________ test_layer_type[value0] ____________________________
+
+value = []
+
+    @pytest.mark.parametrize('value', [[], None, 'x'])
+    def test_layer_type(value):
+>       with pytest.raises(TypeError):
+E       Failed: DID NOT RAISE <class 'TypeError'>
+
+test_heldout.py:21: Failed
+______________________________ test_layer_type[x] ______________________________
+
+value = 'x'
+
+    @pytest.mark.parametrize('value', [[], None, 'x'])
+    def test_layer_type(value):
+        with pytest.raises(TypeError):
+>           merge_layers(value)
+
+test_heldout.py:22: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+layers = ('x',), result = {}, layer = 'x'
+
+    def merge_layers(*layers):
+        result = {}
+        for layer in layers:
+>           result.update(layer)
+E           ValueError: dictionary update sequence element #0 has length 1; 2 is required
+
+merge.py:4: ValueError
+__________________________ test_timeout_ascii_only[] ___________________________
+
+value = ''
+
+    @pytest.mark.parametrize('value', ['', '１２', '١', '+', '1_0'])
+    def test_timeout_ascii_only(value):
+>       with pytest.raises(ValueError):
+E       Failed: DID NOT RAISE <class 'ValueError'>
+
+test_heldout.py:27: Failed
+____________________ test_timeout_ascii_only[\uff11\uff12] _____________________
+
+value = '１２'
+
+    @pytest.mark.parametrize('value', ['', '１２', '١', '+', '1_0'])
+    def test_timeout_ascii_only(value):
+>       with pytest.raises(ValueError):
+E       Failed: DID NOT RAISE <class 'ValueError'>
+
+test_heldout.py:27: Failed
+_______________________ test_timeout_ascii_only[\u0661] ________________________
+
+value = '١'
+
+    @pytest.mark.parametrize('value', ['', '１２', '١', '+', '1_0'])
+    def test_timeout_ascii_only(value):
+>       with pytest.raises(ValueError):
+E       Failed: DID NOT RAISE <class 'ValueError'>
+
+test_heldout.py:27: Failed
+__________________________ test_timeout_ascii_only[+] __________________________
+
+value = '+'
+
+    @pytest.mark.parametrize('value', ['', '１２', '١', '+', '1_0'])
+    def test_timeout_ascii_only(value):
+>       with pytest.raises(ValueError):
+E       Failed: DID NOT RAISE <class 'ValueError'>
+
+test_heldout.py:27: Failed
+_________________________ test_timeout_ascii_only[1_0] _________________________
+
+value = '1_0'
+
+    @pytest.mark.parametrize('value', ['', '１２', '١', '+', '1_0'])
+    def test_timeout_ascii_only(value):
+>       with pytest.raises(ValueError):
+E       Failed: DID NOT RAISE <class 'ValueError'>
+
+test_heldout.py:27: Failed
+_________________ test_environment_validation_and_ignored_keys _________________
+
+    def test_environment_validation_and_ignored_keys():
+        assert build_config({'debug': 'keep'}, {}, {'OTHER': '1'}) == {'debug': 'keep'}
+>       assert build_config({}, {}, {'APP_DEBUG': ' 1 '}) == {'debug': True}
+E       AssertionError: assert {} == {'debug': True}
+E         
+E         Right contains 1 more item:
+E         {'debug': True}
+E         Use -v to get more diff
+
+test_heldout.py:33: AssertionError
+- generated xml file: /mnt/d/Muiti-Agent Programing/experiments/code-agent-smolagents/24371220/stability_tasks/validation-20261030-110226-974671/config_layers-initial-combined.xml -
+=========================== short test summary info ============================
+FAILED test_config.py::test_nested_merge_and_independent_tree - AssertionErro...
+FAILED test_config.py::test_environment_is_last_layer - AssertionError: asser...
+FAILED test_config.py::test_bad_timeout[0] - Failed: DID NOT RAISE <class 'Va...
+FAILED test_config.py::test_bad_timeout[-2] - Failed: DID NOT RAISE <class 'V...
+FAILED test_config.py::test_bad_timeout[1.2] - Failed: DID NOT RAISE <class '...
+FAILED test_config.py::test_bad_timeout[no] - Failed: DID NOT RAISE <class 'V...
+FAILED test_heldout.py::test_later_tree_is_also_copied - AssertionError: asse...
+FAILED test_heldout.py::test_layer_type[value0] - Failed: DID NOT RAISE <clas...
+FAILED test_heldout.py::test_layer_type[x] - ValueError: dictionary update se...
+FAILED test_heldout.py::test_timeout_ascii_only[] - Failed: DID NOT RAISE <cl...
+FAILED test_heldout.py::test_timeout_ascii_only[\uff11\uff12] - Failed: DID N...
+FAILED test_heldout.py::test_timeout_ascii_only[\u0661] - Failed: DID NOT RAI...
+FAILED test_heldout.py::test_timeout_ascii_only[+] - Failed: DID NOT RAISE <c...
+FAILED test_heldout.py::test_timeout_ascii_only[1_0] - Failed: DID NOT RAISE ...
+FAILED test_heldout.py::test_environment_validation_and_ignored_keys - Assert...
+15 failed, 2 passed in 3.20s

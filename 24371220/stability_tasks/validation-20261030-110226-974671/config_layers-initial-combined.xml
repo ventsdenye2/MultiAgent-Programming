@@ -1,0 +1,131 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="0" failures="15" skipped="0" tests="17" time="3.198" timestamp="2026-10-30T11:02:36.447655+08:00" hostname="VENTSDENYE5"><testcase classname="test_config" name="test_nested_merge_and_independent_tree" time="0.001"><failure message="AssertionError: assert {'network': {'timeout': 5}} == {'network': {...'timeout': 5}}&#10;  &#10;  Differing items:&#10;  {'network': {'timeout': 5}} != {'network': {'hosts': ['a'], 'timeout': 5}}&#10;  Use -v to get more diff">def test_nested_merge_and_independent_tree():
+        first = {'network': {'timeout': 3, 'hosts': ['a']}}
+        result = merge_layers(first, {'network': {'timeout': 5}})
+&gt;       assert result == {'network': {'timeout': 5, 'hosts': ['a']}}
+E       AssertionError: assert {'network': {'timeout': 5}} == {'network': {...'timeout': 5}}
+E         
+E         Differing items:
+E         {'network': {'timeout': 5}} != {'network': {'hosts': ['a'], 'timeout': 5}}
+E         Use -v to get more diff
+
+test_config.py:9: AssertionError</failure></testcase><testcase classname="test_config" name="test_environment_is_last_layer" time="0.001"><failure message="AssertionError: assert {'network': {'timeout': 2}} == {'debug': Fal...timeout': 12}}&#10;  &#10;  Differing items:&#10;  {'network': {'timeout': 2}} != {'network': {'timeout': 12}}&#10;  Right contains 1 more item:&#10;  {'debug': False}&#10;  Use -v to get more diff">def test_environment_is_last_layer():
+&gt;       assert build_config({'network': {'timeout': 2}}, {},
+                            {'APP_TIMEOUT': ' +12 ', 'APP_DEBUG': 'FALSE'}) == {
+                                'network': {'timeout': 12}, 'debug': False}
+E       AssertionError: assert {'network': {'timeout': 2}} == {'debug': Fal...timeout': 12}}
+E         
+E         Differing items:
+E         {'network': {'timeout': 2}} != {'network': {'timeout': 12}}
+E         Right contains 1 more item:
+E         {'debug': False}
+E         Use -v to get more diff
+
+test_config.py:15: AssertionError</failure></testcase><testcase classname="test_config" name="test_bad_timeout[0]" time="0.000"><failure message="Failed: DID NOT RAISE &lt;class 'ValueError'&gt;">value = '0'
+
+    @pytest.mark.parametrize('value', ['0', '-2', '1.2', 'no'])
+    def test_bad_timeout(value):
+&gt;       with pytest.raises(ValueError):
+E       Failed: DID NOT RAISE &lt;class 'ValueError'&gt;
+
+test_config.py:22: Failed</failure></testcase><testcase classname="test_config" name="test_bad_timeout[-2]" time="0.000"><failure message="Failed: DID NOT RAISE &lt;class 'ValueError'&gt;">value = '-2'
+
+    @pytest.mark.parametrize('value', ['0', '-2', '1.2', 'no'])
+    def test_bad_timeout(value):
+&gt;       with pytest.raises(ValueError):
+E       Failed: DID NOT RAISE &lt;class 'ValueError'&gt;
+
+test_config.py:22: Failed</failure></testcase><testcase classname="test_config" name="test_bad_timeout[1.2]" time="0.000"><failure message="Failed: DID NOT RAISE &lt;class 'ValueError'&gt;">value = '1.2'
+
+    @pytest.mark.parametrize('value', ['0', '-2', '1.2', 'no'])
+    def test_bad_timeout(value):
+&gt;       with pytest.raises(ValueError):
+E       Failed: DID NOT RAISE &lt;class 'ValueError'&gt;
+
+test_config.py:22: Failed</failure></testcase><testcase classname="test_config" name="test_bad_timeout[no]" time="0.000"><failure message="Failed: DID NOT RAISE &lt;class 'ValueError'&gt;">value = 'no'
+
+    @pytest.mark.parametrize('value', ['0', '-2', '1.2', 'no'])
+    def test_bad_timeout(value):
+&gt;       with pytest.raises(ValueError):
+E       Failed: DID NOT RAISE &lt;class 'ValueError'&gt;
+
+test_config.py:22: Failed</failure></testcase><testcase classname="test_heldout" name="test_scalars_none_and_list_replacement" time="0.000" /><testcase classname="test_heldout" name="test_later_tree_is_also_copied" time="0.000"><failure message="AssertionError: assert {'x': [{'y': [1]}]} == {'x': [{'y': []}]}&#10;  &#10;  Differing items:&#10;  {'x': [{'y': [1]}]} != {'x': [{'y': []}]}&#10;  Use -v to get more diff">def test_later_tree_is_also_copied():
+        second = {'x': [{'y': []}]}
+        result = merge_layers({}, second)
+        result['x'][0]['y'].append(1)
+&gt;       assert second == {'x': [{'y': []}]}
+E       AssertionError: assert {'x': [{'y': [1]}]} == {'x': [{'y': []}]}
+E         
+E         Differing items:
+E         {'x': [{'y': [1]}]} != {'x': [{'y': []}]}
+E         Use -v to get more diff
+
+test_heldout.py:16: AssertionError</failure></testcase><testcase classname="test_heldout" name="test_layer_type[value0]" time="0.000"><failure message="Failed: DID NOT RAISE &lt;class 'TypeError'&gt;">value = []
+
+    @pytest.mark.parametrize('value', [[], None, 'x'])
+    def test_layer_type(value):
+&gt;       with pytest.raises(TypeError):
+E       Failed: DID NOT RAISE &lt;class 'TypeError'&gt;
+
+test_heldout.py:21: Failed</failure></testcase><testcase classname="test_heldout" name="test_layer_type[None]" time="0.000" /><testcase classname="test_heldout" name="test_layer_type[x]" time="0.000"><failure message="ValueError: dictionary update sequence element #0 has length 1; 2 is required">value = 'x'
+
+    @pytest.mark.parametrize('value', [[], None, 'x'])
+    def test_layer_type(value):
+        with pytest.raises(TypeError):
+&gt;           merge_layers(value)
+
+test_heldout.py:22: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+layers = ('x',), result = {}, layer = 'x'
+
+    def merge_layers(*layers):
+        result = {}
+        for layer in layers:
+&gt;           result.update(layer)
+E           ValueError: dictionary update sequence element #0 has length 1; 2 is required
+
+merge.py:4: ValueError</failure></testcase><testcase classname="test_heldout" name="test_timeout_ascii_only[]" time="0.000"><failure message="Failed: DID NOT RAISE &lt;class 'ValueError'&gt;">value = ''
+
+    @pytest.mark.parametrize('value', ['', '１２', '١', '+', '1_0'])
+    def test_timeout_ascii_only(value):
+&gt;       with pytest.raises(ValueError):
+E       Failed: DID NOT RAISE &lt;class 'ValueError'&gt;
+
+test_heldout.py:27: Failed</failure></testcase><testcase classname="test_heldout" name="test_timeout_ascii_only[\uff11\uff12]" time="0.000"><failure message="Failed: DID NOT RAISE &lt;class 'ValueError'&gt;">value = '１２'
+
+    @pytest.mark.parametrize('value', ['', '１２', '١', '+', '1_0'])
+    def test_timeout_ascii_only(value):
+&gt;       with pytest.raises(ValueError):
+E       Failed: DID NOT RAISE &lt;class 'ValueError'&gt;
+
+test_heldout.py:27: Failed</failure></testcase><testcase classname="test_heldout" name="test_timeout_ascii_only[\u0661]" time="0.000"><failure message="Failed: DID NOT RAISE &lt;class 'ValueError'&gt;">value = '١'
+
+    @pytest.mark.parametrize('value', ['', '１２', '١', '+', '1_0'])
+    def test_timeout_ascii_only(value):
+&gt;       with pytest.raises(ValueError):
+E       Failed: DID NOT RAISE &lt;class 'ValueError'&gt;
+
+test_heldout.py:27: Failed</failure></testcase><testcase classname="test_heldout" name="test_timeout_ascii_only[+]" time="0.001"><failure message="Failed: DID NOT RAISE &lt;class 'ValueError'&gt;">value = '+'
+
+    @pytest.mark.parametrize('value', ['', '１２', '١', '+', '1_0'])
+    def test_timeout_ascii_only(value):
+&gt;       with pytest.raises(ValueError):
+E       Failed: DID NOT RAISE &lt;class 'ValueError'&gt;
+
+test_heldout.py:27: Failed</failure></testcase><testcase classname="test_heldout" name="test_timeout_ascii_only[1_0]" time="0.000"><failure message="Failed: DID NOT RAISE &lt;class 'ValueError'&gt;">value = '1_0'
+
+    @pytest.mark.parametrize('value', ['', '１２', '١', '+', '1_0'])
+    def test_timeout_ascii_only(value):
+&gt;       with pytest.raises(ValueError):
+E       Failed: DID NOT RAISE &lt;class 'ValueError'&gt;
+
+test_heldout.py:27: Failed</failure></testcase><testcase classname="test_heldout" name="test_environment_validation_and_ignored_keys" time="0.001"><failure message="AssertionError: assert {} == {'debug': True}&#10;  &#10;  Right contains 1 more item:&#10;  {'debug': True}&#10;  Use -v to get more diff">def test_environment_validation_and_ignored_keys():
+        assert build_config({'debug': 'keep'}, {}, {'OTHER': '1'}) == {'debug': 'keep'}
+&gt;       assert build_config({}, {}, {'APP_DEBUG': ' 1 '}) == {'debug': True}
+E       AssertionError: assert {} == {'debug': True}
+E         
+E         Right contains 1 more item:
+E         {'debug': True}
+E         Use -v to get more diff
+
+test_heldout.py:33: AssertionError</failure></testcase></testsuite></testsuites>

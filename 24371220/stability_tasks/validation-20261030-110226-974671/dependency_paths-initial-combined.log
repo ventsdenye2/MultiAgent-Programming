@@ -1,0 +1,168 @@
+FFFFFFFFFFFFFFF                                                          [100%]
+=================================== FAILURES ===================================
+__________________________ test_canonical_and_escape ___________________________
+
+    def test_canonical_and_escape():
+>       assert canonical_path('a//b/../c') == 'a/c'
+E       AssertionError: assert 'a//b/../c' == 'a/c'
+E         
+E         - a/c
+E         + a//b/../c
+
+test_graph.py:7: AssertionError
+__________________ test_topological_order_uses_ready_priority __________________
+
+    def test_topological_order_uses_ready_priority():
+>       assert build_order({'a': ['z'], 'b': [], 'z': []}) == ['b', 'z', 'a']
+E       AssertionError: assert ['a', 'b', 'z'] == ['b', 'z', 'a']
+E         
+E         At index 0 diff: 'a' != 'b'
+E         Use -v to get more diff
+
+test_graph.py:13: AssertionError
+__________________________________ test_cycle __________________________________
+
+    def test_cycle():
+>       with pytest.raises(ValueError):
+E       Failed: DID NOT RAISE <class 'ValueError'>
+
+test_graph.py:17: Failed
+____________________________ test_rejected_paths[] _____________________________
+
+value = ''
+
+    @pytest.mark.parametrize('value', ['', '.', 'a/..', '/a', 'a/../../b', 'C:x', 'a\\b', 'a\x00b'])
+    def test_rejected_paths(value):
+>       with pytest.raises(ValueError):
+E       Failed: DID NOT RAISE <class 'ValueError'>
+
+test_heldout.py:9: Failed
+____________________________ test_rejected_paths[.] ____________________________
+
+value = '.'
+
+    @pytest.mark.parametrize('value', ['', '.', 'a/..', '/a', 'a/../../b', 'C:x', 'a\\b', 'a\x00b'])
+    def test_rejected_paths(value):
+>       with pytest.raises(ValueError):
+E       Failed: DID NOT RAISE <class 'ValueError'>
+
+test_heldout.py:9: Failed
+__________________________ test_rejected_paths[a/..] ___________________________
+
+value = 'a/..'
+
+    @pytest.mark.parametrize('value', ['', '.', 'a/..', '/a', 'a/../../b', 'C:x', 'a\\b', 'a\x00b'])
+    def test_rejected_paths(value):
+>       with pytest.raises(ValueError):
+E       Failed: DID NOT RAISE <class 'ValueError'>
+
+test_heldout.py:9: Failed
+___________________________ test_rejected_paths[/a] ____________________________
+
+value = '/a'
+
+    @pytest.mark.parametrize('value', ['', '.', 'a/..', '/a', 'a/../../b', 'C:x', 'a\\b', 'a\x00b'])
+    def test_rejected_paths(value):
+>       with pytest.raises(ValueError):
+E       Failed: DID NOT RAISE <class 'ValueError'>
+
+test_heldout.py:9: Failed
+________________________ test_rejected_paths[a/../../b] ________________________
+
+value = 'a/../../b'
+
+    @pytest.mark.parametrize('value', ['', '.', 'a/..', '/a', 'a/../../b', 'C:x', 'a\\b', 'a\x00b'])
+    def test_rejected_paths(value):
+>       with pytest.raises(ValueError):
+E       Failed: DID NOT RAISE <class 'ValueError'>
+
+test_heldout.py:9: Failed
+___________________________ test_rejected_paths[C:x] ___________________________
+
+value = 'C:x'
+
+    @pytest.mark.parametrize('value', ['', '.', 'a/..', '/a', 'a/../../b', 'C:x', 'a\\b', 'a\x00b'])
+    def test_rejected_paths(value):
+>       with pytest.raises(ValueError):
+E       Failed: DID NOT RAISE <class 'ValueError'>
+
+test_heldout.py:9: Failed
+__________________________ test_rejected_paths[a\\b] ___________________________
+
+value = 'a\\b'
+
+    @pytest.mark.parametrize('value', ['', '.', 'a/..', '/a', 'a/../../b', 'C:x', 'a\\b', 'a\x00b'])
+    def test_rejected_paths(value):
+>       with pytest.raises(ValueError):
+E       Failed: DID NOT RAISE <class 'ValueError'>
+
+test_heldout.py:9: Failed
+_________________________ test_rejected_paths[a\x00b] __________________________
+
+value = 'a\x00b'
+
+    @pytest.mark.parametrize('value', ['', '.', 'a/..', '/a', 'a/../../b', 'C:x', 'a\\b', 'a\x00b'])
+    def test_rejected_paths(value):
+>       with pytest.raises(ValueError):
+E       Failed: DID NOT RAISE <class 'ValueError'>
+
+test_heldout.py:9: Failed
+________________________ test_preserve_spaces_and_types ________________________
+
+    def test_preserve_spaces_and_types():
+>       assert canonical_path(' a /./b ') == ' a /b '
+E       AssertionError: assert ' a /./b ' == ' a /b '
+E         
+E         -  a /b 
+E         +  a /./b 
+E         ?    ++
+
+test_heldout.py:14: AssertionError
+_________________ test_alias_union_duplicates_and_no_mutation __________________
+
+    def test_alias_union_duplicates_and_no_mutation():
+        graph = {'./a': ['b', './b'], 'x/../a': ['c'], 'b': [], 'c': []}
+        before = copy.deepcopy(graph)
+>       assert build_order(graph) == ['b', 'c', 'a']
+E       AssertionError: assert ['./a', 'b', 'c', 'x/../a'] == ['b', 'c', 'a']
+E         
+E         At index 0 diff: './a' != 'b'
+E         Left contains one more item: 'x/../a'
+E         Use -v to get more diff
+
+test_heldout.py:26: AssertionError
+____________________ test_unknown_and_canonical_self_cycle _____________________
+
+    def test_unknown_and_canonical_self_cycle():
+>       with pytest.raises(ValueError):
+E       Failed: DID NOT RAISE <class 'ValueError'>
+
+test_heldout.py:32: Failed
+___________ test_newly_ready_node_competes_with_existing_ready_nodes ___________
+
+    def test_newly_ready_node_competes_with_existing_ready_nodes():
+>       assert build_order({'z': [], 'a': ['b'], 'b': [], 'c': []}) == ['b', 'a', 'c', 'z']
+E       AssertionError: assert ['a', 'b', 'c', 'z'] == ['b', 'a', 'c', 'z']
+E         
+E         At index 0 diff: 'a' != 'b'
+E         Use -v to get more diff
+
+test_heldout.py:39: AssertionError
+- generated xml file: /mnt/d/Muiti-Agent Programing/experiments/code-agent-smolagents/24371220/stability_tasks/validation-20261030-110226-974671/dependency_paths-initial-combined.xml -
+=========================== short test summary info ============================
+FAILED test_graph.py::test_canonical_and_escape - AssertionError: assert 'a//...
+FAILED test_graph.py::test_topological_order_uses_ready_priority - AssertionE...
+FAILED test_graph.py::test_cycle - Failed: DID NOT RAISE <class 'ValueError'>
+FAILED test_heldout.py::test_rejected_paths[] - Failed: DID NOT RAISE <class ...
+FAILED test_heldout.py::test_rejected_paths[.] - Failed: DID NOT RAISE <class...
+FAILED test_heldout.py::test_rejected_paths[a/..] - Failed: DID NOT RAISE <cl...
+FAILED test_heldout.py::test_rejected_paths[/a] - Failed: DID NOT RAISE <clas...
+FAILED test_heldout.py::test_rejected_paths[a/../../b] - Failed: DID NOT RAIS...
+FAILED test_heldout.py::test_rejected_paths[C:x] - Failed: DID NOT RAISE <cla...
+FAILED test_heldout.py::test_rejected_paths[a\\b] - Failed: DID NOT RAISE <cl...
+FAILED test_heldout.py::test_rejected_paths[a\x00b] - Failed: DID NOT RAISE <...
+FAILED test_heldout.py::test_preserve_spaces_and_types - AssertionError: asse...
+FAILED test_heldout.py::test_alias_union_duplicates_and_no_mutation - Asserti...
+FAILED test_heldout.py::test_unknown_and_canonical_self_cycle - Failed: DID N...
+FAILED test_heldout.py::test_newly_ready_node_competes_with_existing_ready_nodes
+15 failed in 3.87s

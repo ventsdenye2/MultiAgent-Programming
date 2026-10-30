@@ -1,0 +1,50 @@
+{
+  "provider_calls": 0,
+  "python": "3.12.3 (main, Aug 31 2026, 10:18:26) [GCC 13.3.0]",
+  "tasks": {
+    "ttl_cache": {
+      "input_sha256": {
+        "heldout_tests.py": "5d46b8323ba81a465ccba7af5b3fc9793acd0eca736e9f2121d29ee72298032c",
+        "reference/cache.py": "1fb8f2ad0616f6a0ed4bb08b5af3f144dff54aa718d25fc46a9a892ce1d247f7",
+        "repo/cache.py": "43b57d1ac30f07e51d50184e6735667c45d915247df29a2b9f3941d431e39657",
+        "repo/test_cache.py": "fe517707cbea5b83659adeb89b8daa44467dec7de0cdaf9925db6f0a7fe3576d",
+        "task.md": "506c8e71bc0a00a5970cfa40b3c841eee4adb379e489af261f5becbc4be7ad53"
+      },
+      "checks": {
+        "initial_visible": {
+          "exit_code": 1,
+          "tests": 3,
+          "failures": 3,
+          "errors": 0,
+          "skipped": 0,
+          "expected_result": true
+        },
+        "initial_combined": {
+          "exit_code": 1,
+          "tests": 14,
+          "failures": 13,
+          "errors": 0,
+          "skipped": 0,
+          "expected_result": true
+        },
+        "reference_visible": {
+          "exit_code": 0,
+          "tests": 3,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0,
+          "expected_result": true
+        },
+        "reference_combined": {
+          "exit_code": 0,
+          "tests": 14,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0,
+          "expected_result": true
+        }
+      }
+    }
+  },
+  "ok": true
+}
