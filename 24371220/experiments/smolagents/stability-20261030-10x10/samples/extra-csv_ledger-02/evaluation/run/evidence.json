@@ -1,0 +1,64 @@
+{
+  "evidence": [
+    {
+      "id": "ev-33a11c2340d22ea40039",
+      "source": "ledger.py",
+      "version": "65ca4febe824d5f44ce7b2430e8ff61eed1871f838bfc41cea5b15de4ee171b6",
+      "locator": "lines:1-8",
+      "text": "import csv\nimport io\n\n\ndef summarize(text):\n    return [{'sku': row['sku'], 'quantity': int(row['quantity']),\n             'revenue': str(float(row['unit_price']) * int(row['quantity']))}\n            for row in csv.DictReader(io.StringIO(text))]\n",
+      "required": false,
+      "page": null,
+      "valid": false,
+      "atomic": false
+    },
+    {
+      "id": "ev-4ed373a6c4a35a7afa86",
+      "source": "test_ledger.py",
+      "version": "fba6a24275abb76d9f6ab51075335968bfe36618cd9fa04271a4ee3d5381e0d9",
+      "locator": "lines:1-18",
+      "text": "import pytest\nfrom ledger import summarize\n\n\ndef test_aggregate_returns_and_order():\n    assert summarize('sku,quantity,unit_price\\na,2,0.10\\nb,1,3\\na,-1,0.10\\n') == [\n        {'sku': 'a', 'quantity': 1, 'revenue': '0.10'},\n        {'sku': 'b', 'quantity': 1, 'revenue': '3.00'}]\n\n\ndef test_round_only_after_sum():\n    assert summarize('sku,quantity,unit_price\\na,1,0.005\\na,1,0.005\\n')[0]['revenue'] == '0.01'\n\n\n@pytest.mark.parametrize('text', ['', 'sku,quantity\\na,1\\n', 'sku,quantity,unit_price\\na,1,NaN\\n'])\ndef test_invalid(text):\n    with pytest.raises(ValueError):\n        summarize(text)\n",
+      "required": false,
+      "page": null,
+      "valid": true,
+      "atomic": false
+    },
+    {
+      "id": "ev-7f620f6c2cd359fac3af",
+      "source": "ledger.py",
+      "version": "084b897a51c1a8a40fc3cade4b9af3acd034b1947c7b70caf0f4328db0cddb72",
+      "locator": "lines:1-110",
+      "text": "import csv\nimport io\nimport re\nfrom decimal import Decimal, InvalidOperation\n\n\n_QUANTITY_RE = re.compile(r\"[+-]?[0-9]+\")\n\n\ndef _parse_price(value):\n    try:\n        price = Decimal(value)\n    except (InvalidOperation, ValueError, TypeError) as exc:\n        raise ValueError(\"invalid unit_price\") from exc\n    if not price.is_finite() or price < 0:\n        raise ValueError(\"invalid unit_price\")\n    _sign, digits, exponent = price.as_tuple()\n    coefficient = 0\n    for digit in digits:\n        coefficient = coefficient * 10 + digit\n    return coefficient, exponent\n\n\ndef _round_div_half_even(numerator, denominator):\n    negative = numerator < 0\n    quotient, remainder = divmod(abs(numerator), denominator)\n    doubled = remainder * 2\n    if doubled > denominator or (doubled == denominator and quotient % 2 == 1):\n        quotient += 1\n    return -quotient if negative else quotient\n\n\ndef _format_cents(cents):\n    if cents == 0:\n        return \"0.00\"\n    sign = \"-\" if cents < 0 else \"\"\n    whole, fraction = divmod(abs(cents), 100)\n    return f\"{sign}{whole}.{fraction:02d}\"\n\n\ndef _format_revenue(terms):\n    if not terms:\n        return \"0.00\"\n    minimum_exponent = min(terms)\n    coefficient = sum(\n        term * 10 ** (exponent - minimum_exponent)\n        for exponent, term in terms.items()\n    )\n    shift = minimum_exponent + 2\n    if shift >= 0:\n        cents = coefficient * 10 ** shift\n    else:\n        cents = _round_div_half_even(coefficient, 10 ** (-shift))\n    return _format_cents(cents)\n\n\ndef summarize(text: str) -> list[dict]:\n    try:\n        stream = io.StringIO(text, newline=\"\")\n        reader = csv.reader(stream, strict=True)\n        header = None\n        sku_index = quantity_index = price_index = None\n        states = {}\n        for row in reader:\n            if not row:\n                continue\n            if header is None:\n                header = [cell.strip() for cell in row]\n                if len(set(header)) != len(header):\n                    raise ValueError(\"duplicate header\")\n                try:\n                    sku_index = header.index(\"sku\")\n                    quantity_index = header.index(\"quantity\")\n                    price_index = header.index(\"unit_price\")\n                except ValueError as exc:\n                    raise ValueError(\"missing required header\") from exc\n                continue\n            if len(row) != len(header):\n                raise ValueError(\"record has wrong number of cells\")\n            sku = row[sku_index].strip()\n            if not sku:\n                raise ValueError(\"empty sku\")\n            quantity_text = row[quantity_index].strip()\n            if _QUANTITY_RE.fullmatch(quantity_text) is None:\n                raise ValueError(\"invalid quantity\")\n            quantity = int(quantity_text)\n            price_coefficient, price_exponent = _parse_price(\n                row[price_index].strip()\n            )\n            state = states.get(sku)\n            if state is None:\n                state = [0, {}]\n                states[sku] = state\n            state[0] += quantity\n            product = quantity * price_coefficient\n            terms = state[1]\n            terms[price_exponent] = terms.get(price_exponent, 0) + product\n        if header is None:\n            raise ValueError(\"empty input\")\n    except csv.Error as exc:\n        raise ValueError(\"invalid CSV\") from exc\n\n    result = []\n    for sku, (quantity, terms) in states.items():\n        result.append({\n            \"sku\": sku,\n            \"quantity\": quantity,\n            \"revenue\": _format_revenue(terms),\n        })\n    return result\n",
+      "required": false,
+      "page": null,
+      "valid": true,
+      "atomic": false
+    }
+  ],
+  "notes": {},
+  "exposed": [
+    "ev-4ed373a6c4a35a7afa86",
+    "ev-7f620f6c2cd359fac3af"
+  ],
+  "received_ranges": {
+    "ev-4ed373a6c4a35a7afa86": [
+      [
+        0,
+        597
+      ]
+    ],
+    "ev-7f620f6c2cd359fac3af": [
+      [
+        0,
+        3610
+      ]
+    ]
+  },
+  "full_read_ids": {
+    "test_ledger.py": [
+      "ev-4ed373a6c4a35a7afa86"
+    ],
+    "ledger.py": [
+      "ev-7f620f6c2cd359fac3af"
+    ]
+  }
+}

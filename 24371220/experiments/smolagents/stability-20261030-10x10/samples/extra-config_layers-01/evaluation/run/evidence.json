@@ -1,0 +1,75 @@
+{
+  "evidence": [
+    {
+      "id": "ev-61b3fed94b48b5e9bc1b",
+      "source": "merge.py",
+      "version": "3eaf4562abd3d733d69869cdb62d8fcef38def318668bd59672c058d930d026c",
+      "locator": "lines:1-5",
+      "text": "def merge_layers(*layers):\n    result = {}\n    for layer in layers:\n        result.update(layer)\n    return result\n",
+      "required": false,
+      "page": null,
+      "valid": false,
+      "atomic": false
+    },
+    {
+      "id": "ev-d9fc4c468bc3ac478366",
+      "source": "settings.py",
+      "version": "c7849bd4d905203150182dabdf950a197ddf097a6f4801db66d05810f4629485",
+      "locator": "lines:1-5",
+      "text": "from merge import merge_layers\n\n\ndef build_config(defaults, overrides, environ):\n    return merge_layers(defaults, overrides)\n",
+      "required": false,
+      "page": null,
+      "valid": false,
+      "atomic": false
+    },
+    {
+      "id": "ev-09bfcd6f132d8dbe98d1",
+      "source": "merge.py",
+      "version": "e17e253126186812a814bf1bdab267e63f45adb7a0731fe47bcc59dcdc764c08",
+      "locator": "lines:1-44",
+      "text": "\"\"\"Recursive merging of layered configuration dictionaries.\"\"\"\n\n__all__ = [\"merge_layers\"]\n\n\ndef _copy(value):\n    \"\"\"Return a deep copy of a configuration value.\n\n    Dictionaries and lists are the only mutable containers in a\n    configuration tree, so copying those two types keeps the merged result\n    fully independent from the input layers.\n    \"\"\"\n    if isinstance(value, dict):\n        return {key: _copy(item) for key, item in value.items()}\n    if isinstance(value, list):\n        return [_copy(item) for item in value]\n    return value\n\n\ndef _merge_into(target, source):\n    for key, value in source.items():\n        existing = target.get(key)\n        if isinstance(existing, dict) and isinstance(value, dict):\n            _merge_into(existing, value)\n        else:\n            target[key] = _copy(value)\n\n\ndef merge_layers(*layers):\n    \"\"\"Merge dictionary layers, with later layers taking precedence.\n\n    Dictionaries are merged recursively. Lists and every other value\n    (including ``None``) replace the earlier value. Every layer must be a\n    dictionary, otherwise ``TypeError`` is raised.\n    \"\"\"\n    result = {}\n    for index, layer in enumerate(layers):\n        if not isinstance(layer, dict):\n            raise TypeError(\n                \"layer %d must be a dict, not %s\"\n                % (index, type(layer).__name__)\n            )\n        _merge_into(result, layer)\n    return result\n",
+      "required": false,
+      "page": null,
+      "valid": true,
+      "atomic": false
+    },
+    {
+      "id": "ev-3420cbc474d0bce02f0c",
+      "source": "settings.py",
+      "version": "f31e8fb7c927c48611146eb3a2833c50d1c0e812b1a60d9a6fa298f625d637ef",
+      "locator": "lines:1-56",
+      "text": "\"\"\"Build application configuration from layers and environment keys.\"\"\"\n\nimport re\n\nfrom merge import merge_layers\n\n__all__ = [\"build_config\"]\n\n_TIMEOUT_RE = re.compile(r\"[0-9]+\")\n\n\ndef _parse_timeout(raw):\n    if not isinstance(raw, str):\n        raise ValueError(\"APP_TIMEOUT must be a string, got %r\" % (raw,))\n    text = raw.strip()\n    if text.startswith(\"+\"):\n        text = text[1:]\n    if not _TIMEOUT_RE.fullmatch(text):\n        raise ValueError(\"APP_TIMEOUT must be a positive integer, got %r\" % (raw,))\n    value = int(text)\n    if value <= 0:\n        raise ValueError(\"APP_TIMEOUT must be a positive integer, got %r\" % (raw,))\n    return value\n\n\ndef _parse_debug(raw):\n    if not isinstance(raw, str):\n        raise ValueError(\"APP_DEBUG must be a string, got %r\" % (raw,))\n    text = raw.strip().lower()\n    if text in (\"true\", \"1\"):\n        return True\n    if text in (\"false\", \"0\"):\n        return False\n    raise ValueError(\"APP_DEBUG must be a boolean value, got %r\" % (raw,))\n\n\ndef build_config(defaults, overrides, environ):\n    \"\"\"Merge ``defaults`` and ``overrides``, then apply environment keys.\n\n    Recognized environment keys are ``APP_TIMEOUT`` and ``APP_DEBUG``; all\n    other keys are ignored. ``os.environ`` is never read.\n    \"\"\"\n    result = merge_layers(defaults, overrides)\n\n    if \"APP_TIMEOUT\" in environ:\n        timeout = _parse_timeout(environ[\"APP_TIMEOUT\"])\n        if \"network\" not in result:\n            result[\"network\"] = {}\n        elif not isinstance(result[\"network\"], dict):\n            raise ValueError(\"network setting must be a dict\")\n        result[\"network\"][\"timeout\"] = timeout\n\n    if \"APP_DEBUG\" in environ:\n        result[\"debug\"] = _parse_debug(environ[\"APP_DEBUG\"])\n\n    return result\n",
+      "required": false,
+      "page": null,
+      "valid": true,
+      "atomic": false
+    }
+  ],
+  "notes": {},
+  "exposed": [
+    "ev-09bfcd6f132d8dbe98d1",
+    "ev-3420cbc474d0bce02f0c"
+  ],
+  "received_ranges": {
+    "ev-09bfcd6f132d8dbe98d1": [
+      [
+        0,
+        1412
+      ]
+    ],
+    "ev-3420cbc474d0bce02f0c": [
+      [
+        0,
+        1745
+      ]
+    ]
+  },
+  "full_read_ids": {
+    "merge.py": [
+      "ev-09bfcd6f132d8dbe98d1"
+    ],
+    "settings.py": [
+      "ev-3420cbc474d0bce02f0c"
+    ]
+  }
+}

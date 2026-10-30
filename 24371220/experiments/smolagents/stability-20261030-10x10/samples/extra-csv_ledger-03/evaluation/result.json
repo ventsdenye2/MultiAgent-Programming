@@ -1,0 +1,38 @@
+{
+  "task": "csv_ledger",
+  "number": 3,
+  "status": "passed",
+  "passed": true,
+  "native": "/home/ventsdenye/.local/state/code-agent/evaluations/additional-csv_ledger-03-e8788413",
+  "archive": "/mnt/d/Muiti-Agent Programing/experiments/code-agent-smolagents/24371220/experiments/smolagents/stability-20261030-10x10/samples/extra-csv_ledger-03/evaluation",
+  "input_sha256": {
+    "ledger.py": "65ca4febe824d5f44ce7b2430e8ff61eed1871f838bfc41cea5b15de4ee171b6",
+    "test_ledger.py": "fba6a24275abb76d9f6ab51075335968bfe36618cd9fa04271a4ee3d5381e0d9"
+  },
+  "profile": "generic",
+  "max_requests": 20,
+  "exit_code": 0,
+  "agent_status": "completed",
+  "failure_reason": null,
+  "requests": 14,
+  "prompt_tokens": 62115,
+  "completion_tokens": 16281,
+  "usage_complete": true,
+  "max_request_chars": 23104,
+  "agent_errors": {
+    "AgentParsingError": 1,
+    "AgentExecutionError": 1
+  },
+  "changed_files": [
+    "ledger.py"
+  ],
+  "forbidden_changes": [],
+  "grading_exit_code": 0,
+  "tests": {
+    "tests": 16,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0
+  },
+  "runtime_unchanged": true
+}

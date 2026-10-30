@@ -1,0 +1,82 @@
+--- a/graph.py
++++ b/graph.py
+@@ -2,4 +2,46 @@
+ 
+ 
+ def build_order(graph):
+-    return sorted(canonical_path(key) for key in graph)
++    if not isinstance(graph, dict):
++        raise TypeError("graph must be a dict")
++
++    items = list(graph.items())
++    for _, dependencies in items:
++        if not isinstance(dependencies, list):
++            raise TypeError("dependencies must be a list")
++
++    dependency_map = {}
++    for key, dependencies in items:
++        node = canonical_path(key)
++        merged = dependency_map.setdefault(node, set())
++        for dependency in dependencies:
++            merged.add(canonical_path(dependency))
++
++    nodes = set(dependency_map)
++    dependents = {node: [] for node in nodes}
++    indegree = {}
++
++    for node, dependencies in dependency_map.items():
++        for dependency in dependencies:
++            if dependency not in nodes:
++                raise ValueError("dependency is not a declared node")
++        indegree[node] = len(dependencies)
++        for dependency in dependencies:
++            dependents[dependency].append(node)
++
++    ready = [node for node in nodes if indegree[node] == 0]
++    order = []
++
++    while ready:
++        node = min(ready)
++        ready.remove(node)
++        order.append(node)
++        for dependent in dependents[node]:
++            indegree[dependent] -= 1
++            if indegree[dependent] == 0:
++                ready.append(dependent)
++
++    if len(order) != len(nodes):
++        raise ValueError("graph contains a cycle")
++
++    return order
+--- a/paths.py
++++ b/paths.py
+@@ -1,2 +1,28 @@
+ def canonical_path(value):
+-    return value.strip('/')
++    if not isinstance(value, str):
++        raise TypeError("path must be a string")
++    if not value:
++        raise ValueError("path must not be empty")
++    if value.startswith("/"):
++        raise ValueError("path must be relative")
++    if "\\" in value:
++        raise ValueError("backslashes are not allowed")
++    if ":" in value:
++        raise ValueError("colons are not allowed")
++    if "\x00" in value:
++        raise ValueError("NUL characters are not allowed")
++
++    components = []
++    for component in value.split("/"):
++        if component == "" or component == ".":
++            continue
++        if component == "..":
++            if not components:
++                raise ValueError("path escapes the root")
++            components.pop()
++        else:
++            components.append(component)
++
++    if not components:
++        raise ValueError("path must not be empty")
++    return "/".join(components)

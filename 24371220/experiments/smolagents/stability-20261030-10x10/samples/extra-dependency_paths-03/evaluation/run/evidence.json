@@ -1,0 +1,75 @@
+{
+  "evidence": [
+    {
+      "id": "ev-13384856e308678604bc",
+      "source": "graph.py",
+      "version": "f358f5af1b8edb3869452a86f70fee9485fd94737253e6d6f2c1b735037bc5d1",
+      "locator": "lines:1-5",
+      "text": "from paths import canonical_path\n\n\ndef build_order(graph):\n    return sorted(canonical_path(key) for key in graph)\n",
+      "required": false,
+      "page": null,
+      "valid": false,
+      "atomic": false
+    },
+    {
+      "id": "ev-787f532a0fd25f24bd0f",
+      "source": "paths.py",
+      "version": "eb9204eaa94220a8136e3c761a8ba290663c147217e89b9e43ac6d2f578a9c47",
+      "locator": "lines:1-2",
+      "text": "def canonical_path(value):\n    return value.strip('/')\n",
+      "required": false,
+      "page": null,
+      "valid": false,
+      "atomic": false
+    },
+    {
+      "id": "ev-0da672926f11109676ba",
+      "source": "paths.py",
+      "version": "a33d6d1400d8ca25c86d5fae7ad6ceee9bce60db8090b57fa1e2282cc24f53f7",
+      "locator": "lines:1-32",
+      "text": "def canonical_path(value):\n    \"\"\"Return the canonical form of a relative POSIX path string.\"\"\"\n    if not isinstance(value, str):\n        raise TypeError(\"path must be a str\")\n\n    if value.startswith(\"/\"):\n        raise ValueError(\"path must be relative\")\n\n    if \"\\\\\" in value:\n        raise ValueError(\"backslash is not allowed in a path\")\n\n    if \":\" in value:\n        raise ValueError(\"colon is not allowed in a path\")\n\n    if \"\\x00\" in value:\n        raise ValueError(\"NUL is not allowed in a path\")\n\n    parts = []\n    for component in value.split(\"/\"):\n        if component == \"\" or component == \".\":\n            continue\n        if component == \"..\":\n            if not parts:\n                raise ValueError(\"path escapes the root\")\n            parts.pop()\n            continue\n        parts.append(component)\n\n    if not parts:\n        raise ValueError(\"empty path\")\n\n    return \"/\".join(parts)\n",
+      "required": false,
+      "page": null,
+      "valid": true,
+      "atomic": false
+    },
+    {
+      "id": "ev-916cc1e18d01a011170b",
+      "source": "graph.py",
+      "version": "20c0c9fa2282afb348eab5586d1748a149b22ed1e96d9a466cf9b7e8a0c498a9",
+      "locator": "lines:1-51",
+      "text": "import heapq\n\nfrom paths import canonical_path\n\n\ndef build_order(graph):\n    \"\"\"Return a deterministic dependency-first ordering of canonical nodes.\"\"\"\n    if not isinstance(graph, dict):\n        raise TypeError(\"graph must be a dict\")\n\n    dependencies = {}\n    for key, value in graph.items():\n        if not isinstance(value, list):\n            raise TypeError(\"each dependency collection must be a list\")\n        node = canonical_path(key)\n        bucket = dependencies.setdefault(node, set())\n        for dependency in value:\n            bucket.add(canonical_path(dependency))\n\n    for node, required in dependencies.items():\n        for dependency in required:\n            if dependency not in dependencies:\n                raise ValueError(\n                    \"undeclared dependency: {0!r}\".format(dependency)\n                )\n\n    dependents = {}\n    for node in dependencies:\n        dependents[node] = []\n    indegree = {}\n    for node, required in dependencies.items():\n        indegree[node] = len(required)\n        for dependency in required:\n            dependents[dependency].append(node)\n\n    ready = [node for node, count in indegree.items() if count == 0]\n    heapq.heapify(ready)\n\n    order = []\n    while ready:\n        node = heapq.heappop(ready)\n        order.append(node)\n        for dependent in dependents[node]:\n            indegree[dependent] -= 1\n            if indegree[dependent] == 0:\n                heapq.heappush(ready, dependent)\n\n    if len(order) != len(dependencies):\n        raise ValueError(\"cycle detected\")\n\n    return order\n",
+      "required": false,
+      "page": null,
+      "valid": true,
+      "atomic": false
+    }
+  ],
+  "notes": {},
+  "exposed": [
+    "ev-0da672926f11109676ba",
+    "ev-916cc1e18d01a011170b"
+  ],
+  "received_ranges": {
+    "ev-0da672926f11109676ba": [
+      [
+        0,
+        908
+      ]
+    ],
+    "ev-916cc1e18d01a011170b": [
+      [
+        0,
+        1569
+      ]
+    ]
+  },
+  "full_read_ids": {
+    "paths.py": [
+      "ev-0da672926f11109676ba"
+    ],
+    "graph.py": [
+      "ev-916cc1e18d01a011170b"
+    ]
+  }
+}

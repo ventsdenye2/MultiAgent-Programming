@@ -1,0 +1,75 @@
+{
+  "evidence": [
+    {
+      "id": "ev-787f532a0fd25f24bd0f",
+      "source": "paths.py",
+      "version": "eb9204eaa94220a8136e3c761a8ba290663c147217e89b9e43ac6d2f578a9c47",
+      "locator": "lines:1-2",
+      "text": "def canonical_path(value):\n    return value.strip('/')\n",
+      "required": false,
+      "page": null,
+      "valid": false,
+      "atomic": false
+    },
+    {
+      "id": "ev-13384856e308678604bc",
+      "source": "graph.py",
+      "version": "f358f5af1b8edb3869452a86f70fee9485fd94737253e6d6f2c1b735037bc5d1",
+      "locator": "lines:1-5",
+      "text": "from paths import canonical_path\n\n\ndef build_order(graph):\n    return sorted(canonical_path(key) for key in graph)\n",
+      "required": false,
+      "page": null,
+      "valid": false,
+      "atomic": false
+    },
+    {
+      "id": "ev-7d13de0828aa4ebabb83",
+      "source": "paths.py",
+      "version": "be46e42c69ce634e04d7b5d616ac7237b2fa93f850ce7faa9ff03b5306e1a4e3",
+      "locator": "lines:1-34",
+      "text": "def canonical_path(value):\n    r\"\"\"Return the canonical form of a relative POSIX path string.\n\n    Raises TypeError for non-str input and ValueError for every other\n    invalid input.  Never touches the filesystem.\n    \"\"\"\n    if not isinstance(value, str):\n        raise TypeError(\"path must be a str\")\n\n    if not value:\n        raise ValueError(\"empty path\")\n    if value[0] == \"/\":\n        raise ValueError(\"absolute path not allowed\")\n    if \"\\\\\" in value:\n        raise ValueError(\"backslash not allowed\")\n    if \":\" in value:\n        raise ValueError(\"colon not allowed\")\n    if \"\\x00\" in value:\n        raise ValueError(\"NUL not allowed\")\n\n    parts = []\n    for part in value.split(\"/\"):\n        if part == \"\" or part == \".\":\n            continue\n        if part == \"..\":\n            if not parts:\n                raise ValueError(\"path escapes the root\")\n            parts.pop()\n            continue\n        parts.append(part)\n\n    if not parts:\n        raise ValueError(\"empty path\")\n    return \"/\".join(parts)\n",
+      "required": false,
+      "page": null,
+      "valid": true,
+      "atomic": false
+    },
+    {
+      "id": "ev-2a4bd7d20529ba3fb023",
+      "source": "graph.py",
+      "version": "165237f8cf4d688eeafda0a37a0f76e800b3f9d3db65bd5f5950f58e2225fe31",
+      "locator": "lines:1-44",
+      "text": "from paths import canonical_path\n\n\ndef build_order(graph):\n    \"\"\"Return a deterministic dependency order for *graph*.\n\n    ``graph`` maps relative POSIX path strings to lists of dependency path\n    strings.  Keys and dependencies are canonicalized; keys sharing one\n    canonical form are merged.  Every dependency must be a declared canonical\n    key.  The result lists each canonical node once, dependencies first,\n    choosing the lexicographically smallest available node at each step.\n    \"\"\"\n    if not isinstance(graph, dict):\n        raise TypeError(\"graph must be a dict\")\n\n    dependencies_by_node = {}\n    for key, dependencies in graph.items():\n        if not isinstance(dependencies, list):\n            raise TypeError(\"dependencies must be a list\")\n        node = canonical_path(key)\n        bucket = dependencies_by_node.setdefault(node, set())\n        for dependency in dependencies:\n            bucket.add(canonical_path(dependency))\n\n    for dependencies in dependencies_by_node.values():\n        for dependency in dependencies:\n            if dependency not in dependencies_by_node:\n                raise ValueError(\"undeclared dependency: %s\" % dependency)\n\n    order = []\n    done = set()\n    remaining = set(dependencies_by_node)\n    while remaining:\n        available = [\n            node for node in remaining\n            if dependencies_by_node[node] <= done\n        ]\n        if not available:\n            raise ValueError(\"cycle detected\")\n        next_node = min(available)\n        order.append(next_node)\n        done.add(next_node)\n        remaining.remove(next_node)\n    return order\n",
+      "required": false,
+      "page": null,
+      "valid": true,
+      "atomic": false
+    }
+  ],
+  "notes": {},
+  "exposed": [
+    "ev-2a4bd7d20529ba3fb023",
+    "ev-7d13de0828aa4ebabb83"
+  ],
+  "received_ranges": {
+    "ev-7d13de0828aa4ebabb83": [
+      [
+        0,
+        1022
+      ]
+    ],
+    "ev-2a4bd7d20529ba3fb023": [
+      [
+        0,
+        1616
+      ]
+    ]
+  },
+  "full_read_ids": {
+    "paths.py": [
+      "ev-7d13de0828aa4ebabb83"
+    ],
+    "graph.py": [
+      "ev-2a4bd7d20529ba3fb023"
+    ]
+  }
+}

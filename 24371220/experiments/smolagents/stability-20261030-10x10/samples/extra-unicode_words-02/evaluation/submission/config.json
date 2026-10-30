@@ -1,0 +1,15 @@
+{
+  "model": "deepseek-flash",
+  "base_url": "https://api.deepseek.com",
+  "key_env": "DEEPSEEK_API_KEY",
+  "max_steps": 60,
+  "context_chars": 15000,
+  "max_tokens": 16384,
+  "thinking": "enabled",
+  "reasoning_effort": "high",
+  "use_structured_outputs_internally": false,
+  "code_block_tags": "markdown",
+  "timeout": 210,
+  "context_chars_smol": 31800,
+  "request_chars": 32000
+}

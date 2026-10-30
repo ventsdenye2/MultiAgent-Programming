@@ -1,0 +1,75 @@
+{
+  "evidence": [
+    {
+      "id": "ev-787f532a0fd25f24bd0f",
+      "source": "paths.py",
+      "version": "eb9204eaa94220a8136e3c761a8ba290663c147217e89b9e43ac6d2f578a9c47",
+      "locator": "lines:1-2",
+      "text": "def canonical_path(value):\n    return value.strip('/')\n",
+      "required": false,
+      "page": null,
+      "valid": false,
+      "atomic": false
+    },
+    {
+      "id": "ev-13384856e308678604bc",
+      "source": "graph.py",
+      "version": "f358f5af1b8edb3869452a86f70fee9485fd94737253e6d6f2c1b735037bc5d1",
+      "locator": "lines:1-5",
+      "text": "from paths import canonical_path\n\n\ndef build_order(graph):\n    return sorted(canonical_path(key) for key in graph)\n",
+      "required": false,
+      "page": null,
+      "valid": false,
+      "atomic": false
+    },
+    {
+      "id": "ev-5c839e91bbf6f2188e23",
+      "source": "paths.py",
+      "version": "cafda181441b0da822c7429da57384ed232d29ab2fb46eab4f36756b41a95f36",
+      "locator": "lines:1-28",
+      "text": "def canonical_path(value):\n    if not isinstance(value, str):\n        raise TypeError(\"path must be a string\")\n    if not value:\n        raise ValueError(\"path must not be empty\")\n    if value.startswith(\"/\"):\n        raise ValueError(\"path must be relative\")\n    if \"\\\\\" in value:\n        raise ValueError(\"backslashes are not allowed\")\n    if \":\" in value:\n        raise ValueError(\"colons are not allowed\")\n    if \"\\x00\" in value:\n        raise ValueError(\"NUL characters are not allowed\")\n\n    components = []\n    for component in value.split(\"/\"):\n        if component == \"\" or component == \".\":\n            continue\n        if component == \"..\":\n            if not components:\n                raise ValueError(\"path escapes the root\")\n            components.pop()\n        else:\n            components.append(component)\n\n    if not components:\n        raise ValueError(\"path must not be empty\")\n    return \"/\".join(components)\n",
+      "required": false,
+      "page": null,
+      "valid": true,
+      "atomic": false
+    },
+    {
+      "id": "ev-5636b5f49f658fad2775",
+      "source": "graph.py",
+      "version": "45b9727f7a362a389bb0742cc68c31624cf39ab673500db433be728c948b340f",
+      "locator": "lines:1-47",
+      "text": "from paths import canonical_path\n\n\ndef build_order(graph):\n    if not isinstance(graph, dict):\n        raise TypeError(\"graph must be a dict\")\n\n    items = list(graph.items())\n    for _, dependencies in items:\n        if not isinstance(dependencies, list):\n            raise TypeError(\"dependencies must be a list\")\n\n    dependency_map = {}\n    for key, dependencies in items:\n        node = canonical_path(key)\n        merged = dependency_map.setdefault(node, set())\n        for dependency in dependencies:\n            merged.add(canonical_path(dependency))\n\n    nodes = set(dependency_map)\n    dependents = {node: [] for node in nodes}\n    indegree = {}\n\n    for node, dependencies in dependency_map.items():\n        for dependency in dependencies:\n            if dependency not in nodes:\n                raise ValueError(\"dependency is not a declared node\")\n        indegree[node] = len(dependencies)\n        for dependency in dependencies:\n            dependents[dependency].append(node)\n\n    ready = [node for node in nodes if indegree[node] == 0]\n    order = []\n\n    while ready:\n        node = min(ready)\n        ready.remove(node)\n        order.append(node)\n        for dependent in dependents[node]:\n            indegree[dependent] -= 1\n            if indegree[dependent] == 0:\n                ready.append(dependent)\n\n    if len(order) != len(nodes):\n        raise ValueError(\"graph contains a cycle\")\n\n    return order\n",
+      "required": false,
+      "page": null,
+      "valid": true,
+      "atomic": false
+    }
+  ],
+  "notes": {},
+  "exposed": [
+    "ev-5636b5f49f658fad2775",
+    "ev-5c839e91bbf6f2188e23"
+  ],
+  "received_ranges": {
+    "ev-5c839e91bbf6f2188e23": [
+      [
+        0,
+        932
+      ]
+    ],
+    "ev-5636b5f49f658fad2775": [
+      [
+        0,
+        1430
+      ]
+    ]
+  },
+  "full_read_ids": {
+    "paths.py": [
+      "ev-5c839e91bbf6f2188e23"
+    ],
+    "graph.py": [
+      "ev-5636b5f49f658fad2775"
+    ]
+  }
+}

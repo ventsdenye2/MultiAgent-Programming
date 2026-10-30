@@ -1,0 +1,14 @@
+fatal: not a git repository: /mnt/d/Muiti-Agent Programing/experiments/code-agent-smolagents/D:/Muiti-Agent Programing/agents/code-agent/.git/worktrees/code-agent-smolagents
+Traceback (most recent call last):
+  File "/mnt/d/Muiti-Agent Programing/experiments/code-agent-smolagents/24371220/run_stability.py", line 173, in <module>
+    raise SystemExit(main())
+                     ^^^^^^
+  File "/mnt/d/Muiti-Agent Programing/experiments/code-agent-smolagents/24371220/run_stability.py", line 121, in main
+    commit = subprocess.check_output(['git', 'rev-parse', 'HEAD'], cwd=root, text=True).strip()
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3.12/subprocess.py", line 466, in check_output
+    return run(*popenargs, stdout=PIPE, timeout=timeout, check=True,
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3.12/subprocess.py", line 571, in run
+    raise CalledProcessError(retcode, process.args,
+subprocess.CalledProcessError: Command '['git', 'rev-parse', 'HEAD']' returned non-zero exit status 128.

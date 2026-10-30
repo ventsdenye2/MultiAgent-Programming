@@ -1,0 +1,54 @@
+import math
+
+_MISSING = object()
+
+
+class TTLCache:
+    def __init__(self, clock):
+        self.clock = clock
+        self._entries = {}   # key -> (value, expires_at)
+        self._loading = {}   # key -> load frame, for recursion guard / cancellation
+
+    @staticmethod
+    def _check_ttl(ttl):
+        if isinstance(ttl, bool) or not isinstance(ttl, (int, float)):
+            raise ValueError("ttl must be a finite nonnegative int or float")
+        if isinstance(ttl, float) and not math.isfinite(ttl):
+            raise ValueError("ttl must be finite")
+        if ttl < 0:
+            raise ValueError("ttl must be nonnegative")
+
+    def get(self, key, loader, ttl):
+        self._check_ttl(ttl)
+        if key in self._loading:
+            raise RuntimeError("recursive get for key whose loader is running")
+
+        if ttl > 0:
+            entry = self._entries.get(key, _MISSING)
+            if entry is not _MISSING and self.clock() < entry[1]:
+                return entry[0]
+
+        frame = {"cancelled": False}
+        self._loading[key] = frame
+        try:
+            value = loader()
+            if frame["cancelled"]:
+                return value
+            if ttl > 0:
+                self._entries[key] = (value, self.clock() + ttl)
+            return value
+        finally:
+            del self._loading[key]
+
+    def invalidate(self, key):
+        frame = self._loading.get(key)
+        if frame is not None:
+            frame["cancelled"] = True
+        self._entries.pop(key, None)
+        return None
+
+    def clear(self):
+        for frame in self._loading.values():
+            frame["cancelled"] = True
+        self._entries.clear()
+        return None

@@ -1,0 +1,43 @@
+{
+  "evidence": [
+    {
+      "id": "ev-5c02078383794f90f4f4",
+      "source": "words.py",
+      "version": "20b8eee3413c99c4e25e5f340560a4b095881970cc18b2cb8f80585e710729b2",
+      "locator": "lines:1-8",
+      "text": "import re\n\n\ndef word_counts(text):\n    counts = {}\n    for word in re.findall(r'[a-z]+', text.lower()):\n        counts[word] = counts.get(word, 0) + 1\n    return list(counts.items())\n",
+      "required": false,
+      "page": null,
+      "valid": false,
+      "atomic": false
+    },
+    {
+      "id": "ev-810c2f0c209aaf86feb3",
+      "source": "test_words.py",
+      "version": "2fcd2dad0cf4acceacbff1bebf40c4113ce7f466b9e208fa03ad97fc21996898",
+      "locator": "lines:1-15",
+      "text": "import pytest\nfrom words import word_counts\n\n\ndef test_canonical_equivalence_and_casefold():\n    assert word_counts('Café CAFE\\u0301 Straße STRASSE') == [('café', 2), ('strasse', 2)]\n\n\ndef test_scripts_numbers_and_boundaries():\n    assert word_counts('中文 中文 １２ a_b a-b') == [('中文', 2), ('１２', 1), ('a', 2), ('b', 2)]\n\n\ndef test_input_type():\n    with pytest.raises(TypeError):\n        word_counts(None)\n",
+      "required": false,
+      "page": null,
+      "valid": true,
+      "atomic": false
+    }
+  ],
+  "notes": {},
+  "exposed": [
+    "ev-810c2f0c209aaf86feb3"
+  ],
+  "received_ranges": {
+    "ev-810c2f0c209aaf86feb3": [
+      [
+        0,
+        403
+      ]
+    ]
+  },
+  "full_read_ids": {
+    "test_words.py": [
+      "ev-810c2f0c209aaf86feb3"
+    ]
+  }
+}

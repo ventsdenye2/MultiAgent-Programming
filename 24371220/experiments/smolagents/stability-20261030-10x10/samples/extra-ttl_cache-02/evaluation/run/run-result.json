@@ -1,0 +1,15 @@
+{
+  "status": "completed",
+  "engine": "smolagents",
+  "upstream_version": "1.26.0",
+  "context_mode": "evidence",
+  "reason": null,
+  "usage": {
+    "requests": 10,
+    "complete": true,
+    "prompt_tokens": 41549,
+    "completion_tokens": 20073
+  },
+  "answer": "Implemented TTLCache in cache.py. Verification: `python -m pytest -q` -> 3 passed.",
+  "remaining": []
+}

@@ -1,0 +1,15 @@
+{
+  "status": "completed",
+  "engine": "smolagents",
+  "upstream_version": "1.26.0",
+  "context_mode": "evidence",
+  "reason": null,
+  "usage": {
+    "requests": 8,
+    "complete": true,
+    "prompt_tokens": 33241,
+    "completion_tokens": 3326
+  },
+  "answer": "Implemented paths.canonical_path and graph.build_order; full test suite passes (3 passed).",
+  "remaining": []
+}

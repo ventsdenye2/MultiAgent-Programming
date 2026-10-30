@@ -1,0 +1,75 @@
+{
+  "evidence": [
+    {
+      "id": "ev-61b3fed94b48b5e9bc1b",
+      "source": "merge.py",
+      "version": "3eaf4562abd3d733d69869cdb62d8fcef38def318668bd59672c058d930d026c",
+      "locator": "lines:1-5",
+      "text": "def merge_layers(*layers):\n    result = {}\n    for layer in layers:\n        result.update(layer)\n    return result\n",
+      "required": false,
+      "page": null,
+      "valid": false,
+      "atomic": false
+    },
+    {
+      "id": "ev-d9fc4c468bc3ac478366",
+      "source": "settings.py",
+      "version": "c7849bd4d905203150182dabdf950a197ddf097a6f4801db66d05810f4629485",
+      "locator": "lines:1-5",
+      "text": "from merge import merge_layers\n\n\ndef build_config(defaults, overrides, environ):\n    return merge_layers(defaults, overrides)\n",
+      "required": false,
+      "page": null,
+      "valid": false,
+      "atomic": false
+    },
+    {
+      "id": "ev-601ccb34a6ac024e9e8f",
+      "source": "test_config.py",
+      "version": "5e9d84733bc29281268857907e5ffaa7b85e2e8e25249b5d3aeab2d92f535677",
+      "locator": "lines:1-23",
+      "text": "import pytest\nfrom merge import merge_layers\nfrom settings import build_config\n\n\ndef test_nested_merge_and_independent_tree():\n    first = {'network': {'timeout': 3, 'hosts': ['a']}}\n    result = merge_layers(first, {'network': {'timeout': 5}})\n    assert result == {'network': {'timeout': 5, 'hosts': ['a']}}\n    result['network']['hosts'].append('b')\n    assert first['network']['hosts'] == ['a']\n\n\ndef test_environment_is_last_layer():\n    assert build_config({'network': {'timeout': 2}}, {},\n                        {'APP_TIMEOUT': ' +12 ', 'APP_DEBUG': 'FALSE'}) == {\n                            'network': {'timeout': 12}, 'debug': False}\n\n\n@pytest.mark.parametrize('value', ['0', '-2', '1.2', 'no'])\ndef test_bad_timeout(value):\n    with pytest.raises(ValueError):\n        build_config({}, {}, {'APP_TIMEOUT': value})\n",
+      "required": false,
+      "page": null,
+      "valid": true,
+      "atomic": false
+    },
+    {
+      "id": "ev-2a0716b94074b77e58d2",
+      "source": "merge.py",
+      "version": "425a38637179c7643581b962bd799f858423f068ab04903cff7f2a8105a26fee",
+      "locator": "lines:1-34",
+      "text": "def _clone(value):\n    \"\"\"Return a deep copy of dictionaries/lists; other values are atomic.\"\"\"\n    if isinstance(value, dict):\n        return {key: _clone(item) for key, item in value.items()}\n    if isinstance(value, list):\n        return [_clone(item) for item in value]\n    return value\n\n\ndef _merge(base, override):\n    result = {key: _clone(value) for key, value in base.items()}\n    for key, value in override.items():\n        current = result.get(key)\n        if isinstance(current, dict) and isinstance(value, dict):\n            result[key] = _merge(current, value)\n        else:\n            result[key] = _clone(value)\n    return result\n\n\ndef merge_layers(*layers):\n    \"\"\"Merge dictionary layers from left to right.\n\n    Later values win. Nested dictionaries are merged recursively; lists and\n    every other value (including ``None``) replace the earlier value. The\n    result is an independent tree that shares no mutable containers with the\n    inputs, and the inputs are never modified.\n    \"\"\"\n    result = {}\n    for layer in layers:\n        if not isinstance(layer, dict):\n            raise TypeError(\"every layer must be a dictionary\")\n        result = _merge(result, layer)\n    return result\n",
+      "required": false,
+      "page": null,
+      "valid": true,
+      "atomic": false
+    }
+  ],
+  "notes": {},
+  "exposed": [
+    "ev-2a0716b94074b77e58d2",
+    "ev-601ccb34a6ac024e9e8f"
+  ],
+  "received_ranges": {
+    "ev-601ccb34a6ac024e9e8f": [
+      [
+        0,
+        825
+      ]
+    ],
+    "ev-2a0716b94074b77e58d2": [
+      [
+        0,
+        1212
+      ]
+    ]
+  },
+  "full_read_ids": {
+    "test_config.py": [
+      "ev-601ccb34a6ac024e9e8f"
+    ],
+    "merge.py": [
+      "ev-2a0716b94074b77e58d2"
+    ]
+  }
+}

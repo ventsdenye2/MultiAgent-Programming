@@ -1,0 +1,107 @@
+{
+  "evidence": [
+    {
+      "id": "ev-61b3fed94b48b5e9bc1b",
+      "source": "merge.py",
+      "version": "3eaf4562abd3d733d69869cdb62d8fcef38def318668bd59672c058d930d026c",
+      "locator": "lines:1-5",
+      "text": "def merge_layers(*layers):\n    result = {}\n    for layer in layers:\n        result.update(layer)\n    return result\n",
+      "required": false,
+      "page": null,
+      "valid": false,
+      "atomic": false
+    },
+    {
+      "id": "ev-d9fc4c468bc3ac478366",
+      "source": "settings.py",
+      "version": "c7849bd4d905203150182dabdf950a197ddf097a6f4801db66d05810f4629485",
+      "locator": "lines:1-5",
+      "text": "from merge import merge_layers\n\n\ndef build_config(defaults, overrides, environ):\n    return merge_layers(defaults, overrides)\n",
+      "required": false,
+      "page": null,
+      "valid": false,
+      "atomic": false
+    },
+    {
+      "id": "ev-601ccb34a6ac024e9e8f",
+      "source": "test_config.py",
+      "version": "5e9d84733bc29281268857907e5ffaa7b85e2e8e25249b5d3aeab2d92f535677",
+      "locator": "lines:1-23",
+      "text": "import pytest\nfrom merge import merge_layers\nfrom settings import build_config\n\n\ndef test_nested_merge_and_independent_tree():\n    first = {'network': {'timeout': 3, 'hosts': ['a']}}\n    result = merge_layers(first, {'network': {'timeout': 5}})\n    assert result == {'network': {'timeout': 5, 'hosts': ['a']}}\n    result['network']['hosts'].append('b')\n    assert first['network']['hosts'] == ['a']\n\n\ndef test_environment_is_last_layer():\n    assert build_config({'network': {'timeout': 2}}, {},\n                        {'APP_TIMEOUT': ' +12 ', 'APP_DEBUG': 'FALSE'}) == {\n                            'network': {'timeout': 12}, 'debug': False}\n\n\n@pytest.mark.parametrize('value', ['0', '-2', '1.2', 'no'])\ndef test_bad_timeout(value):\n    with pytest.raises(ValueError):\n        build_config({}, {}, {'APP_TIMEOUT': value})\n",
+      "required": false,
+      "page": null,
+      "valid": true,
+      "atomic": false
+    },
+    {
+      "id": "ev-9cdd24477bb30af807ea",
+      "source": "merge.py",
+      "version": "3c3a1b124cd3f7012fc98dbd654ebf4cee49085c951b5fa7406d96f52efbe1eb",
+      "locator": "lines:1-36",
+      "text": "\"\"\"Layered dictionary merging.\"\"\"\n\n\ndef _copy(value):\n    \"\"\"Deep-copy dictionaries and lists; other values are returned as-is.\"\"\"\n    if isinstance(value, dict):\n        return {key: _copy(item) for key, item in value.items()}\n    if isinstance(value, list):\n        return [_copy(item) for item in value]\n    return value\n\n\ndef _merge_into(target, layer):\n    for key, value in layer.items():\n        if key in target and isinstance(target[key], dict) and isinstance(value, dict):\n            _merge_into(target[key], value)\n        else:\n            target[key] = _copy(value)\n\n\ndef merge_layers(*layers):\n    \"\"\"Merge dictionary layers left to right.\n\n    Later values win; dictionaries are merged recursively, while lists and\n    every other value (including ``None``) replace the earlier value.  The\n    result is a fresh tree that shares no mutable dictionaries or lists with\n    the inputs, and the inputs are never modified.\n    \"\"\"\n    result = {}\n    for layer in layers:\n        if not isinstance(layer, dict):\n            raise TypeError(\n                \"merge_layers() layers must be dicts, got %s\" % type(layer).__name__\n            )\n        _merge_into(result, layer)\n    return result\n",
+      "required": false,
+      "page": null,
+      "valid": true,
+      "atomic": false
+    },
+    {
+      "id": "ev-6baa46952f2c0a93f6f2",
+      "source": "settings.py",
+      "version": "51f595dddddfcb6adcee46251e3cf1b95b66115c6ff3538b040a948933a8f22d",
+      "locator": "lines:1-64",
+      "text": "\"\"\"Build application configuration from defaults, overrides and environ.\"\"\"\n\nimport re\n\nfrom merge import merge_layers\n\n_TIMEOUT_RE = re.compile(r\"\\+?[0-9]+\")\n\n_TRUE_VALUES = frozenset({\"true\", \"1\"})\n_FALSE_VALUES = frozenset({\"false\", \"0\"})\n\n\ndef _parse_timeout(raw):\n    \"\"\"Return a positive int from a decimal ASCII string, else ValueError.\"\"\"\n    if not isinstance(raw, str):\n        raise ValueError(\"APP_TIMEOUT must be a string, got %r\" % (raw,))\n    text = raw.strip()\n    if _TIMEOUT_RE.fullmatch(text) is None:\n        raise ValueError(\"APP_TIMEOUT is not a decimal integer: %r\" % (raw,))\n    value = int(text, 10)\n    if value <= 0:\n        raise ValueError(\"APP_TIMEOUT must be positive, got %r\" % (raw,))\n    return value\n\n\ndef _parse_bool(raw):\n    \"\"\"Return a bool from true/false/1/0 (case-insensitive), else ValueError.\"\"\"\n    if not isinstance(raw, str):\n        raise ValueError(\"APP_DEBUG must be a string, got %r\" % (raw,))\n    text = raw.strip().lower()\n    if text in _TRUE_VALUES:\n        return True\n    if text in _FALSE_VALUES:\n        return False\n    raise ValueError(\"APP_DEBUG must be true/false/1/0, got %r\" % (raw,))\n\n\ndef build_config(defaults, overrides, environ):\n    \"\"\"Merge ``defaults`` and ``overrides``, then apply environment keys.\"\"\"\n    result = merge_layers(defaults, overrides)\n\n    timeout = None\n    if \"APP_TIMEOUT\" in environ:\n        timeout = _parse_timeout(environ[\"APP_TIMEOUT\"])\n\n    debug = None\n    if \"APP_DEBUG\" in environ:\n        debug = _parse_bool(environ[\"APP_DEBUG\"])\n\n    if timeout is not None:\n        network = result.get(\"network\")\n        if network is None:\n            network = {}\n            result[\"network\"] = network\n        elif not isinstance(network, dict):\n            raise ValueError(\n                \"cannot apply APP_TIMEOUT: network is not a dictionary\"\n            )\n        network[\"timeout\"] = timeout\n\n    if debug is not None:\n        result[\"debug\"] = debug\n\n    return result\n",
+      "required": false,
+      "page": null,
+      "valid": false,
+      "atomic": false
+    },
+    {
+      "id": "ev-58ad83245cbe1f1440b9",
+      "source": "settings.py",
+      "version": "f817d1644d2fe571826139339ba9ae22f29d8e5ca37f643e097b7fef4cf961ca",
+      "locator": "lines:1-63",
+      "text": "\"\"\"Build application configuration from defaults, overrides and environ.\"\"\"\n\nimport re\n\nfrom merge import merge_layers\n\n_TIMEOUT_RE = re.compile(r\"\\+?[0-9]+\")\n\n_TRUE_VALUES = frozenset({\"true\", \"1\"})\n_FALSE_VALUES = frozenset({\"false\", \"0\"})\n\n\ndef _parse_timeout(raw):\n    \"\"\"Return a positive int from a decimal ASCII string, else ValueError.\"\"\"\n    if not isinstance(raw, str):\n        raise ValueError(\"APP_TIMEOUT must be a string, got %r\" % (raw,))\n    text = raw.strip()\n    if _TIMEOUT_RE.fullmatch(text) is None:\n        raise ValueError(\"APP_TIMEOUT is not a decimal integer: %r\" % (raw,))\n    value = int(text, 10)\n    if value <= 0:\n        raise ValueError(\"APP_TIMEOUT must be positive, got %r\" % (raw,))\n    return value\n\n\ndef _parse_bool(raw):\n    \"\"\"Return a bool from true/false/1/0 (case-insensitive), else ValueError.\"\"\"\n    if not isinstance(raw, str):\n        raise ValueError(\"APP_DEBUG must be a string, got %r\" % (raw,))\n    text = raw.strip().lower()\n    if text in _TRUE_VALUES:\n        return True\n    if text in _FALSE_VALUES:\n        return False\n    raise ValueError(\"APP_DEBUG must be true/false/1/0, got %r\" % (raw,))\n\n\ndef build_config(defaults, overrides, environ):\n    \"\"\"Merge ``defaults`` and ``overrides``, then apply environment keys.\"\"\"\n    result = merge_layers(defaults, overrides)\n\n    timeout = None\n    if \"APP_TIMEOUT\" in environ:\n        timeout = _parse_timeout(environ[\"APP_TIMEOUT\"])\n\n    debug = None\n    if \"APP_DEBUG\" in environ:\n        debug = _parse_bool(environ[\"APP_DEBUG\"])\n\n    if timeout is not None:\n        if \"network\" not in result:\n            result[\"network\"] = {}\n        network = result[\"network\"]\n        if not isinstance(network, dict):\n            raise ValueError(\n                \"cannot apply APP_TIMEOUT: network is not a dictionary\"\n            )\n        network[\"timeout\"] = timeout\n\n    if debug is not None:\n        result[\"debug\"] = debug\n\n    return result\n",
+      "required": false,
+      "page": null,
+      "valid": true,
+      "atomic": false
+    }
+  ],
+  "notes": {},
+  "exposed": [
+    "ev-58ad83245cbe1f1440b9",
+    "ev-601ccb34a6ac024e9e8f",
+    "ev-9cdd24477bb30af807ea"
+  ],
+  "received_ranges": {
+    "ev-601ccb34a6ac024e9e8f": [
+      [
+        0,
+        825
+      ]
+    ],
+    "ev-9cdd24477bb30af807ea": [
+      [
+        0,
+        1204
+      ]
+    ],
+    "ev-58ad83245cbe1f1440b9": [
+      [
+        0,
+        1942
+      ]
+    ]
+  },
+  "full_read_ids": {
+    "test_config.py": [
+      "ev-601ccb34a6ac024e9e8f"
+    ],
+    "merge.py": [
+      "ev-9cdd24477bb30af807ea"
+    ],
+    "settings.py": [
+      "ev-58ad83245cbe1f1440b9"
+    ]
+  }
+}

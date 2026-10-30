@@ -1,0 +1,91 @@
+--- a/graph.py
++++ b/graph.py
+@@ -1,5 +1,51 @@
++import heapq
++
+ from paths import canonical_path
+ 
+ 
+ def build_order(graph):
+-    return sorted(canonical_path(key) for key in graph)
++    """Return a deterministic dependency-first ordering of canonical nodes."""
++    if not isinstance(graph, dict):
++        raise TypeError("graph must be a dict")
++
++    dependencies = {}
++    for key, value in graph.items():
++        if not isinstance(value, list):
++            raise TypeError("each dependency collection must be a list")
++        node = canonical_path(key)
++        bucket = dependencies.setdefault(node, set())
++        for dependency in value:
++            bucket.add(canonical_path(dependency))
++
++    for node, required in dependencies.items():
++        for dependency in required:
++            if dependency not in dependencies:
++                raise ValueError(
++                    "undeclared dependency: {0!r}".format(dependency)
++                )
++
++    dependents = {}
++    for node in dependencies:
++        dependents[node] = []
++    indegree = {}
++    for node, required in dependencies.items():
++        indegree[node] = len(required)
++        for dependency in required:
++            dependents[dependency].append(node)
++
++    ready = [node for node, count in indegree.items() if count == 0]
++    heapq.heapify(ready)
++
++    order = []
++    while ready:
++        node = heapq.heappop(ready)
++        order.append(node)
++        for dependent in dependents[node]:
++            indegree[dependent] -= 1
++            if indegree[dependent] == 0:
++                heapq.heappush(ready, dependent)
++
++    if len(order) != len(dependencies):
++        raise ValueError("cycle detected")
++
++    return order
+--- a/paths.py
++++ b/paths.py
+@@ -1,2 +1,32 @@
+ def canonical_path(value):
+-    return value.strip('/')
++    """Return the canonical form of a relative POSIX path string."""
++    if not isinstance(value, str):
++        raise TypeError("path must be a str")
++
++    if value.startswith("/"):
++        raise ValueError("path must be relative")
++
++    if "\\" in value:
++        raise ValueError("backslash is not allowed in a path")
++
++    if ":" in value:
++        raise ValueError("colon is not allowed in a path")
++
++    if "\x00" in value:
++        raise ValueError("NUL is not allowed in a path")
++
++    parts = []
++    for component in value.split("/"):
++        if component == "" or component == ".":
++            continue
++        if component == "..":
++            if not parts:
++                raise ValueError("path escapes the root")
++            parts.pop()
++            continue
++        parts.append(component)
++
++    if not parts:
++        raise ValueError("empty path")
++
++    return "/".join(parts)

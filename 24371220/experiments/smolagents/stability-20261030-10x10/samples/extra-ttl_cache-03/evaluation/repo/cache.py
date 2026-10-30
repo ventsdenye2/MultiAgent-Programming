@@ -1,0 +1,66 @@
+import math
+
+
+class TTLCache:
+    """Single-threaded TTL cache with deterministic expiry.
+
+    All time measurements come from the injected zero-argument ``clock``
+    function.  No wall-clock time or sleeping is used.
+    """
+
+    def __init__(self, clock):
+        self.clock = clock
+        self._values = {}        # key -> (value, expires_at)
+        self._running = set()    # keys whose loader is currently executing
+        self._key_versions = {}  # key -> version, bumped by invalidate()
+        self._generation = 0     # bumped by clear()
+
+    @staticmethod
+    def _validate_ttl(ttl):
+        if isinstance(ttl, bool) or not isinstance(ttl, (int, float)):
+            raise ValueError("ttl must be a finite nonnegative int or float")
+        if not math.isfinite(ttl) or ttl < 0:
+            raise ValueError("ttl must be a finite nonnegative int or float")
+
+    def get(self, key, loader, ttl):
+        self._validate_ttl(ttl)
+
+        # The recursion guard stays in place until the loader finishes,
+        # even if the loader invalidates or clears the cache.
+        if key in self._running:
+            raise RuntimeError(f"recursive load for key {key!r}")
+
+        # ttl == 0 always bypasses any cached entry.
+        if ttl > 0:
+            entry = self._values.get(key)
+            if entry is not None and self.clock() < entry[1]:
+                return entry[0]
+
+        key_version = self._key_versions.get(key, 0)
+        generation = self._generation
+
+        self._running.add(key)
+        try:
+            value = loader()
+        finally:
+            self._running.discard(key)
+
+        if (
+            ttl > 0
+            and self._generation == generation
+            and self._key_versions.get(key, 0) == key_version
+        ):
+            expires_at = self.clock() + ttl
+            self._values[key] = (value, expires_at)
+
+        return value
+
+    def invalidate(self, key):
+        self._values.pop(key, None)
+        self._key_versions[key] = self._key_versions.get(key, 0) + 1
+        return None
+
+    def clear(self):
+        self._values.clear()
+        self._generation += 1
+        return None

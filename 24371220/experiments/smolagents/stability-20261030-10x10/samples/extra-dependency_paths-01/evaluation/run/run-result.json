@@ -1,0 +1,15 @@
+{
+  "status": "completed",
+  "engine": "smolagents",
+  "upstream_version": "1.26.0",
+  "context_mode": "evidence",
+  "reason": null,
+  "usage": {
+    "requests": 13,
+    "complete": true,
+    "prompt_tokens": 51243,
+    "completion_tokens": 4663
+  },
+  "answer": "Implemented canonical_path in paths.py and build_order in graph.py; full suite passes (3 passed).",
+  "remaining": []
+}

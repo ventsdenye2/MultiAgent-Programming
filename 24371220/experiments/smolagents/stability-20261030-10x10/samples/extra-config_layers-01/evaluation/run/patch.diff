@@ -1,0 +1,109 @@
+--- a/merge.py
++++ b/merge.py
+@@ -1,5 +1,44 @@
++"""Recursive merging of layered configuration dictionaries."""
++
++__all__ = ["merge_layers"]
++
++
++def _copy(value):
++    """Return a deep copy of a configuration value.
++
++    Dictionaries and lists are the only mutable containers in a
++    configuration tree, so copying those two types keeps the merged result
++    fully independent from the input layers.
++    """
++    if isinstance(value, dict):
++        return {key: _copy(item) for key, item in value.items()}
++    if isinstance(value, list):
++        return [_copy(item) for item in value]
++    return value
++
++
++def _merge_into(target, source):
++    for key, value in source.items():
++        existing = target.get(key)
++        if isinstance(existing, dict) and isinstance(value, dict):
++            _merge_into(existing, value)
++        else:
++            target[key] = _copy(value)
++
++
+ def merge_layers(*layers):
++    """Merge dictionary layers, with later layers taking precedence.
++
++    Dictionaries are merged recursively. Lists and every other value
++    (including ``None``) replace the earlier value. Every layer must be a
++    dictionary, otherwise ``TypeError`` is raised.
++    """
+     result = {}
+-    for layer in layers:
+-        result.update(layer)
++    for index, layer in enumerate(layers):
++        if not isinstance(layer, dict):
++            raise TypeError(
++                "layer %d must be a dict, not %s"
++                % (index, type(layer).__name__)
++            )
++        _merge_into(result, layer)
+     return result
+--- a/settings.py
++++ b/settings.py
+@@ -1,5 +1,56 @@
++"""Build application configuration from layers and environment keys."""
++
++import re
++
+ from merge import merge_layers
++
++__all__ = ["build_config"]
++
++_TIMEOUT_RE = re.compile(r"[0-9]+")
++
++
++def _parse_timeout(raw):
++    if not isinstance(raw, str):
++        raise ValueError("APP_TIMEOUT must be a string, got %r" % (raw,))
++    text = raw.strip()
++    if text.startswith("+"):
++        text = text[1:]
++    if not _TIMEOUT_RE.fullmatch(text):
++        raise ValueError("APP_TIMEOUT must be a positive integer, got %r" % (raw,))
++    value = int(text)
++    if value <= 0:
++        raise ValueError("APP_TIMEOUT must be a positive integer, got %r" % (raw,))
++    return value
++
++
++def _parse_debug(raw):
++    if not isinstance(raw, str):
++        raise ValueError("APP_DEBUG must be a string, got %r" % (raw,))
++    text = raw.strip().lower()
++    if text in ("true", "1"):
++        return True
++    if text in ("false", "0"):
++        return False
++    raise ValueError("APP_DEBUG must be a boolean value, got %r" % (raw,))
+ 
+ 
+ def build_config(defaults, overrides, environ):
+-    return merge_layers(defaults, overrides)
++    """Merge ``defaults`` and ``overrides``, then apply environment keys.
++
++    Recognized environment keys are ``APP_TIMEOUT`` and ``APP_DEBUG``; all
++    other keys are ignored. ``os.environ`` is never read.
++    """
++    result = merge_layers(defaults, overrides)
++
++    if "APP_TIMEOUT" in environ:
++        timeout = _parse_timeout(environ["APP_TIMEOUT"])
++        if "network" not in result:
++            result["network"] = {}
++        elif not isinstance(result["network"], dict):
++            raise ValueError("network setting must be a dict")
++        result["network"]["timeout"] = timeout
++
++    if "APP_DEBUG" in environ:
++        result["debug"] = _parse_debug(environ["APP_DEBUG"])
++
++    return result

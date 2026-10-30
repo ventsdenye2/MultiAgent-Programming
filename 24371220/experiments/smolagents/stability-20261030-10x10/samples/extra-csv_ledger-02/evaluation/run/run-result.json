@@ -1,0 +1,15 @@
+{
+  "status": "completed",
+  "engine": "smolagents",
+  "upstream_version": "1.26.0",
+  "context_mode": "evidence",
+  "reason": null,
+  "usage": {
+    "requests": 9,
+    "complete": true,
+    "prompt_tokens": 39107,
+    "completion_tokens": 24558
+  },
+  "answer": "Implemented summarize() in ledger.py: CSV parsing with strict header validation (stripped, unique, required sku/quantity/unit_price in any order, extras ignored), exact Decimal-based revenue accumulation with a single ROUND_HALF_EVEN rounding per sku, negative-zero normalization, and ValueError on all invalid input. Full suite passes: 5 passed.",
+  "remaining": []
+}

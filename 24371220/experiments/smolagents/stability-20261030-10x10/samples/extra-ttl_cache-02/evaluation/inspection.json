@@ -1,0 +1,132 @@
+{
+  "path": "/home/ventsdenye/.local/state/code-agent/evaluations/additional-ttl_cache-02-80rcrrob/run/run.log",
+  "requests": 10,
+  "responses": 10,
+  "model_errors": 0,
+  "usage_complete": true,
+  "known_prompt_tokens": 41549,
+  "known_completion_tokens": 20073,
+  "known_total_tokens": 61622,
+  "cache_hit_tokens": 31872,
+  "cache_miss_tokens": 9677,
+  "max_request_chars": 20385,
+  "response_classes": {
+    "ok": 10
+  },
+  "last_request_parameters": {
+    "model": "deepseek-flash",
+    "max_tokens": 16384,
+    "thinking": {
+      "type": "enabled"
+    },
+    "reasoning_effort": "high"
+  },
+  "counts": {
+    "snapshot": 1,
+    "run_start": 1,
+    "file_read": 4,
+    "context_selection": 10,
+    "request_budget": 10,
+    "model_request": 10,
+    "model_response": 10,
+    "usage": 10,
+    "context_exposure": 10,
+    "agent_step": 10,
+    "agent_error": 1,
+    "tool_call": 9,
+    "plan": 3,
+    "tool_result": 9,
+    "evidence": 3,
+    "command_result": 2,
+    "context_clip": 2,
+    "file_write": 1,
+    "evidence_invalidated": 1,
+    "run_result": 1
+  },
+  "commands": [
+    {
+      "argv": [
+        "/mnt/d/Muiti-Agent Programing/experiments/code-agent-smolagents/24371220/.venv/bin/python",
+        "-m",
+        "pytest",
+        "-q"
+      ],
+      "rc": 1,
+      "timed_out": false
+    },
+    {
+      "argv": [
+        "/mnt/d/Muiti-Agent Programing/experiments/code-agent-smolagents/24371220/.venv/bin/python",
+        "-m",
+        "pytest",
+        "-q"
+      ],
+      "rc": 0,
+      "timed_out": false
+    }
+  ],
+  "paper_pages_exposed": [],
+  "paper_page_count": 0,
+  "section_note_count": 0,
+  "section_topics": [],
+  "changed_files": [
+    "cache.py"
+  ],
+  "agent_error_types": {
+    "AgentParsingError": 1
+  },
+  "recent_actions": [
+    {
+      "event": "tool_call",
+      "tool": "read_file",
+      "error_type": null,
+      "error": null
+    },
+    {
+      "event": "tool_call",
+      "tool": "update_plan",
+      "error_type": null,
+      "error": null
+    },
+    {
+      "event": "tool_call",
+      "tool": "write_file",
+      "error_type": null,
+      "error": null
+    },
+    {
+      "event": "tool_call",
+      "tool": "run_command",
+      "error_type": null,
+      "error": null
+    },
+    {
+      "event": "tool_call",
+      "tool": "read_file",
+      "error_type": null,
+      "error": null
+    },
+    {
+      "event": "tool_call",
+      "tool": "update_plan",
+      "error_type": null,
+      "error": null
+    }
+  ],
+  "result": {
+    "status": "completed",
+    "engine": "smolagents",
+    "upstream_version": "1.26.0",
+    "context_mode": "evidence",
+    "reason": null,
+    "usage": {
+      "requests": 10,
+      "complete": true,
+      "prompt_tokens": 41549,
+      "completion_tokens": 20073
+    },
+    "answer": "Implemented TTLCache in cache.py. Verification: `python -m pytest -q` -> 3 passed.",
+    "remaining": []
+  },
+  "invalid_lines": 0
+}

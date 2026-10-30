@@ -1,0 +1,39 @@
+{
+  "task": "config_layers",
+  "number": 2,
+  "status": "passed",
+  "passed": true,
+  "native": "/home/ventsdenye/.local/state/code-agent/evaluations/additional-config_layers-02-4j84h86c",
+  "archive": "/mnt/d/Muiti-Agent Programing/experiments/code-agent-smolagents/24371220/experiments/smolagents/stability-20261030-10x10/samples/extra-config_layers-02/evaluation",
+  "input_sha256": {
+    "merge.py": "3eaf4562abd3d733d69869cdb62d8fcef38def318668bd59672c058d930d026c",
+    "settings.py": "c7849bd4d905203150182dabdf950a197ddf097a6f4801db66d05810f4629485",
+    "test_config.py": "5e9d84733bc29281268857907e5ffaa7b85e2e8e25249b5d3aeab2d92f535677"
+  },
+  "profile": "generic",
+  "max_requests": 20,
+  "exit_code": 0,
+  "agent_status": "completed",
+  "failure_reason": null,
+  "requests": 14,
+  "prompt_tokens": 60044,
+  "completion_tokens": 6277,
+  "usage_complete": true,
+  "max_request_chars": 22405,
+  "agent_errors": {
+    "AgentParsingError": 2
+  },
+  "changed_files": [
+    "merge.py",
+    "settings.py"
+  ],
+  "forbidden_changes": [],
+  "grading_exit_code": 0,
+  "tests": {
+    "tests": 17,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0
+  },
+  "runtime_unchanged": true
+}

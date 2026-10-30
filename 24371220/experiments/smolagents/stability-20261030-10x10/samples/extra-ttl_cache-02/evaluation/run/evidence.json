@@ -1,0 +1,64 @@
+{
+  "evidence": [
+    {
+      "id": "ev-85211846aa4936d0e2e2",
+      "source": "cache.py",
+      "version": "43b57d1ac30f07e51d50184e6735667c45d915247df29a2b9f3941d431e39657",
+      "locator": "lines:1-15",
+      "text": "class TTLCache:\n    def __init__(self, clock):\n        self.clock = clock\n        self.values = {}\n\n    def get(self, key, loader, ttl):\n        if key not in self.values:\n            self.values[key] = loader()\n        return self.values[key]\n\n    def invalidate(self, key):\n        pass\n\n    def clear(self):\n        self.values.clear()\n",
+      "required": false,
+      "page": null,
+      "valid": false,
+      "atomic": false
+    },
+    {
+      "id": "ev-de27e451c119d9f4bff2",
+      "source": "test_cache.py",
+      "version": "fe517707cbea5b83659adeb89b8daa44467dec7de0cdaf9925db6f0a7fe3576d",
+      "locator": "lines:1-31",
+      "text": "import pytest\nfrom cache import TTLCache\n\n\ndef test_expiration_at_exact_deadline_and_invalidate():\n    now = [0]\n    cache = TTLCache(lambda: now[0])\n    assert cache.get('x', lambda: 1, 5) == 1\n    now[0] = 4\n    assert cache.get('x', lambda: 2, 100) == 1\n    now[0] = 5\n    assert cache.get('x', lambda: 3, 5) == 3\n    cache.invalidate('x')\n    assert cache.get('x', lambda: 4, 5) == 4\n\n\ndef test_zero_ttl_and_invalid_ttl():\n    cache = TTLCache(lambda: 0)\n    assert cache.get('x', lambda: 1, 0) == 1\n    assert cache.get('x', lambda: 2, 0) == 2\n    with pytest.raises(ValueError):\n        cache.get('x', lambda: 3, -1)\n\n\ndef test_invalidate_during_load():\n    cache = TTLCache(lambda: 0)\n    def load():\n        cache.invalidate('x')\n        return 1\n    assert cache.get('x', load, 10) == 1\n    assert cache.get('x', lambda: 2, 10) == 2\n",
+      "required": false,
+      "page": null,
+      "valid": true,
+      "atomic": false
+    },
+    {
+      "id": "ev-526405fb5d2e29507b95",
+      "source": "cache.py",
+      "version": "6cf86495497b09e78e52e590e5c2e12e4b44beb7424f7872d18536358f9cfedd",
+      "locator": "lines:1-54",
+      "text": "import math\n\n_MISSING = object()\n\n\nclass TTLCache:\n    def __init__(self, clock):\n        self.clock = clock\n        self._entries = {}   # key -> (value, expires_at)\n        self._loading = {}   # key -> load frame, for recursion guard / cancellation\n\n    @staticmethod\n    def _check_ttl(ttl):\n        if isinstance(ttl, bool) or not isinstance(ttl, (int, float)):\n            raise ValueError(\"ttl must be a finite nonnegative int or float\")\n        if isinstance(ttl, float) and not math.isfinite(ttl):\n            raise ValueError(\"ttl must be finite\")\n        if ttl < 0:\n            raise ValueError(\"ttl must be nonnegative\")\n\n    def get(self, key, loader, ttl):\n        self._check_ttl(ttl)\n        if key in self._loading:\n            raise RuntimeError(\"recursive get for key whose loader is running\")\n\n        if ttl > 0:\n            entry = self._entries.get(key, _MISSING)\n            if entry is not _MISSING and self.clock() < entry[1]:\n                return entry[0]\n\n        frame = {\"cancelled\": False}\n        self._loading[key] = frame\n        try:\n            value = loader()\n            if frame[\"cancelled\"]:\n                return value\n            if ttl > 0:\n                self._entries[key] = (value, self.clock() + ttl)\n            return value\n        finally:\n            del self._loading[key]\n\n    def invalidate(self, key):\n        frame = self._loading.get(key)\n        if frame is not None:\n            frame[\"cancelled\"] = True\n        self._entries.pop(key, None)\n        return None\n\n    def clear(self):\n        for frame in self._loading.values():\n            frame[\"cancelled\"] = True\n        self._entries.clear()\n        return None\n",
+      "required": false,
+      "page": null,
+      "valid": true,
+      "atomic": false
+    }
+  ],
+  "notes": {},
+  "exposed": [
+    "ev-526405fb5d2e29507b95",
+    "ev-de27e451c119d9f4bff2"
+  ],
+  "received_ranges": {
+    "ev-de27e451c119d9f4bff2": [
+      [
+        0,
+        842
+      ]
+    ],
+    "ev-526405fb5d2e29507b95": [
+      [
+        0,
+        1682
+      ]
+    ]
+  },
+  "full_read_ids": {
+    "test_cache.py": [
+      "ev-de27e451c119d9f4bff2"
+    ],
+    "cache.py": [
+      "ev-526405fb5d2e29507b95"
+    ]
+  }
+}

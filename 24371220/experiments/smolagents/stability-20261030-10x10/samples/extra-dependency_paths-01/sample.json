@@ -1,0 +1,39 @@
+{
+  "task": "dependency_paths",
+  "number": 1,
+  "status": "passed",
+  "passed": true,
+  "native": "/home/ventsdenye/.local/state/code-agent/evaluations/additional-dependency_paths-01-1wu1dgvc",
+  "archive": "/mnt/d/Muiti-Agent Programing/experiments/code-agent-smolagents/24371220/experiments/smolagents/stability-20261030-10x10/samples/extra-dependency_paths-01/evaluation",
+  "input_sha256": {
+    "graph.py": "f358f5af1b8edb3869452a86f70fee9485fd94737253e6d6f2c1b735037bc5d1",
+    "paths.py": "eb9204eaa94220a8136e3c761a8ba290663c147217e89b9e43ac6d2f578a9c47",
+    "test_graph.py": "26f4c7af0fc6dc1b00ed59c3f4943c58adac953b415ac312e81d55d1d2289717"
+  },
+  "profile": "generic",
+  "max_requests": 20,
+  "exit_code": 0,
+  "agent_status": "completed",
+  "failure_reason": null,
+  "requests": 13,
+  "prompt_tokens": 51243,
+  "completion_tokens": 4663,
+  "usage_complete": true,
+  "max_request_chars": 20759,
+  "agent_errors": {
+    "AgentParsingError": 1
+  },
+  "changed_files": [
+    "graph.py",
+    "paths.py"
+  ],
+  "forbidden_changes": [],
+  "grading_exit_code": 0,
+  "tests": {
+    "tests": 15,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0
+  },
+  "runtime_unchanged": true
+}

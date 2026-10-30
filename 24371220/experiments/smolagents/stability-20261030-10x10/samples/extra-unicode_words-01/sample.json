@@ -1,0 +1,38 @@
+{
+  "task": "unicode_words",
+  "number": 1,
+  "status": "passed",
+  "passed": true,
+  "native": "/home/ventsdenye/.local/state/code-agent/evaluations/additional-unicode_words-01-w_3gur1z",
+  "archive": "/mnt/d/Muiti-Agent Programing/experiments/code-agent-smolagents/24371220/experiments/smolagents/stability-20261030-10x10/samples/extra-unicode_words-01/evaluation",
+  "input_sha256": {
+    "test_words.py": "2fcd2dad0cf4acceacbff1bebf40c4113ce7f466b9e208fa03ad97fc21996898",
+    "words.py": "20b8eee3413c99c4e25e5f340560a4b095881970cc18b2cb8f80585e710729b2"
+  },
+  "profile": "generic",
+  "max_requests": 20,
+  "exit_code": 0,
+  "agent_status": "completed",
+  "failure_reason": null,
+  "requests": 15,
+  "prompt_tokens": 60272,
+  "completion_tokens": 5682,
+  "usage_complete": true,
+  "max_request_chars": 20070,
+  "agent_errors": {
+    "AgentParsingError": 3,
+    "AgentExecutionError": 1
+  },
+  "changed_files": [
+    "words.py"
+  ],
+  "forbidden_changes": [],
+  "grading_exit_code": 0,
+  "tests": {
+    "tests": 10,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0
+  },
+  "runtime_unchanged": true
+}

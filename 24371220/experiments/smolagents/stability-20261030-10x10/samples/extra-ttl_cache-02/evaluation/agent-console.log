@@ -1,0 +1,21 @@
+Error in code parsing:
+Your code snippet is invalid, because the regex pattern ```python(.*?)``` was 
+not found in it.
+            Here is your code snippet:
+
+
+<｜｜DSML｜｜ calls>
+<｜｜DSML｜｜ invoke name="update_plan">
+<｜｜DSML｜｜ parameter name="items" string="false">[{"title": "Read cache.py 
+and run baseline tests", "status": "doing"}, {"title": "Implement TTLCache 
+behavior in cache.py", "status": "todo"}, {"title": "Run full test suite and 
+verify", "status": "todo"}]</｜｜DSML｜｜ parameter>
+</｜｜DSML｜｜ invoke>
+</｜｜DSML｜｜ calls>```
+            Make sure to include code with the correct pattern, for instance:
+            Thoughts: Your thoughts
+            ```python
+            # Your python code here
+            ```
+Make sure to provide correct code blobs.
+{"status": "completed", "engine": "smolagents", "upstream_version": "1.26.0", "context_mode": "evidence", "reason": null, "usage": {"requests": 10, "complete": true, "prompt_tokens": 41549, "completion_tokens": 20073}, "answer": "Implemented TTLCache in cache.py. Verification: `python -m pytest -q` -> 3 passed.", "remaining": []}

@@ -1,0 +1,15 @@
+{
+  "status": "completed",
+  "engine": "smolagents",
+  "upstream_version": "1.26.0",
+  "context_mode": "evidence",
+  "reason": null,
+  "usage": {
+    "requests": 10,
+    "complete": true,
+    "prompt_tokens": 43936,
+    "completion_tokens": 13990
+  },
+  "answer": "Implemented TTLCache in cache.py with deterministic TTL expiry, zero-TTL bypass, safe recursive-load guards, and invalidation/clear semantics that prevent caching canceled loads. Full test suite passes: 3 passed.",
+  "remaining": []
+}

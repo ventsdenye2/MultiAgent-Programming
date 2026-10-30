@@ -1,0 +1,132 @@
+{
+  "path": "/home/ventsdenye/.local/state/code-agent/evaluations/additional-dependency_paths-01-1wu1dgvc/run/run.log",
+  "requests": 13,
+  "responses": 13,
+  "model_errors": 0,
+  "usage_complete": true,
+  "known_prompt_tokens": 51243,
+  "known_completion_tokens": 4663,
+  "known_total_tokens": 55906,
+  "cache_hit_tokens": 40064,
+  "cache_miss_tokens": 11179,
+  "max_request_chars": 20759,
+  "response_classes": {
+    "ok": 13
+  },
+  "last_request_parameters": {
+    "model": "deepseek-flash",
+    "max_tokens": 16384,
+    "thinking": {
+      "type": "enabled"
+    },
+    "reasoning_effort": "high"
+  },
+  "counts": {
+    "snapshot": 2,
+    "run_start": 1,
+    "file_read": 5,
+    "context_selection": 13,
+    "request_budget": 13,
+    "model_request": 13,
+    "model_response": 13,
+    "usage": 13,
+    "context_exposure": 13,
+    "agent_step": 13,
+    "agent_error": 1,
+    "tool_call": 14,
+    "plan": 4,
+    "tool_result": 14,
+    "command_result": 2,
+    "evidence": 4,
+    "file_write": 2,
+    "evidence_invalidated": 2,
+    "run_result": 1
+  },
+  "commands": [
+    {
+      "argv": [
+        "/mnt/d/Muiti-Agent Programing/experiments/code-agent-smolagents/24371220/.venv/bin/python",
+        "-m",
+        "pytest",
+        "-q"
+      ],
+      "rc": 1,
+      "timed_out": false
+    },
+    {
+      "argv": [
+        "/mnt/d/Muiti-Agent Programing/experiments/code-agent-smolagents/24371220/.venv/bin/python",
+        "-m",
+        "pytest",
+        "-q"
+      ],
+      "rc": 0,
+      "timed_out": false
+    }
+  ],
+  "paper_pages_exposed": [],
+  "paper_page_count": 0,
+  "section_note_count": 0,
+  "section_topics": [],
+  "changed_files": [
+    "graph.py",
+    "paths.py"
+  ],
+  "agent_error_types": {
+    "AgentParsingError": 1
+  },
+  "recent_actions": [
+    {
+      "event": "tool_call",
+      "tool": "write_file",
+      "error_type": null,
+      "error": null
+    },
+    {
+      "event": "tool_call",
+      "tool": "read_file",
+      "error_type": null,
+      "error": null
+    },
+    {
+      "event": "tool_call",
+      "tool": "write_file",
+      "error_type": null,
+      "error": null
+    },
+    {
+      "event": "tool_call",
+      "tool": "run_command",
+      "error_type": null,
+      "error": null
+    },
+    {
+      "event": "tool_call",
+      "tool": "read_file",
+      "error_type": null,
+      "error": null
+    },
+    {
+      "event": "tool_call",
+      "tool": "update_plan",
+      "error_type": null,
+      "error": null
+    }
+  ],
+  "result": {
+    "status": "completed",
+    "engine": "smolagents",
+    "upstream_version": "1.26.0",
+    "context_mode": "evidence",
+    "reason": null,
+    "usage": {
+      "requests": 13,
+      "complete": true,
+      "prompt_tokens": 51243,
+      "completion_tokens": 4663
+    },
+    "answer": "Implemented canonical_path in paths.py and build_order in graph.py; full suite passes (3 passed).",
+    "remaining": []
+  },
+  "invalid_lines": 0
+}

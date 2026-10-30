@@ -1,0 +1,64 @@
+{
+  "evidence": [
+    {
+      "id": "ev-33a11c2340d22ea40039",
+      "source": "ledger.py",
+      "version": "65ca4febe824d5f44ce7b2430e8ff61eed1871f838bfc41cea5b15de4ee171b6",
+      "locator": "lines:1-8",
+      "text": "import csv\nimport io\n\n\ndef summarize(text):\n    return [{'sku': row['sku'], 'quantity': int(row['quantity']),\n             'revenue': str(float(row['unit_price']) * int(row['quantity']))}\n            for row in csv.DictReader(io.StringIO(text))]\n",
+      "required": false,
+      "page": null,
+      "valid": false,
+      "atomic": false
+    },
+    {
+      "id": "ev-4ed373a6c4a35a7afa86",
+      "source": "test_ledger.py",
+      "version": "fba6a24275abb76d9f6ab51075335968bfe36618cd9fa04271a4ee3d5381e0d9",
+      "locator": "lines:1-18",
+      "text": "import pytest\nfrom ledger import summarize\n\n\ndef test_aggregate_returns_and_order():\n    assert summarize('sku,quantity,unit_price\\na,2,0.10\\nb,1,3\\na,-1,0.10\\n') == [\n        {'sku': 'a', 'quantity': 1, 'revenue': '0.10'},\n        {'sku': 'b', 'quantity': 1, 'revenue': '3.00'}]\n\n\ndef test_round_only_after_sum():\n    assert summarize('sku,quantity,unit_price\\na,1,0.005\\na,1,0.005\\n')[0]['revenue'] == '0.01'\n\n\n@pytest.mark.parametrize('text', ['', 'sku,quantity\\na,1\\n', 'sku,quantity,unit_price\\na,1,NaN\\n'])\ndef test_invalid(text):\n    with pytest.raises(ValueError):\n        summarize(text)\n",
+      "required": false,
+      "page": null,
+      "valid": true,
+      "atomic": false
+    },
+    {
+      "id": "ev-7a10f25d27525d749b6d",
+      "source": "ledger.py",
+      "version": "39f8dad749e876067b10ae9a9e500c22bfb666000b8fdf0ec54f0603fa7ed07c",
+      "locator": "lines:1-102",
+      "text": "\"\"\"Aggregate a CSV sales ledger.\"\"\"\n\nimport csv\nimport io\nimport re\nfrom decimal import Decimal, ROUND_HALF_EVEN, localcontext\n\nREQUIRED_COLUMNS = (\"sku\", \"quantity\", \"unit_price\")\n\n_INTEGER = re.compile(r\"[+-]?[0-9]+\\Z\")\n_CENT = Decimal(\"0.01\")\n_PRECISION = 500\n\n\ndef summarize(text):\n    \"\"\"Aggregate quantities and exact revenue per sku, in first-seen order.\"\"\"\n    if not isinstance(text, str):\n        raise ValueError(\"input must be a string\")\n    if not text:\n        raise ValueError(\"empty input\")\n\n    try:\n        rows = list(csv.reader(io.StringIO(text, newline=\"\"), strict=True))\n    except csv.Error as exc:\n        raise ValueError(\"invalid CSV: %s\" % exc) from None\n\n    position = 0\n    header = None\n    while position < len(rows):\n        row = rows[position]\n        position += 1\n        if row:\n            header = row\n            break\n    if header is None:\n        raise ValueError(\"missing header row\")\n\n    names = [cell.strip() for cell in header]\n    seen = set()\n    for name in names:\n        if name in seen:\n            raise ValueError(\"duplicate column name: %r\" % (name,))\n        seen.add(name)\n\n    columns = {}\n    for name in REQUIRED_COLUMNS:\n        if name not in seen:\n            raise ValueError(\"missing required column: %s\" % name)\n        columns[name] = names.index(name)\n\n    width = len(names)\n    order = []\n    quantities = {}\n    revenues = {}\n\n    with localcontext() as ctx:\n        ctx.prec = _PRECISION\n        for row in rows[position:]:\n            if not row:\n                continue\n            if len(row) != width:\n                raise ValueError(\n                    \"expected %d cells, got %d\" % (width, len(row))\n                )\n\n            sku = row[columns[\"sku\"]].strip()\n            if not sku:\n                raise ValueError(\"empty sku\")\n\n            quantity_text = row[columns[\"quantity\"]].strip()\n            if _INTEGER.match(quantity_text) is None:\n                raise ValueError(\"invalid quantity: %r\" % (quantity_text,))\n            quantity = int(quantity_text)\n\n            price_text = row[columns[\"unit_price\"]].strip()\n            try:\n                price = Decimal(price_text)\n            except (ArithmeticError, ValueError):\n                raise ValueError(\"invalid unit price: %r\" % (price_text,)) from None\n            if not price.is_finite() or price < 0:\n                raise ValueError(\"invalid unit price: %r\" % (price_text,))\n\n            revenue = price * quantity\n            if sku in revenues:\n                quantities[sku] += quantity\n                revenues[sku] += revenue\n            else:\n                quantities[sku] = quantity\n                revenues[sku] = revenue\n                order.append(sku)\n\n        summary = []\n        for sku in order:\n            total = revenues[sku].quantize(_CENT, rounding=ROUND_HALF_EVEN)\n            if total == 0:\n                total = Decimal(\"0.00\")\n            summary.append({\n                \"sku\": sku,\n                \"quantity\": quantities[sku],\n                \"revenue\": str(total),\n            })\n    return summary\n",
+      "required": false,
+      "page": null,
+      "valid": true,
+      "atomic": false
+    }
+  ],
+  "notes": {},
+  "exposed": [
+    "ev-4ed373a6c4a35a7afa86",
+    "ev-7a10f25d27525d749b6d"
+  ],
+  "received_ranges": {
+    "ev-4ed373a6c4a35a7afa86": [
+      [
+        0,
+        597
+      ]
+    ],
+    "ev-7a10f25d27525d749b6d": [
+      [
+        0,
+        3094
+      ]
+    ]
+  },
+  "full_read_ids": {
+    "test_ledger.py": [
+      "ev-4ed373a6c4a35a7afa86"
+    ],
+    "ledger.py": [
+      "ev-7a10f25d27525d749b6d"
+    ]
+  }
+}

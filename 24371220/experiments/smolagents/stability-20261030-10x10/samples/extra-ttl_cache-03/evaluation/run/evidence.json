@@ -1,0 +1,64 @@
+{
+  "evidence": [
+    {
+      "id": "ev-85211846aa4936d0e2e2",
+      "source": "cache.py",
+      "version": "43b57d1ac30f07e51d50184e6735667c45d915247df29a2b9f3941d431e39657",
+      "locator": "lines:1-15",
+      "text": "class TTLCache:\n    def __init__(self, clock):\n        self.clock = clock\n        self.values = {}\n\n    def get(self, key, loader, ttl):\n        if key not in self.values:\n            self.values[key] = loader()\n        return self.values[key]\n\n    def invalidate(self, key):\n        pass\n\n    def clear(self):\n        self.values.clear()\n",
+      "required": false,
+      "page": null,
+      "valid": false,
+      "atomic": false
+    },
+    {
+      "id": "ev-de27e451c119d9f4bff2",
+      "source": "test_cache.py",
+      "version": "fe517707cbea5b83659adeb89b8daa44467dec7de0cdaf9925db6f0a7fe3576d",
+      "locator": "lines:1-31",
+      "text": "import pytest\nfrom cache import TTLCache\n\n\ndef test_expiration_at_exact_deadline_and_invalidate():\n    now = [0]\n    cache = TTLCache(lambda: now[0])\n    assert cache.get('x', lambda: 1, 5) == 1\n    now[0] = 4\n    assert cache.get('x', lambda: 2, 100) == 1\n    now[0] = 5\n    assert cache.get('x', lambda: 3, 5) == 3\n    cache.invalidate('x')\n    assert cache.get('x', lambda: 4, 5) == 4\n\n\ndef test_zero_ttl_and_invalid_ttl():\n    cache = TTLCache(lambda: 0)\n    assert cache.get('x', lambda: 1, 0) == 1\n    assert cache.get('x', lambda: 2, 0) == 2\n    with pytest.raises(ValueError):\n        cache.get('x', lambda: 3, -1)\n\n\ndef test_invalidate_during_load():\n    cache = TTLCache(lambda: 0)\n    def load():\n        cache.invalidate('x')\n        return 1\n    assert cache.get('x', load, 10) == 1\n    assert cache.get('x', lambda: 2, 10) == 2\n",
+      "required": false,
+      "page": null,
+      "valid": true,
+      "atomic": false
+    },
+    {
+      "id": "ev-c0789ab00427dd49c446",
+      "source": "cache.py",
+      "version": "897b3ed6122cda485bea8be0fe793b2d49e120243323d7f617dba3dfef47f126",
+      "locator": "lines:1-66",
+      "text": "import math\n\n\nclass TTLCache:\n    \"\"\"Single-threaded TTL cache with deterministic expiry.\n\n    All time measurements come from the injected zero-argument ``clock``\n    function.  No wall-clock time or sleeping is used.\n    \"\"\"\n\n    def __init__(self, clock):\n        self.clock = clock\n        self._values = {}        # key -> (value, expires_at)\n        self._running = set()    # keys whose loader is currently executing\n        self._key_versions = {}  # key -> version, bumped by invalidate()\n        self._generation = 0     # bumped by clear()\n\n    @staticmethod\n    def _validate_ttl(ttl):\n        if isinstance(ttl, bool) or not isinstance(ttl, (int, float)):\n            raise ValueError(\"ttl must be a finite nonnegative int or float\")\n        if not math.isfinite(ttl) or ttl < 0:\n            raise ValueError(\"ttl must be a finite nonnegative int or float\")\n\n    def get(self, key, loader, ttl):\n        self._validate_ttl(ttl)\n\n        # The recursion guard stays in place until the loader finishes,\n        # even if the loader invalidates or clears the cache.\n        if key in self._running:\n            raise RuntimeError(f\"recursive load for key {key!r}\")\n\n        # ttl == 0 always bypasses any cached entry.\n        if ttl > 0:\n            entry = self._values.get(key)\n            if entry is not None and self.clock() < entry[1]:\n                return entry[0]\n\n        key_version = self._key_versions.get(key, 0)\n        generation = self._generation\n\n        self._running.add(key)\n        try:\n            value = loader()\n        finally:\n            self._running.discard(key)\n\n        if (\n            ttl > 0\n            and self._generation == generation\n            and self._key_versions.get(key, 0) == key_version\n        ):\n            expires_at = self.clock() + ttl\n            self._values[key] = (value, expires_at)\n\n        return value\n\n    def invalidate(self, key):\n        self._values.pop(key, None)\n        self._key_versions[key] = self._key_versions.get(key, 0) + 1\n        return None\n\n    def clear(self):\n        self._values.clear()\n        self._generation += 1\n        return None\n",
+      "required": false,
+      "page": null,
+      "valid": true,
+      "atomic": false
+    }
+  ],
+  "notes": {},
+  "exposed": [
+    "ev-c0789ab00427dd49c446",
+    "ev-de27e451c119d9f4bff2"
+  ],
+  "received_ranges": {
+    "ev-de27e451c119d9f4bff2": [
+      [
+        0,
+        842
+      ]
+    ],
+    "ev-c0789ab00427dd49c446": [
+      [
+        0,
+        2137
+      ]
+    ]
+  },
+  "full_read_ids": {
+    "test_cache.py": [
+      "ev-de27e451c119d9f4bff2"
+    ],
+    "cache.py": [
+      "ev-c0789ab00427dd49c446"
+    ]
+  }
+}

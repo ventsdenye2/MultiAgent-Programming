@@ -1,0 +1,1270 @@
+{
+  "baseline_commit": "dbc405bda6f454a90f5c35392d00274834c80e31",
+  "groups": {
+    "config_layers": {
+      "finished": 3,
+      "passed": 3,
+      "success_rate": 1.0,
+      "wilson_95": [
+        0.4385029682449546,
+        1.0
+      ],
+      "failure_reasons": {}
+    },
+    "csv_ledger": {
+      "finished": 3,
+      "passed": 3,
+      "success_rate": 1.0,
+      "wilson_95": [
+        0.4385029682449546,
+        1.0
+      ],
+      "failure_reasons": {}
+    },
+    "dependency_paths": {
+      "finished": 3,
+      "passed": 3,
+      "success_rate": 1.0,
+      "wilson_95": [
+        0.4385029682449546,
+        1.0
+      ],
+      "failure_reasons": {}
+    },
+    "paper": {
+      "finished": 10,
+      "passed": 1,
+      "success_rate": 0.1,
+      "wilson_95": [
+        0.017876213095072896,
+        0.4041500267952385
+      ],
+      "failure_reasons": {
+        "MAX_STEPS_NO_EXTRA_REQUEST": 6,
+        "failed": 3
+      }
+    },
+    "source": {
+      "finished": 10,
+      "passed": 1,
+      "success_rate": 0.1,
+      "wilson_95": [
+        0.017876213095072896,
+        0.4041500267952385
+      ],
+      "failure_reasons": {
+        "MAX_STEPS_NO_EXTRA_REQUEST": 8,
+        "AgentGenerationError: Error in generating model output:\nRequest timed out.": 1
+      }
+    },
+    "ttl_cache": {
+      "finished": 3,
+      "passed": 3,
+      "success_rate": 1.0,
+      "wilson_95": [
+        0.4385029682449546,
+        1.0
+      ],
+      "failure_reasons": {}
+    },
+    "unicode_words": {
+      "finished": 3,
+      "passed": 3,
+      "success_rate": 1.0,
+      "wilson_95": [
+        0.4385029682449546,
+        1.0
+      ],
+      "failure_reasons": {}
+    }
+  },
+  "requests": 739,
+  "prompt_tokens": 5586216,
+  "completion_tokens": 700074,
+  "usage_complete": false,
+  "rows": [
+    {
+      "task": "config_layers",
+      "number": 1,
+      "status": "passed",
+      "passed": true,
+      "native": "/home/ventsdenye/.local/state/code-agent/evaluations/additional-config_layers-01-cc7t38c4",
+      "archive": "/mnt/d/Muiti-Agent Programing/experiments/code-agent-smolagents/24371220/experiments/smolagents/stability-20261030-10x10/samples/extra-config_layers-01/evaluation",
+      "input_sha256": {
+        "merge.py": "3eaf4562abd3d733d69869cdb62d8fcef38def318668bd59672c058d930d026c",
+        "settings.py": "c7849bd4d905203150182dabdf950a197ddf097a6f4801db66d05810f4629485",
+        "test_config.py": "5e9d84733bc29281268857907e5ffaa7b85e2e8e25249b5d3aeab2d92f535677"
+      },
+      "profile": "generic",
+      "max_requests": 20,
+      "exit_code": 0,
+      "agent_status": "completed",
+      "failure_reason": null,
+      "requests": 7,
+      "prompt_tokens": 29056,
+      "completion_tokens": 3863,
+      "usage_complete": true,
+      "max_request_chars": 21283,
+      "agent_errors": {},
+      "changed_files": [
+        "merge.py",
+        "settings.py"
+      ],
+      "forbidden_changes": [],
+      "grading_exit_code": 0,
+      "tests": {
+        "tests": 17,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      "runtime_unchanged": true
+    },
+    {
+      "task": "config_layers",
+      "number": 2,
+      "status": "passed",
+      "passed": true,
+      "native": "/home/ventsdenye/.local/state/code-agent/evaluations/additional-config_layers-02-4j84h86c",
+      "archive": "/mnt/d/Muiti-Agent Programing/experiments/code-agent-smolagents/24371220/experiments/smolagents/stability-20261030-10x10/samples/extra-config_layers-02/evaluation",
+      "input_sha256": {
+        "merge.py": "3eaf4562abd3d733d69869cdb62d8fcef38def318668bd59672c058d930d026c",
+        "settings.py": "c7849bd4d905203150182dabdf950a197ddf097a6f4801db66d05810f4629485",
+        "test_config.py": "5e9d84733bc29281268857907e5ffaa7b85e2e8e25249b5d3aeab2d92f535677"
+      },
+      "profile": "generic",
+      "max_requests": 20,
+      "exit_code": 0,
+      "agent_status": "completed",
+      "failure_reason": null,
+      "requests": 14,
+      "prompt_tokens": 60044,
+      "completion_tokens": 6277,
+      "usage_complete": true,
+      "max_request_chars": 22405,
+      "agent_errors": {
+        "AgentParsingError": 2
+      },
+      "changed_files": [
+        "merge.py",
+        "settings.py"
+      ],
+      "forbidden_changes": [],
+      "grading_exit_code": 0,
+      "tests": {
+        "tests": 17,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      "runtime_unchanged": true
+    },
+    {
+      "task": "config_layers",
+      "number": 3,
+      "status": "passed",
+      "passed": true,
+      "native": "/home/ventsdenye/.local/state/code-agent/evaluations/additional-config_layers-03-az0cj5xg",
+      "archive": "/mnt/d/Muiti-Agent Programing/experiments/code-agent-smolagents/24371220/experiments/smolagents/stability-20261030-10x10/samples/extra-config_layers-03/evaluation",
+      "input_sha256": {
+        "merge.py": "3eaf4562abd3d733d69869cdb62d8fcef38def318668bd59672c058d930d026c",
+        "settings.py": "c7849bd4d905203150182dabdf950a197ddf097a6f4801db66d05810f4629485",
+        "test_config.py": "5e9d84733bc29281268857907e5ffaa7b85e2e8e25249b5d3aeab2d92f535677"
+      },
+      "profile": "generic",
+      "max_requests": 20,
+      "exit_code": 0,
+      "agent_status": "completed",
+      "failure_reason": null,
+      "requests": 10,
+      "prompt_tokens": 41207,
+      "completion_tokens": 7213,
+      "usage_complete": true,
+      "max_request_chars": 20839,
+      "agent_errors": {
+        "AgentParsingError": 1
+      },
+      "changed_files": [
+        "merge.py",
+        "settings.py"
+      ],
+      "forbidden_changes": [],
+      "grading_exit_code": 0,
+      "tests": {
+        "tests": 17,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      "runtime_unchanged": true
+    },
+    {
+      "task": "csv_ledger",
+      "number": 1,
+      "status": "passed",
+      "passed": true,
+      "native": "/home/ventsdenye/.local/state/code-agent/evaluations/additional-csv_ledger-01-etmykkpa",
+      "archive": "/mnt/d/Muiti-Agent Programing/experiments/code-agent-smolagents/24371220/experiments/smolagents/stability-20261030-10x10/samples/extra-csv_ledger-01/evaluation",
+      "input_sha256": {
+        "ledger.py": "65ca4febe824d5f44ce7b2430e8ff61eed1871f838bfc41cea5b15de4ee171b6",
+        "test_ledger.py": "fba6a24275abb76d9f6ab51075335968bfe36618cd9fa04271a4ee3d5381e0d9"
+      },
+      "profile": "generic",
+      "max_requests": 20,
+      "exit_code": 0,
+      "agent_status": "completed",
+      "failure_reason": null,
+      "requests": 6,
+      "prompt_tokens": 26110,
+      "completion_tokens": 29031,
+      "usage_complete": true,
+      "max_request_chars": 23530,
+      "agent_errors": {
+        "AgentExecutionError": 2
+      },
+      "changed_files": [
+        "ledger.py"
+      ],
+      "forbidden_changes": [],
+      "grading_exit_code": 0,
+      "tests": {
+        "tests": 16,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      "runtime_unchanged": true
+    },
+    {
+      "task": "csv_ledger",
+      "number": 2,
+      "status": "passed",
+      "passed": true,
+      "native": "/home/ventsdenye/.local/state/code-agent/evaluations/additional-csv_ledger-02-_jtb77c2",
+      "archive": "/mnt/d/Muiti-Agent Programing/experiments/code-agent-smolagents/24371220/experiments/smolagents/stability-20261030-10x10/samples/extra-csv_ledger-02/evaluation",
+      "input_sha256": {
+        "ledger.py": "65ca4febe824d5f44ce7b2430e8ff61eed1871f838bfc41cea5b15de4ee171b6",
+        "test_ledger.py": "fba6a24275abb76d9f6ab51075335968bfe36618cd9fa04271a4ee3d5381e0d9"
+      },
+      "profile": "generic",
+      "max_requests": 20,
+      "exit_code": 0,
+      "agent_status": "completed",
+      "failure_reason": null,
+      "requests": 9,
+      "prompt_tokens": 39107,
+      "completion_tokens": 24558,
+      "usage_complete": true,
+      "max_request_chars": 22122,
+      "agent_errors": {},
+      "changed_files": [
+        "ledger.py"
+      ],
+      "forbidden_changes": [],
+      "grading_exit_code": 0,
+      "tests": {
+        "tests": 16,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      "runtime_unchanged": true
+    },
+    {
+      "task": "csv_ledger",
+      "number": 3,
+      "status": "passed",
+      "passed": true,
+      "native": "/home/ventsdenye/.local/state/code-agent/evaluations/additional-csv_ledger-03-e8788413",
+      "archive": "/mnt/d/Muiti-Agent Programing/experiments/code-agent-smolagents/24371220/experiments/smolagents/stability-20261030-10x10/samples/extra-csv_ledger-03/evaluation",
+      "input_sha256": {
+        "ledger.py": "65ca4febe824d5f44ce7b2430e8ff61eed1871f838bfc41cea5b15de4ee171b6",
+        "test_ledger.py": "fba6a24275abb76d9f6ab51075335968bfe36618cd9fa04271a4ee3d5381e0d9"
+      },
+      "profile": "generic",
+      "max_requests": 20,
+      "exit_code": 0,
+      "agent_status": "completed",
+      "failure_reason": null,
+      "requests": 14,
+      "prompt_tokens": 62115,
+      "completion_tokens": 16281,
+      "usage_complete": true,
+      "max_request_chars": 23104,
+      "agent_errors": {
+        "AgentParsingError": 1,
+        "AgentExecutionError": 1
+      },
+      "changed_files": [
+        "ledger.py"
+      ],
+      "forbidden_changes": [],
+      "grading_exit_code": 0,
+      "tests": {
+        "tests": 16,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      "runtime_unchanged": true
+    },
+    {
+      "task": "dependency_paths",
+      "number": 1,
+      "status": "passed",
+      "passed": true,
+      "native": "/home/ventsdenye/.local/state/code-agent/evaluations/additional-dependency_paths-01-1wu1dgvc",
+      "archive": "/mnt/d/Muiti-Agent Programing/experiments/code-agent-smolagents/24371220/experiments/smolagents/stability-20261030-10x10/samples/extra-dependency_paths-01/evaluation",
+      "input_sha256": {
+        "graph.py": "f358f5af1b8edb3869452a86f70fee9485fd94737253e6d6f2c1b735037bc5d1",
+        "paths.py": "eb9204eaa94220a8136e3c761a8ba290663c147217e89b9e43ac6d2f578a9c47",
+        "test_graph.py": "26f4c7af0fc6dc1b00ed59c3f4943c58adac953b415ac312e81d55d1d2289717"
+      },
+      "profile": "generic",
+      "max_requests": 20,
+      "exit_code": 0,
+      "agent_status": "completed",
+      "failure_reason": null,
+      "requests": 13,
+      "prompt_tokens": 51243,
+      "completion_tokens": 4663,
+      "usage_complete": true,
+      "max_request_chars": 20759,
+      "agent_errors": {
+        "AgentParsingError": 1
+      },
+      "changed_files": [
+        "graph.py",
+        "paths.py"
+      ],
+      "forbidden_changes": [],
+      "grading_exit_code": 0,
+      "tests": {
+        "tests": 15,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      "runtime_unchanged": true
+    },
+    {
+      "task": "dependency_paths",
+      "number": 2,
+      "status": "passed",
+      "passed": true,
+      "native": "/home/ventsdenye/.local/state/code-agent/evaluations/additional-dependency_paths-02-p3g0_hsl",
+      "archive": "/mnt/d/Muiti-Agent Programing/experiments/code-agent-smolagents/24371220/experiments/smolagents/stability-20261030-10x10/samples/extra-dependency_paths-02/evaluation",
+      "input_sha256": {
+        "graph.py": "f358f5af1b8edb3869452a86f70fee9485fd94737253e6d6f2c1b735037bc5d1",
+        "paths.py": "eb9204eaa94220a8136e3c761a8ba290663c147217e89b9e43ac6d2f578a9c47",
+        "test_graph.py": "26f4c7af0fc6dc1b00ed59c3f4943c58adac953b415ac312e81d55d1d2289717"
+      },
+      "profile": "generic",
+      "max_requests": 20,
+      "exit_code": 0,
+      "agent_status": "completed",
+      "failure_reason": null,
+      "requests": 7,
+      "prompt_tokens": 28732,
+      "completion_tokens": 5490,
+      "usage_complete": true,
+      "max_request_chars": 20451,
+      "agent_errors": {
+        "AgentParsingError": 1
+      },
+      "changed_files": [
+        "graph.py",
+        "paths.py"
+      ],
+      "forbidden_changes": [],
+      "grading_exit_code": 0,
+      "tests": {
+        "tests": 15,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      "runtime_unchanged": true
+    },
+    {
+      "task": "dependency_paths",
+      "number": 3,
+      "status": "passed",
+      "passed": true,
+      "native": "/home/ventsdenye/.local/state/code-agent/evaluations/additional-dependency_paths-03-6vmdv706",
+      "archive": "/mnt/d/Muiti-Agent Programing/experiments/code-agent-smolagents/24371220/experiments/smolagents/stability-20261030-10x10/samples/extra-dependency_paths-03/evaluation",
+      "input_sha256": {
+        "graph.py": "f358f5af1b8edb3869452a86f70fee9485fd94737253e6d6f2c1b735037bc5d1",
+        "paths.py": "eb9204eaa94220a8136e3c761a8ba290663c147217e89b9e43ac6d2f578a9c47",
+        "test_graph.py": "26f4c7af0fc6dc1b00ed59c3f4943c58adac953b415ac312e81d55d1d2289717"
+      },
+      "profile": "generic",
+      "max_requests": 20,
+      "exit_code": 0,
+      "agent_status": "completed",
+      "failure_reason": null,
+      "requests": 8,
+      "prompt_tokens": 33241,
+      "completion_tokens": 3326,
+      "usage_complete": true,
+      "max_request_chars": 20184,
+      "agent_errors": {
+        "AgentParsingError": 1
+      },
+      "changed_files": [
+        "graph.py",
+        "paths.py"
+      ],
+      "forbidden_changes": [],
+      "grading_exit_code": 0,
+      "tests": {
+        "tests": 15,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      "runtime_unchanged": true
+    },
+    {
+      "task": "ttl_cache",
+      "number": 1,
+      "status": "passed",
+      "passed": true,
+      "native": "/home/ventsdenye/.local/state/code-agent/evaluations/additional-ttl_cache-01-hh1zy0j8",
+      "archive": "/mnt/d/Muiti-Agent Programing/experiments/code-agent-smolagents/24371220/experiments/smolagents/stability-20261030-10x10/samples/extra-ttl_cache-01/evaluation",
+      "input_sha256": {
+        "cache.py": "43b57d1ac30f07e51d50184e6735667c45d915247df29a2b9f3941d431e39657",
+        "test_cache.py": "fe517707cbea5b83659adeb89b8daa44467dec7de0cdaf9925db6f0a7fe3576d"
+      },
+      "profile": "generic",
+      "max_requests": 20,
+      "exit_code": 0,
+      "agent_status": "completed",
+      "failure_reason": null,
+      "requests": 15,
+      "prompt_tokens": 62907,
+      "completion_tokens": 12037,
+      "usage_complete": true,
+      "max_request_chars": 20950,
+      "agent_errors": {
+        "AgentParsingError": 4,
+        "AgentExecutionError": 1
+      },
+      "changed_files": [
+        "cache.py"
+      ],
+      "forbidden_changes": [],
+      "grading_exit_code": 0,
+      "tests": {
+        "tests": 14,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      "runtime_unchanged": true
+    },
+    {
+      "task": "ttl_cache",
+      "number": 2,
+      "status": "passed",
+      "passed": true,
+      "native": "/home/ventsdenye/.local/state/code-agent/evaluations/additional-ttl_cache-02-80rcrrob",
+      "archive": "/mnt/d/Muiti-Agent Programing/experiments/code-agent-smolagents/24371220/experiments/smolagents/stability-20261030-10x10/samples/extra-ttl_cache-02/evaluation",
+      "input_sha256": {
+        "cache.py": "43b57d1ac30f07e51d50184e6735667c45d915247df29a2b9f3941d431e39657",
+        "test_cache.py": "fe517707cbea5b83659adeb89b8daa44467dec7de0cdaf9925db6f0a7fe3576d"
+      },
+      "profile": "generic",
+      "max_requests": 20,
+      "exit_code": 0,
+      "agent_status": "completed",
+      "failure_reason": null,
+      "requests": 10,
+      "prompt_tokens": 41549,
+      "completion_tokens": 20073,
+      "usage_complete": true,
+      "max_request_chars": 20385,
+      "agent_errors": {
+        "AgentParsingError": 1
+      },
+      "changed_files": [
+        "cache.py"
+      ],
+      "forbidden_changes": [],
+      "grading_exit_code": 0,
+      "tests": {
+        "tests": 14,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      "runtime_unchanged": true
+    },
+    {
+      "task": "ttl_cache",
+      "number": 3,
+      "status": "passed",
+      "passed": true,
+      "native": "/home/ventsdenye/.local/state/code-agent/evaluations/additional-ttl_cache-03-9gw7gqoc",
+      "archive": "/mnt/d/Muiti-Agent Programing/experiments/code-agent-smolagents/24371220/experiments/smolagents/stability-20261030-10x10/samples/extra-ttl_cache-03/evaluation",
+      "input_sha256": {
+        "cache.py": "43b57d1ac30f07e51d50184e6735667c45d915247df29a2b9f3941d431e39657",
+        "test_cache.py": "fe517707cbea5b83659adeb89b8daa44467dec7de0cdaf9925db6f0a7fe3576d"
+      },
+      "profile": "generic",
+      "max_requests": 20,
+      "exit_code": 0,
+      "agent_status": "completed",
+      "failure_reason": null,
+      "requests": 10,
+      "prompt_tokens": 43936,
+      "completion_tokens": 13990,
+      "usage_complete": true,
+      "max_request_chars": 21247,
+      "agent_errors": {
+        "AgentParsingError": 3
+      },
+      "changed_files": [
+        "cache.py"
+      ],
+      "forbidden_changes": [],
+      "grading_exit_code": 0,
+      "tests": {
+        "tests": 14,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      "runtime_unchanged": true
+    },
+    {
+      "task": "unicode_words",
+      "number": 1,
+      "status": "passed",
+      "passed": true,
+      "native": "/home/ventsdenye/.local/state/code-agent/evaluations/additional-unicode_words-01-w_3gur1z",
+      "archive": "/mnt/d/Muiti-Agent Programing/experiments/code-agent-smolagents/24371220/experiments/smolagents/stability-20261030-10x10/samples/extra-unicode_words-01/evaluation",
+      "input_sha256": {
+        "test_words.py": "2fcd2dad0cf4acceacbff1bebf40c4113ce7f466b9e208fa03ad97fc21996898",
+        "words.py": "20b8eee3413c99c4e25e5f340560a4b095881970cc18b2cb8f80585e710729b2"
+      },
+      "profile": "generic",
+      "max_requests": 20,
+      "exit_code": 0,
+      "agent_status": "completed",
+      "failure_reason": null,
+      "requests": 15,
+      "prompt_tokens": 60272,
+      "completion_tokens": 5682,
+      "usage_complete": true,
+      "max_request_chars": 20070,
+      "agent_errors": {
+        "AgentParsingError": 3,
+        "AgentExecutionError": 1
+      },
+      "changed_files": [
+        "words.py"
+      ],
+      "forbidden_changes": [],
+      "grading_exit_code": 0,
+      "tests": {
+        "tests": 10,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      "runtime_unchanged": true
+    },
+    {
+      "task": "unicode_words",
+      "number": 2,
+      "status": "passed",
+      "passed": true,
+      "native": "/home/ventsdenye/.local/state/code-agent/evaluations/additional-unicode_words-02-ogjtgu1g",
+      "archive": "/mnt/d/Muiti-Agent Programing/experiments/code-agent-smolagents/24371220/experiments/smolagents/stability-20261030-10x10/samples/extra-unicode_words-02/evaluation",
+      "input_sha256": {
+        "test_words.py": "2fcd2dad0cf4acceacbff1bebf40c4113ce7f466b9e208fa03ad97fc21996898",
+        "words.py": "20b8eee3413c99c4e25e5f340560a4b095881970cc18b2cb8f80585e710729b2"
+      },
+      "profile": "generic",
+      "max_requests": 20,
+      "exit_code": 0,
+      "agent_status": "completed",
+      "failure_reason": null,
+      "requests": 8,
+      "prompt_tokens": 31502,
+      "completion_tokens": 3702,
+      "usage_complete": true,
+      "max_request_chars": 18795,
+      "agent_errors": {
+        "AgentParsingError": 1
+      },
+      "changed_files": [
+        "words.py"
+      ],
+      "forbidden_changes": [],
+      "grading_exit_code": 0,
+      "tests": {
+        "tests": 10,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      "runtime_unchanged": true
+    },
+    {
+      "task": "unicode_words",
+      "number": 3,
+      "status": "passed",
+      "passed": true,
+      "native": "/home/ventsdenye/.local/state/code-agent/evaluations/additional-unicode_words-03-pm_jxby_",
+      "archive": "/mnt/d/Muiti-Agent Programing/experiments/code-agent-smolagents/24371220/experiments/smolagents/stability-20261030-10x10/samples/extra-unicode_words-03/evaluation",
+      "input_sha256": {
+        "test_words.py": "2fcd2dad0cf4acceacbff1bebf40c4113ce7f466b9e208fa03ad97fc21996898",
+        "words.py": "20b8eee3413c99c4e25e5f340560a4b095881970cc18b2cb8f80585e710729b2"
+      },
+      "profile": "generic",
+      "max_requests": 20,
+      "exit_code": 0,
+      "agent_status": "completed",
+      "failure_reason": null,
+      "requests": 8,
+      "prompt_tokens": 30507,
+      "completion_tokens": 3029,
+      "usage_complete": true,
+      "max_request_chars": 19230,
+      "agent_errors": {
+        "AgentParsingError": 1,
+        "AgentExecutionError": 1
+      },
+      "changed_files": [
+        "words.py"
+      ],
+      "forbidden_changes": [],
+      "grading_exit_code": 0,
+      "tests": {
+        "tests": 10,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      "runtime_unchanged": true
+    },
+    {
+      "task": "paper",
+      "exit_code": 1,
+      "archive": "/mnt/d/Muiti-Agent Programing/experiments/code-agent-smolagents/24371220/experiments/smolagents/stability-20261030-10x10/samples/paper-01/evaluation",
+      "status": "failed",
+      "passed": false,
+      "requests": 40,
+      "prompt_tokens": 333805,
+      "completion_tokens": 35622,
+      "usage_complete": true,
+      "max_request_chars": 31746,
+      "agent_errors": {
+        "AgentExecutionError": 2
+      },
+      "failure_reason": "MAX_STEPS_NO_EXTRA_REQUEST",
+      "agent_status": "failed",
+      "score": 0.0,
+      "max_score": 5,
+      "checks": {
+        "学生程序与报告生成": "agent 退出码 1，查看 agent-console.log；未产生 file_write，尚未完成指定文件；先检查 agent-console.log 中的退出原因；report.json 与初始内容相同或为空，尚未生成阅读报告",
+        "其他文件保持原样": true
+      },
+      "number": 1,
+      "native": "/home/ventsdenye/.local/state/code-agent/evaluations/stability-paper-01-rkxpsyzw"
+    },
+    {
+      "task": "paper",
+      "exit_code": 1,
+      "archive": "/mnt/d/Muiti-Agent Programing/experiments/code-agent-smolagents/24371220/experiments/smolagents/stability-20261030-10x10/samples/paper-02/evaluation",
+      "status": "failed",
+      "passed": false,
+      "requests": 40,
+      "prompt_tokens": 338771,
+      "completion_tokens": 31516,
+      "usage_complete": true,
+      "max_request_chars": 31563,
+      "agent_errors": {
+        "AgentExecutionError": 4
+      },
+      "failure_reason": null,
+      "agent_status": "completed",
+      "score": 4.5,
+      "max_score": 5,
+      "checks": {
+        "真实运行、PDF提取、分块笔记和补丁": true,
+        "报告结构": true,
+        "overview.categories：答案与原文引用": true,
+        "overview.search_methods：答案与原文引用": true,
+        "reasoning.self_consistency_selection：答案与原文引用": "self_consistency_selection 与论文中的结论不一致；请重新核对原文；self_consistency_selection 的 quote 不是该页原文；可合并空白，不能改写原句；self_consistency_selection 引文未覆盖支撑这个答案的关键内容",
+        "reasoning.tot_search：答案与原文引用": true,
+        "tool_use.toolformer_tools：答案与原文引用": true,
+        "tool_use.toolbench_api_count：答案与原文引用": true,
+        "multi_agent.camel_prompting：答案与原文引用": true,
+        "multi_agent.generative_agents_evaluators：答案与原文引用": true,
+        "outlook.agenda_topics：答案与原文引用": true,
+        "outlook.shared_foundations：答案与原文引用": true
+      },
+      "number": 2,
+      "native": "/home/ventsdenye/.local/state/code-agent/evaluations/stability-paper-02-o5gu4i0w"
+    },
+    {
+      "task": "paper",
+      "exit_code": 1,
+      "archive": "/mnt/d/Muiti-Agent Programing/experiments/code-agent-smolagents/24371220/experiments/smolagents/stability-20261030-10x10/samples/paper-03/evaluation",
+      "status": "failed",
+      "passed": false,
+      "requests": 40,
+      "prompt_tokens": 329772,
+      "completion_tokens": 20876,
+      "usage_complete": true,
+      "max_request_chars": 31743,
+      "agent_errors": {
+        "AgentExecutionError": 4
+      },
+      "failure_reason": "MAX_STEPS_NO_EXTRA_REQUEST",
+      "agent_status": "failed",
+      "score": 0.0,
+      "max_score": 5,
+      "checks": {
+        "学生程序与报告生成": "agent 退出码 1，查看 agent-console.log；未产生 file_write，尚未完成指定文件；先检查 agent-console.log 中的退出原因；report.json 与初始内容相同或为空，尚未生成阅读报告",
+        "其他文件保持原样": true
+      },
+      "number": 3,
+      "native": "/home/ventsdenye/.local/state/code-agent/evaluations/stability-paper-03-dxznov67"
+    },
+    {
+      "task": "paper",
+      "exit_code": 1,
+      "archive": "/mnt/d/Muiti-Agent Programing/experiments/code-agent-smolagents/24371220/experiments/smolagents/stability-20261030-10x10/samples/paper-04/evaluation",
+      "status": "failed",
+      "passed": false,
+      "requests": 40,
+      "prompt_tokens": 348153,
+      "completion_tokens": 49447,
+      "usage_complete": true,
+      "max_request_chars": 31742,
+      "agent_errors": {
+        "AgentExecutionError": 1,
+        "AgentParsingError": 1
+      },
+      "failure_reason": null,
+      "agent_status": "completed",
+      "score": 4.0,
+      "max_score": 5,
+      "checks": {
+        "真实运行、PDF提取、分块笔记和补丁": true,
+        "报告结构": true,
+        "overview.categories：答案与原文引用": "categories 引文未覆盖支撑这个答案的关键内容",
+        "overview.search_methods：答案与原文引用": true,
+        "reasoning.self_consistency_selection：答案与原文引用": true,
+        "reasoning.tot_search：答案与原文引用": true,
+        "tool_use.toolformer_tools：答案与原文引用": true,
+        "tool_use.toolbench_api_count：答案与原文引用": true,
+        "multi_agent.camel_prompting：答案与原文引用": "camel_prompting 的 quote 不是该页原文；可合并空白，不能改写原句",
+        "multi_agent.generative_agents_evaluators：答案与原文引用": true,
+        "outlook.agenda_topics：答案与原文引用": true,
+        "outlook.shared_foundations：答案与原文引用": true
+      },
+      "number": 4,
+      "native": "/home/ventsdenye/.local/state/code-agent/evaluations/stability-paper-04-4aio1qie"
+    },
+    {
+      "task": "paper",
+      "exit_code": 1,
+      "archive": "/mnt/d/Muiti-Agent Programing/experiments/code-agent-smolagents/24371220/experiments/smolagents/stability-20261030-10x10/samples/paper-05/evaluation",
+      "status": "failed",
+      "passed": false,
+      "requests": 40,
+      "prompt_tokens": 329075,
+      "completion_tokens": 24461,
+      "usage_complete": true,
+      "max_request_chars": 31799,
+      "agent_errors": {
+        "AgentExecutionError": 4
+      },
+      "failure_reason": "MAX_STEPS_NO_EXTRA_REQUEST",
+      "agent_status": "failed",
+      "score": 0.0,
+      "max_score": 5,
+      "checks": {
+        "学生程序与报告生成": "agent 退出码 1，查看 agent-console.log；未产生 file_write，尚未完成指定文件；先检查 agent-console.log 中的退出原因；report.json 与初始内容相同或为空，尚未生成阅读报告",
+        "其他文件保持原样": true
+      },
+      "number": 5,
+      "native": "/home/ventsdenye/.local/state/code-agent/evaluations/stability-paper-05-y1bamper"
+    },
+    {
+      "task": "paper",
+      "exit_code": 1,
+      "archive": "/mnt/d/Muiti-Agent Programing/experiments/code-agent-smolagents/24371220/experiments/smolagents/stability-20261030-10x10/samples/paper-06/evaluation",
+      "status": "failed",
+      "passed": false,
+      "requests": 40,
+      "prompt_tokens": 333411,
+      "completion_tokens": 41237,
+      "usage_complete": true,
+      "max_request_chars": 31718,
+      "agent_errors": {
+        "AgentExecutionError": 7
+      },
+      "failure_reason": null,
+      "agent_status": "completed",
+      "score": 4.0,
+      "max_score": 5,
+      "checks": {
+        "真实运行、PDF提取、分块笔记和补丁": true,
+        "报告结构": true,
+        "overview.categories：答案与原文引用": "categories 的 quote 不是该页原文；可合并空白，不能改写原句",
+        "overview.search_methods：答案与原文引用": true,
+        "reasoning.self_consistency_selection：答案与原文引用": true,
+        "reasoning.tot_search：答案与原文引用": true,
+        "tool_use.toolformer_tools：答案与原文引用": true,
+        "tool_use.toolbench_api_count：答案与原文引用": true,
+        "multi_agent.camel_prompting：答案与原文引用": true,
+        "multi_agent.generative_agents_evaluators：答案与原文引用": true,
+        "outlook.agenda_topics：答案与原文引用": "agenda_topics 的 quote 不是该页原文；可合并空白，不能改写原句",
+        "outlook.shared_foundations：答案与原文引用": true
+      },
+      "number": 6,
+      "native": "/home/ventsdenye/.local/state/code-agent/evaluations/stability-paper-06-la6ez8vd"
+    },
+    {
+      "task": "paper",
+      "exit_code": 1,
+      "archive": "/mnt/d/Muiti-Agent Programing/experiments/code-agent-smolagents/24371220/experiments/smolagents/stability-20261030-10x10/samples/paper-07/evaluation",
+      "status": "failed",
+      "passed": false,
+      "requests": 40,
+      "prompt_tokens": 334950,
+      "completion_tokens": 36165,
+      "usage_complete": true,
+      "max_request_chars": 31788,
+      "agent_errors": {
+        "AgentExecutionError": 2,
+        "AgentParsingError": 2
+      },
+      "failure_reason": "MAX_STEPS_NO_EXTRA_REQUEST",
+      "agent_status": "failed",
+      "score": 0.0,
+      "max_score": 5,
+      "checks": {
+        "真实运行、PDF提取、分块笔记和补丁": "agent 退出码 1，查看 agent-console.log；最后修改后须执行完整 pytest 并通过",
+        "报告结构": "报告结构未通过；查看 report-format.log"
+      },
+      "number": 7,
+      "native": "/home/ventsdenye/.local/state/code-agent/evaluations/stability-paper-07-boed0xjl"
+    },
+    {
+      "task": "paper",
+      "exit_code": 1,
+      "archive": "/mnt/d/Muiti-Agent Programing/experiments/code-agent-smolagents/24371220/experiments/smolagents/stability-20261030-10x10/samples/paper-08/evaluation",
+      "status": "failed",
+      "passed": false,
+      "requests": 40,
+      "prompt_tokens": 341641,
+      "completion_tokens": 35251,
+      "usage_complete": true,
+      "max_request_chars": 31769,
+      "agent_errors": {
+        "AgentExecutionError": 6
+      },
+      "failure_reason": "MAX_STEPS_NO_EXTRA_REQUEST",
+      "agent_status": "failed",
+      "score": 0.0,
+      "max_score": 5,
+      "checks": {
+        "学生程序与报告生成": "agent 退出码 1，查看 agent-console.log；未产生 file_write，尚未完成指定文件；先检查 agent-console.log 中的退出原因；report.json 与初始内容相同或为空，尚未生成阅读报告",
+        "其他文件保持原样": true
+      },
+      "number": 8,
+      "native": "/home/ventsdenye/.local/state/code-agent/evaluations/stability-paper-08-h4ce5522"
+    },
+    {
+      "task": "paper",
+      "exit_code": 0,
+      "archive": "/mnt/d/Muiti-Agent Programing/experiments/code-agent-smolagents/24371220/experiments/smolagents/stability-20261030-10x10/samples/paper-09/evaluation",
+      "status": "passed",
+      "passed": true,
+      "requests": 36,
+      "prompt_tokens": 288667,
+      "completion_tokens": 29693,
+      "usage_complete": true,
+      "max_request_chars": 31468,
+      "agent_errors": {
+        "AgentExecutionError": 4
+      },
+      "failure_reason": null,
+      "agent_status": "completed",
+      "score": 5.0,
+      "max_score": 5,
+      "checks": {
+        "真实运行、PDF提取、分块笔记和补丁": true,
+        "报告结构": true,
+        "overview.categories：答案与原文引用": true,
+        "overview.search_methods：答案与原文引用": true,
+        "reasoning.self_consistency_selection：答案与原文引用": true,
+        "reasoning.tot_search：答案与原文引用": true,
+        "tool_use.toolformer_tools：答案与原文引用": true,
+        "tool_use.toolbench_api_count：答案与原文引用": true,
+        "multi_agent.camel_prompting：答案与原文引用": true,
+        "multi_agent.generative_agents_evaluators：答案与原文引用": true,
+        "outlook.agenda_topics：答案与原文引用": true,
+        "outlook.shared_foundations：答案与原文引用": true
+      },
+      "number": 9,
+      "native": "/home/ventsdenye/.local/state/code-agent/evaluations/stability-paper-09-bntrokw9"
+    },
+    {
+      "task": "paper",
+      "exit_code": 1,
+      "archive": "/mnt/d/Muiti-Agent Programing/experiments/code-agent-smolagents/24371220/experiments/smolagents/stability-20261030-10x10/samples/paper-10/evaluation",
+      "status": "failed",
+      "passed": false,
+      "requests": 40,
+      "prompt_tokens": 340759,
+      "completion_tokens": 34078,
+      "usage_complete": true,
+      "max_request_chars": 31792,
+      "agent_errors": {
+        "AgentExecutionError": 7
+      },
+      "failure_reason": "MAX_STEPS_NO_EXTRA_REQUEST",
+      "agent_status": "failed",
+      "score": 0.0,
+      "max_score": 5,
+      "checks": {
+        "学生程序与报告生成": "agent 退出码 1，查看 agent-console.log；未产生 file_write，尚未完成指定文件；先检查 agent-console.log 中的退出原因；report.json 与初始内容相同或为空，尚未生成阅读报告",
+        "其他文件保持原样": true
+      },
+      "number": 10,
+      "native": "/home/ventsdenye/.local/state/code-agent/evaluations/stability-paper-10-gkvnan7w"
+    },
+    {
+      "task": "source",
+      "exit_code": 1,
+      "archive": "/mnt/d/Muiti-Agent Programing/experiments/code-agent-smolagents/24371220/experiments/smolagents/stability-20261030-10x10/samples/source-01/evaluation",
+      "status": "failed",
+      "passed": false,
+      "requests": 20,
+      "prompt_tokens": 157994,
+      "completion_tokens": 16546,
+      "usage_complete": true,
+      "max_request_chars": 30273,
+      "agent_errors": {
+        "AgentParsingError": 2
+      },
+      "failure_reason": "MAX_STEPS_NO_EXTRA_REQUEST",
+      "agent_status": "failed",
+      "score": 0,
+      "max_score": 1,
+      "checks": {
+        "真实开发过程与修改范围": "agent 退出码 1，查看 agent-console.log；目标源码尚未修改：deepinfer/engine/stats_logger.py；deepinfer/engine/stats_logger.py 须有与最终文件一致的 file_write；最后修改后须执行完整 pytest 并通过",
+        "补丁可还原实际修改": false,
+        "相关源码真实读取并入模": true,
+        "首次修改复用相关源码或模型笔记": true,
+        "独立兼容与新增功能测试": "源码或检查文件不完整，未执行",
+        "真实日志处理链路": "前置条件未满足，未执行",
+        "运行后修改范围仍合规": "目标源码尚未修改：deepinfer/engine/stats_logger.py",
+        "学生代码与本轮开始一致": true,
+        "服务端真实用量完整": true
+      },
+      "number": 1,
+      "native": "/home/ventsdenye/.local/state/code-agent/evaluations/stability-source-01-5ixtzj6s"
+    },
+    {
+      "task": "source",
+      "exit_code": 1,
+      "archive": "/mnt/d/Muiti-Agent Programing/experiments/code-agent-smolagents/24371220/experiments/smolagents/stability-20261030-10x10/samples/source-02/evaluation",
+      "status": "failed",
+      "passed": false,
+      "requests": 20,
+      "prompt_tokens": 166028,
+      "completion_tokens": 12105,
+      "usage_complete": true,
+      "max_request_chars": 31756,
+      "agent_errors": {
+        "AgentExecutionError": 1
+      },
+      "failure_reason": "MAX_STEPS_NO_EXTRA_REQUEST",
+      "agent_status": "failed",
+      "score": 0,
+      "max_score": 1,
+      "checks": {
+        "真实开发过程与修改范围": "agent 退出码 1，查看 agent-console.log",
+        "补丁可还原实际修改": true,
+        "相关源码真实读取并入模": true,
+        "首次修改复用相关源码或模型笔记": true,
+        "独立兼容与新增功能测试": true,
+        "真实日志处理链路": true,
+        "运行后修改范围仍合规": true,
+        "学生代码与本轮开始一致": true,
+        "服务端真实用量完整": true
+      },
+      "number": 2,
+      "native": "/home/ventsdenye/.local/state/code-agent/evaluations/stability-source-02-kcw55ewz"
+    },
+    {
+      "task": "source",
+      "exit_code": 1,
+      "archive": "/mnt/d/Muiti-Agent Programing/experiments/code-agent-smolagents/24371220/experiments/smolagents/stability-20261030-10x10/samples/source-03/evaluation",
+      "status": "failed",
+      "passed": false,
+      "requests": 20,
+      "prompt_tokens": 180553,
+      "completion_tokens": 34412,
+      "usage_complete": true,
+      "max_request_chars": 31757,
+      "agent_errors": {
+        "AgentExecutionError": 2,
+        "AgentParsingError": 1
+      },
+      "failure_reason": "MAX_STEPS_NO_EXTRA_REQUEST",
+      "agent_status": "failed",
+      "score": 0,
+      "max_score": 1,
+      "checks": {
+        "真实开发过程与修改范围": "agent 退出码 1，查看 agent-console.log；目标源码尚未修改：deepinfer/logger.py；目标源码尚未修改：deepinfer/engine/stats_logger.py；deepinfer/logger.py 须有与最终文件一致的 file_write；deepinfer/engine/stats_logger.py 须有与最终文件一致的 file_write；最后修改后须执行完整 pytest 并通过",
+        "补丁可还原实际修改": false,
+        "相关源码真实读取并入模": true,
+        "首次修改复用相关源码或模型笔记": true,
+        "独立兼容与新增功能测试": "源码或检查文件不完整，未执行",
+        "真实日志处理链路": "前置条件未满足，未执行",
+        "运行后修改范围仍合规": "目标源码尚未修改：deepinfer/logger.py；目标源码尚未修改：deepinfer/engine/stats_logger.py",
+        "学生代码与本轮开始一致": true,
+        "服务端真实用量完整": true
+      },
+      "number": 3,
+      "native": "/home/ventsdenye/.local/state/code-agent/evaluations/stability-source-03-zd77sewe"
+    },
+    {
+      "task": "source",
+      "exit_code": 1,
+      "archive": "/mnt/d/Muiti-Agent Programing/experiments/code-agent-smolagents/24371220/experiments/smolagents/stability-20261030-10x10/samples/source-04/evaluation",
+      "status": "failed",
+      "passed": false,
+      "requests": 20,
+      "prompt_tokens": 171766,
+      "completion_tokens": 15241,
+      "usage_complete": true,
+      "max_request_chars": 31692,
+      "agent_errors": {
+        "AgentParsingError": 2,
+        "AgentExecutionError": 2
+      },
+      "failure_reason": "MAX_STEPS_NO_EXTRA_REQUEST",
+      "agent_status": "failed",
+      "score": 0,
+      "max_score": 1,
+      "checks": {
+        "真实开发过程与修改范围": "agent 退出码 1，查看 agent-console.log；目标源码尚未修改：deepinfer/engine/stats_logger.py；deepinfer/engine/stats_logger.py 须有与最终文件一致的 file_write；最后修改后须执行完整 pytest 并通过",
+        "补丁可还原实际修改": false,
+        "相关源码真实读取并入模": true,
+        "首次修改复用相关源码或模型笔记": true,
+        "独立兼容与新增功能测试": "源码或检查文件不完整，未执行",
+        "真实日志处理链路": "前置条件未满足，未执行",
+        "运行后修改范围仍合规": "目标源码尚未修改：deepinfer/engine/stats_logger.py",
+        "学生代码与本轮开始一致": true,
+        "服务端真实用量完整": true
+      },
+      "number": 4,
+      "native": "/home/ventsdenye/.local/state/code-agent/evaluations/stability-source-04-l5msyhzv"
+    },
+    {
+      "task": "source",
+      "exit_code": 2,
+      "archive": "/mnt/d/Muiti-Agent Programing/experiments/code-agent-smolagents/24371220/experiments/smolagents/stability-20261030-10x10/samples/source-05/evaluation",
+      "status": "infrastructure_failure",
+      "passed": false,
+      "requests": 11,
+      "prompt_tokens": 88629,
+      "completion_tokens": 10760,
+      "usage_complete": false,
+      "max_request_chars": 31800,
+      "agent_errors": {
+        "AgentExecutionError": 2
+      },
+      "failure_reason": "AgentGenerationError: Error in generating model output:\nRequest timed out.",
+      "agent_status": "failed",
+      "score": 0,
+      "max_score": 1,
+      "checks": {
+        "真实开发过程与修改范围": "agent 退出码 1，查看 agent-console.log；目标源码尚未修改：deepinfer/logger.py；目标源码尚未修改：deepinfer/engine/stats_logger.py；deepinfer/logger.py 须有与最终文件一致的 file_write；deepinfer/engine/stats_logger.py 须有与最终文件一致的 file_write；最后修改后须执行完整 pytest 并通过",
+        "补丁可还原实际修改": false,
+        "相关源码真实读取并入模": true,
+        "首次修改复用相关源码或模型笔记": true,
+        "独立兼容与新增功能测试": "源码或检查文件不完整，未执行",
+        "真实日志处理链路": "前置条件未满足，未执行",
+        "运行后修改范围仍合规": "目标源码尚未修改：deepinfer/logger.py；目标源码尚未修改：deepinfer/engine/stats_logger.py",
+        "学生代码与本轮开始一致": true,
+        "服务端真实用量完整": true
+      },
+      "number": 5,
+      "native": "/home/ventsdenye/.local/state/code-agent/evaluations/stability-source-05-pzpataq3"
+    },
+    {
+      "task": "source",
+      "exit_code": 1,
+      "archive": "/mnt/d/Muiti-Agent Programing/experiments/code-agent-smolagents/24371220/experiments/smolagents/stability-20261030-10x10/samples/source-06/evaluation",
+      "status": "failed",
+      "passed": false,
+      "requests": 20,
+      "prompt_tokens": 181607,
+      "completion_tokens": 39911,
+      "usage_complete": true,
+      "max_request_chars": 31739,
+      "agent_errors": {
+        "AgentExecutionError": 5
+      },
+      "failure_reason": "MAX_STEPS_NO_EXTRA_REQUEST",
+      "agent_status": "failed",
+      "score": 0,
+      "max_score": 1,
+      "checks": {
+        "真实开发过程与修改范围": "agent 退出码 1，查看 agent-console.log；目标源码尚未修改：deepinfer/logger.py；目标源码尚未修改：deepinfer/engine/stats_logger.py；deepinfer/logger.py 须有与最终文件一致的 file_write；deepinfer/engine/stats_logger.py 须有与最终文件一致的 file_write；最后修改后须执行完整 pytest 并通过",
+        "补丁可还原实际修改": false,
+        "相关源码真实读取并入模": true,
+        "首次修改复用相关源码或模型笔记": true,
+        "独立兼容与新增功能测试": "源码或检查文件不完整，未执行",
+        "真实日志处理链路": "前置条件未满足，未执行",
+        "运行后修改范围仍合规": "目标源码尚未修改：deepinfer/logger.py；目标源码尚未修改：deepinfer/engine/stats_logger.py",
+        "学生代码与本轮开始一致": true,
+        "服务端真实用量完整": true
+      },
+      "number": 6,
+      "native": "/home/ventsdenye/.local/state/code-agent/evaluations/stability-source-06-jhx4c82q"
+    },
+    {
+      "task": "source",
+      "exit_code": 1,
+      "archive": "/mnt/d/Muiti-Agent Programing/experiments/code-agent-smolagents/24371220/experiments/smolagents/stability-20261030-10x10/samples/source-07/evaluation",
+      "status": "failed",
+      "passed": false,
+      "requests": 20,
+      "prompt_tokens": 176327,
+      "completion_tokens": 17023,
+      "usage_complete": true,
+      "max_request_chars": 31797,
+      "agent_errors": {
+        "AgentExecutionError": 2,
+        "AgentParsingError": 1
+      },
+      "failure_reason": "MAX_STEPS_NO_EXTRA_REQUEST",
+      "agent_status": "failed",
+      "score": 0,
+      "max_score": 1,
+      "checks": {
+        "真实开发过程与修改范围": "agent 退出码 1，查看 agent-console.log；最后修改后须执行完整 pytest 并通过",
+        "补丁可还原实际修改": true,
+        "相关源码真实读取并入模": true,
+        "首次修改复用相关源码或模型笔记": true,
+        "独立兼容与新增功能测试": true,
+        "真实日志处理链路": true,
+        "运行后修改范围仍合规": true,
+        "学生代码与本轮开始一致": true,
+        "服务端真实用量完整": true
+      },
+      "number": 7,
+      "native": "/home/ventsdenye/.local/state/code-agent/evaluations/stability-source-07-y430sk18"
+    },
+    {
+      "task": "source",
+      "exit_code": 1,
+      "archive": "/mnt/d/Muiti-Agent Programing/experiments/code-agent-smolagents/24371220/experiments/smolagents/stability-20261030-10x10/samples/source-08/evaluation",
+      "status": "failed",
+      "passed": false,
+      "requests": 20,
+      "prompt_tokens": 172394,
+      "completion_tokens": 19647,
+      "usage_complete": true,
+      "max_request_chars": 31635,
+      "agent_errors": {
+        "AgentExecutionError": 5
+      },
+      "failure_reason": "MAX_STEPS_NO_EXTRA_REQUEST",
+      "agent_status": "failed",
+      "score": 0,
+      "max_score": 1,
+      "checks": {
+        "真实开发过程与修改范围": "agent 退出码 1，查看 agent-console.log；最后修改后须执行完整 pytest 并通过",
+        "补丁可还原实际修改": true,
+        "相关源码真实读取并入模": true,
+        "首次修改复用相关源码或模型笔记": true,
+        "独立兼容与新增功能测试": false,
+        "真实日志处理链路": false,
+        "运行后修改范围仍合规": true,
+        "学生代码与本轮开始一致": true,
+        "服务端真实用量完整": true
+      },
+      "number": 8,
+      "native": "/home/ventsdenye/.local/state/code-agent/evaluations/stability-source-08-xpm5z9cw"
+    },
+    {
+      "task": "source",
+      "exit_code": 1,
+      "archive": "/mnt/d/Muiti-Agent Programing/experiments/code-agent-smolagents/24371220/experiments/smolagents/stability-20261030-10x10/samples/source-09/evaluation",
+      "status": "failed",
+      "passed": false,
+      "requests": 20,
+      "prompt_tokens": 182240,
+      "completion_tokens": 21506,
+      "usage_complete": true,
+      "max_request_chars": 31747,
+      "agent_errors": {
+        "AgentParsingError": 1,
+        "AgentExecutionError": 2
+      },
+      "failure_reason": "MAX_STEPS_NO_EXTRA_REQUEST",
+      "agent_status": "failed",
+      "score": 0,
+      "max_score": 1,
+      "checks": {
+        "真实开发过程与修改范围": "agent 退出码 1，查看 agent-console.log",
+        "补丁可还原实际修改": true,
+        "相关源码真实读取并入模": true,
+        "首次修改复用相关源码或模型笔记": true,
+        "独立兼容与新增功能测试": true,
+        "真实日志处理链路": true,
+        "运行后修改范围仍合规": true,
+        "学生代码与本轮开始一致": true,
+        "服务端真实用量完整": true
+      },
+      "number": 9,
+      "native": "/home/ventsdenye/.local/state/code-agent/evaluations/stability-source-09-pihzhr4w"
+    },
+    {
+      "task": "source",
+      "exit_code": 0,
+      "archive": "/mnt/d/Muiti-Agent Programing/experiments/code-agent-smolagents/24371220/experiments/smolagents/stability-20261030-10x10/samples/source-10/evaluation",
+      "status": "passed",
+      "passed": true,
+      "requests": 18,
+      "prompt_tokens": 148146,
+      "completion_tokens": 15362,
+      "usage_complete": true,
+      "max_request_chars": 31757,
+      "agent_errors": {
+        "AgentParsingError": 1
+      },
+      "failure_reason": null,
+      "agent_status": "completed",
+      "score": 1,
+      "max_score": 1,
+      "checks": {
+        "真实开发过程与修改范围": true,
+        "补丁可还原实际修改": true,
+        "相关源码真实读取并入模": true,
+        "首次修改复用相关源码或模型笔记": true,
+        "独立兼容与新增功能测试": true,
+        "真实日志处理链路": true,
+        "运行后修改范围仍合规": true,
+        "学生代码与本轮开始一致": true,
+        "服务端真实用量完整": true
+      },
+      "number": 10,
+      "native": "/home/ventsdenye/.local/state/code-agent/evaluations/stability-source-10-4_7tgwpb"
+    }
+  ]
+}

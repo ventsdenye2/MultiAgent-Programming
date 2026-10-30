@@ -1,0 +1,37 @@
+{
+  "task": "ttl_cache",
+  "number": 3,
+  "status": "passed",
+  "passed": true,
+  "native": "/home/ventsdenye/.local/state/code-agent/evaluations/additional-ttl_cache-03-9gw7gqoc",
+  "archive": "/mnt/d/Muiti-Agent Programing/experiments/code-agent-smolagents/24371220/experiments/smolagents/stability-20261030-10x10/samples/extra-ttl_cache-03/evaluation",
+  "input_sha256": {
+    "cache.py": "43b57d1ac30f07e51d50184e6735667c45d915247df29a2b9f3941d431e39657",
+    "test_cache.py": "fe517707cbea5b83659adeb89b8daa44467dec7de0cdaf9925db6f0a7fe3576d"
+  },
+  "profile": "generic",
+  "max_requests": 20,
+  "exit_code": 0,
+  "agent_status": "completed",
+  "failure_reason": null,
+  "requests": 10,
+  "prompt_tokens": 43936,
+  "completion_tokens": 13990,
+  "usage_complete": true,
+  "max_request_chars": 21247,
+  "agent_errors": {
+    "AgentParsingError": 3
+  },
+  "changed_files": [
+    "cache.py"
+  ],
+  "forbidden_changes": [],
+  "grading_exit_code": 0,
+  "tests": {
+    "tests": 14,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0
+  },
+  "runtime_unchanged": true
+}

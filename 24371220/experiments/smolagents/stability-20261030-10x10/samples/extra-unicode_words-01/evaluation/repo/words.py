@@ -1,0 +1,43 @@
+import unicodedata
+
+
+def _normalize(word: str) -> str:
+    """NFC, then casefold, then NFC again."""
+    return unicodedata.normalize("NFC", unicodedata.normalize("NFC", word).casefold())
+
+
+def word_counts(text: str) -> list[tuple[str, int]]:
+    """Count words in *text*, keyed by their normalized form.
+
+    A word starts with a letter (category L*) or number (N*) and continues over
+    letters, numbers and combining marks (M*). A mark with no active word is
+    ignored; any other character terminates the current word. Words are
+    normalized with NFC, casefold, NFC before being counted, and are returned
+    in first normalized occurrence order.
+    """
+    if not isinstance(text, str):
+        raise TypeError("word_counts() expects a str, got %r" % (type(text).__name__,))
+
+    counts: dict[str, int] = {}
+    current: list[str] = []
+
+    def flush() -> None:
+        if current:
+            key = _normalize("".join(current))
+            counts[key] = counts.get(key, 0) + 1
+            del current[:]
+
+    for char in text:
+        category = unicodedata.category(char)
+        major = category[0]
+        if major == "L" or major == "N":
+            current.append(char)
+        elif major == "M":
+            if current:
+                current.append(char)
+            # A mark without an active word is ignored.
+        else:
+            flush()
+
+    flush()
+    return list(counts.items())

@@ -1,0 +1,15 @@
+{
+  "status": "completed",
+  "engine": "smolagents",
+  "upstream_version": "1.26.0",
+  "context_mode": "evidence",
+  "reason": null,
+  "usage": {
+    "requests": 14,
+    "complete": true,
+    "prompt_tokens": 62115,
+    "completion_tokens": 16281
+  },
+  "answer": "Implemented summarize() in ledger.py; full test suite passes (5 passed).",
+  "remaining": []
+}

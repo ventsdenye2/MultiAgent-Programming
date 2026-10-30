@@ -1,0 +1,117 @@
+--- a/ledger.py
++++ b/ledger.py
+@@ -1,8 +1,110 @@
+ import csv
+ import io
++import re
++from decimal import Decimal, InvalidOperation
+ 
+ 
+-def summarize(text):
+-    return [{'sku': row['sku'], 'quantity': int(row['quantity']),
+-             'revenue': str(float(row['unit_price']) * int(row['quantity']))}
+-            for row in csv.DictReader(io.StringIO(text))]
++_QUANTITY_RE = re.compile(r"[+-]?[0-9]+")
++
++
++def _parse_price(value):
++    try:
++        price = Decimal(value)
++    except (InvalidOperation, ValueError, TypeError) as exc:
++        raise ValueError("invalid unit_price") from exc
++    if not price.is_finite() or price < 0:
++        raise ValueError("invalid unit_price")
++    _sign, digits, exponent = price.as_tuple()
++    coefficient = 0
++    for digit in digits:
++        coefficient = coefficient * 10 + digit
++    return coefficient, exponent
++
++
++def _round_div_half_even(numerator, denominator):
++    negative = numerator < 0
++    quotient, remainder = divmod(abs(numerator), denominator)
++    doubled = remainder * 2
++    if doubled > denominator or (doubled == denominator and quotient % 2 == 1):
++        quotient += 1
++    return -quotient if negative else quotient
++
++
++def _format_cents(cents):
++    if cents == 0:
++        return "0.00"
++    sign = "-" if cents < 0 else ""
++    whole, fraction = divmod(abs(cents), 100)
++    return f"{sign}{whole}.{fraction:02d}"
++
++
++def _format_revenue(terms):
++    if not terms:
++        return "0.00"
++    minimum_exponent = min(terms)
++    coefficient = sum(
++        term * 10 ** (exponent - minimum_exponent)
++        for exponent, term in terms.items()
++    )
++    shift = minimum_exponent + 2
++    if shift >= 0:
++        cents = coefficient * 10 ** shift
++    else:
++        cents = _round_div_half_even(coefficient, 10 ** (-shift))
++    return _format_cents(cents)
++
++
++def summarize(text: str) -> list[dict]:
++    try:
++        stream = io.StringIO(text, newline="")
++        reader = csv.reader(stream, strict=True)
++        header = None
++        sku_index = quantity_index = price_index = None
++        states = {}
++        for row in reader:
++            if not row:
++                continue
++            if header is None:
++                header = [cell.strip() for cell in row]
++                if len(set(header)) != len(header):
++                    raise ValueError("duplicate header")
++                try:
++                    sku_index = header.index("sku")
++                    quantity_index = header.index("quantity")
++                    price_index = header.index("unit_price")
++                except ValueError as exc:
++                    raise ValueError("missing required header") from exc
++                continue
++            if len(row) != len(header):
++                raise ValueError("record has wrong number of cells")
++            sku = row[sku_index].strip()
++            if not sku:
++                raise ValueError("empty sku")
++            quantity_text = row[quantity_index].strip()
++            if _QUANTITY_RE.fullmatch(quantity_text) is None:
++                raise ValueError("invalid quantity")
++            quantity = int(quantity_text)
++            price_coefficient, price_exponent = _parse_price(
++                row[price_index].strip()
++            )
++            state = states.get(sku)
++            if state is None:
++                state = [0, {}]
++                states[sku] = state
++            state[0] += quantity
++            product = quantity * price_coefficient
++            terms = state[1]
++            terms[price_exponent] = terms.get(price_exponent, 0) + product
++        if header is None:
++            raise ValueError("empty input")
++    except csv.Error as exc:
++        raise ValueError("invalid CSV") from exc
++
++    result = []
++    for sku, (quantity, terms) in states.items():
++        result.append({
++            "sku": sku,
++            "quantity": quantity,
++            "revenue": _format_revenue(terms),
++        })
++    return result

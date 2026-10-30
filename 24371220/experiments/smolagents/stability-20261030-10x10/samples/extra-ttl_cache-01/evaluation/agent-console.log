@@ -1,0 +1,94 @@
+Error in code parsing:
+Your code snippet is invalid, because the regex pattern ```python(.*?)``` was 
+not found in it.
+            Here is your code snippet:
+
+
+<｜｜DSML｜｜ calls>
+<｜｜DSML｜｜ invoke name="update_plan">
+<｜｜DSML｜｜ parameter name="items" string="false">[{"title": "Inspect 
+repository and read cache.py fully", "status": "in_progress"}, {"title": "Run 
+baseline pytest", "status": "todo"}, {"title": "Implement TTLCache in cache.py",
+"status": "pending"}, {"title": "Run full pytest verification", "status": 
+"pending"}, {"title": "Finalize plan and answer", "status": 
+"pending"}]</｜｜DSML｜｜ parameter>
+</｜｜DSML｜｜ invoke>
+</｜｜DSML｜｜ calls>```
+            Make sure to include code with the correct pattern, for instance:
+            Thoughts: Your thoughts
+            ```python
+            # Your python code here
+            ```
+Make sure to provide correct code blobs.
+Code execution failed at line 'update_plan(items=[
+    {"title": "Inspect repository and read cache.py fully", "status": 
+"in_progress"},
+    {"title": "Run baseline pytest", "status": "todo"},
+    {"title": "Implement TTLCache in cache.py", "status": "pending"},
+    {"title": "Run full pytest verification", "status": "pending"},
+    {"title": "Finalize plan and answer", "status": "pending"},
+])' due to: ValueError: Each plan item requires a nonempty title and 
+todo/doing/done status
+Error in code parsing:
+Your code snippet is invalid, because the regex pattern ```python(.*?)``` was 
+not found in it.
+            Here is your code snippet:
+
+
+<｜｜DSML｜｜ calls>
+<｜｜DSML｜｜ invoke name="read_file">
+<｜｜DSML｜｜ parameter name="path" string="true">cache.py</｜｜DSML｜｜ 
+parameter>
+</｜｜DSML｜｜ invoke>
+</｜｜DSML｜｜ calls>```
+            Make sure to include code with the correct pattern, for instance:
+            Thoughts: Your thoughts
+            ```python
+            # Your python code here
+            ```
+Make sure to provide correct code blobs.
+Error in code parsing:
+Your code snippet is invalid, because the regex pattern ```python(.*?)``` was 
+not found in it.
+            Here is your code snippet:
+
+
+<｜｜DSML｜｜ calls>
+<｜｜DSML｜｜ invoke name="update_plan">
+<｜｜DSML｜｜ parameter name="items" string="false">[{"title": "Inspect 
+repository and read cache.py fully", "status": "done"}, {"title": "Run baseline 
+pytest", "status": "done"}, {"title": "Implement TTLCache in cache.py", 
+"status": "doing"}, {"title": "Run full pytest verification", "status": "todo"},
+{"title": "Finalize plan and answer", "status": "todo"}]</｜｜DSML｜｜ 
+parameter>
+</｜｜DSML｜｜ invoke>
+</｜｜DSML｜｜ calls>```
+            Make sure to include code with the correct pattern, for instance:
+            Thoughts: Your thoughts
+            ```python
+            # Your python code here
+            ```
+Make sure to provide correct code blobs.
+Error in code parsing:
+Your code snippet is invalid, because the regex pattern ```python(.*?)``` was 
+not found in it.
+            Here is your code snippet:
+
+
+<｜｜DSML｜｜ calls>
+<｜｜DSML｜｜ invoke name="update_plan">
+<｜｜DSML｜｜ parameter name="items" string="false">[{"title": "Inspect 
+repository and read cache.py fully", "status": "done"}, {"title": "Run baseline 
+pytest", "status": "done"}, {"title": "Implement TTLCache in cache.py", 
+"status": "doing"}, {"title": "Run full pytest verification", "status": "todo"},
+{"title": "Finalize plan and answer", "status": "todo"}]</｜｜DSML｜｜ 
+parameter>
+</｜｜DSML｜｜ invoke>
+</｜｜DSML｜｜ calls>```
+            Make sure to include code with the correct pattern, for instance:
+            Thoughts: Your thoughts
+            ```python
+            # Your python code here
+            ```
+Make sure to provide correct code blobs.
+{"status": "completed", "engine": "smolagents", "upstream_version": "1.26.0", "context_mode": "evidence", "reason": null, "usage": {"requests": 15, "complete": true, "prompt_tokens": 62907, "completion_tokens": 12037}, "answer": "Implemented TTLCache in cache.py and verified with `python -m pytest -q`: 3 passed.", "remaining": []}

@@ -1,0 +1,82 @@
+{
+  "evidence": [
+    {
+      "id": "ev-33a11c2340d22ea40039",
+      "source": "ledger.py",
+      "version": "65ca4febe824d5f44ce7b2430e8ff61eed1871f838bfc41cea5b15de4ee171b6",
+      "locator": "lines:1-8",
+      "text": "import csv\nimport io\n\n\ndef summarize(text):\n    return [{'sku': row['sku'], 'quantity': int(row['quantity']),\n             'revenue': str(float(row['unit_price']) * int(row['quantity']))}\n            for row in csv.DictReader(io.StringIO(text))]\n",
+      "required": false,
+      "page": null,
+      "valid": false,
+      "atomic": false
+    },
+    {
+      "id": "ev-4ed373a6c4a35a7afa86",
+      "source": "test_ledger.py",
+      "version": "fba6a24275abb76d9f6ab51075335968bfe36618cd9fa04271a4ee3d5381e0d9",
+      "locator": "lines:1-18",
+      "text": "import pytest\nfrom ledger import summarize\n\n\ndef test_aggregate_returns_and_order():\n    assert summarize('sku,quantity,unit_price\\na,2,0.10\\nb,1,3\\na,-1,0.10\\n') == [\n        {'sku': 'a', 'quantity': 1, 'revenue': '0.10'},\n        {'sku': 'b', 'quantity': 1, 'revenue': '3.00'}]\n\n\ndef test_round_only_after_sum():\n    assert summarize('sku,quantity,unit_price\\na,1,0.005\\na,1,0.005\\n')[0]['revenue'] == '0.01'\n\n\n@pytest.mark.parametrize('text', ['', 'sku,quantity\\na,1\\n', 'sku,quantity,unit_price\\na,1,NaN\\n'])\ndef test_invalid(text):\n    with pytest.raises(ValueError):\n        summarize(text)\n",
+      "required": false,
+      "page": null,
+      "valid": true,
+      "atomic": false
+    },
+    {
+      "id": "ev-7085c6bbdeba860aaa63",
+      "source": "ledger.py",
+      "version": "c7fac3117d9a3b74e282e583fdf7d92e714a910f58369fc9d6dcfc1b02546daa",
+      "locator": "lines:1-116",
+      "text": "import csv\nimport io\nimport re\nfrom decimal import Decimal, InvalidOperation\n\n_REQUIRED = (\"sku\", \"quantity\", \"unit_price\")\n_INT_RE = re.compile(r\"[+-]?[0-9]+\")\n\n\ndef _format_cents(cents):\n    if cents == 0:\n        return \"0.00\"\n    sign = \"-\" if cents < 0 else \"\"\n    cents = abs(cents)\n    return f\"{sign}{cents // 100}.{cents % 100:02d}\"\n\n\ndef _revenue_string(coefficient, exponent):\n    # The exact revenue is coefficient * 10**exponent.  Round once to cents.\n    if exponent >= -2:\n        cents = coefficient * (10 ** (exponent + 2))\n    else:\n        shift = -2 - exponent\n        divisor = 10 ** shift\n        quotient, remainder = divmod(abs(coefficient), divisor)\n        half = divisor // 2\n        if remainder > half or (remainder == half and quotient % 2 == 1):\n            quotient += 1\n        cents = -quotient if coefficient < 0 else quotient\n    return _format_cents(cents)\n\n\ndef summarize(text):\n    if not isinstance(text, str) or text == \"\":\n        raise ValueError(\"input is empty\")\n\n    try:\n        reader = csv.reader(io.StringIO(text, newline=\"\"), strict=True)\n        rows = [row for row in reader if row]\n    except (csv.Error, TypeError) as exc:\n        raise ValueError(\"invalid CSV\") from exc\n\n    if not rows:\n        raise ValueError(\"missing header\")\n\n    header = [name.strip() for name in rows[0]]\n    seen = set()\n    for name in header:\n        if name in seen:\n            raise ValueError(\"duplicate header\")\n        seen.add(name)\n\n    if any(name not in seen for name in _REQUIRED):\n        raise ValueError(\"missing required header\")\n\n    indexes = {name: index for index, name in enumerate(header)}\n    sku_index = indexes[\"sku\"]\n    quantity_index = indexes[\"quantity\"]\n    price_index = indexes[\"unit_price\"]\n\n    aggregates = {}\n    for row in rows[1:]:\n        if len(row) != len(header):\n            raise ValueError(\"row does not match header\")\n\n        sku = row[sku_index].strip()\n        if not sku:\n            raise ValueError(\"empty sku\")\n\n        quantity_text = row[quantity_index].strip()\n        if _INT_RE.fullmatch(quantity_text) is None:\n            raise ValueError(\"invalid quantity\")\n        quantity = int(quantity_text)\n\n        price_text = row[price_index].strip()\n        try:\n            price = Decimal(price_text)\n        except (InvalidOperation, ValueError, TypeError) as exc:\n            raise ValueError(\"invalid price\") from exc\n        if not price.is_finite() or price < 0:\n            raise ValueError(\"invalid price\")\n\n        sign, digits, exponent = price.as_tuple()\n        coefficient = 0\n        for digit in digits:\n            coefficient = coefficient * 10 + digit\n        if sign:\n            coefficient = -coefficient\n\n        term = quantity * coefficient\n        previous = aggregates.get(sku)\n        if previous is None:\n            aggregates[sku] = [quantity, term, exponent]\n        else:\n            total_quantity, total_coefficient, total_exponent = previous\n            if exponent < total_exponent:\n                total_coefficient = (\n                    total_coefficient * (10 ** (total_exponent - exponent)) + term\n                )\n                total_exponent = exponent\n            elif exponent > total_exponent:\n                total_coefficient += term * (10 ** (exponent - total_exponent))\n            else:\n                total_coefficient += term\n            previous[0] = total_quantity + quantity\n            previous[1] = total_coefficient\n            previous[2] = total_exponent\n\n    result = []\n    for sku, (quantity, coefficient, exponent) in aggregates.items():\n        result.append({\n            \"sku\": sku,\n            \"quantity\": quantity,\n            \"revenue\": _revenue_string(coefficient, exponent),\n        })\n    return result\n",
+      "required": false,
+      "page": null,
+      "valid": true,
+      "atomic": false
+    },
+    {
+      "id": "ev-287f6efa145a33843f0e",
+      "source": "ledger.py",
+      "version": "c7fac3117d9a3b74e282e583fdf7d92e714a910f58369fc9d6dcfc1b02546daa",
+      "locator": "lines:18-30",
+      "text": "def _revenue_string(coefficient, exponent):\n    # The exact revenue is coefficient * 10**exponent.  Round once to cents.\n    if exponent >= -2:\n        cents = coefficient * (10 ** (exponent + 2))\n    else:\n        shift = -2 - exponent\n        divisor = 10 ** shift\n        quotient, remainder = divmod(abs(coefficient), divisor)\n        half = divisor // 2\n        if remainder > half or (remainder == half and quotient % 2 == 1):\n            quotient += 1\n        cents = -quotient if coefficient < 0 else quotient\n    return _format_cents(cents)\n",
+      "required": false,
+      "page": null,
+      "valid": true,
+      "atomic": false
+    }
+  ],
+  "notes": {},
+  "exposed": [
+    "ev-287f6efa145a33843f0e",
+    "ev-4ed373a6c4a35a7afa86",
+    "ev-7085c6bbdeba860aaa63"
+  ],
+  "received_ranges": {
+    "ev-4ed373a6c4a35a7afa86": [
+      [
+        0,
+        597
+      ]
+    ],
+    "ev-7085c6bbdeba860aaa63": [
+      [
+        0,
+        3771
+      ]
+    ],
+    "ev-287f6efa145a33843f0e": [
+      [
+        0,
+        550
+      ]
+    ]
+  },
+  "full_read_ids": {
+    "test_ledger.py": [
+      "ev-4ed373a6c4a35a7afa86"
+    ],
+    "ledger.py": [
+      "ev-7085c6bbdeba860aaa63"
+    ]
+  }
+}

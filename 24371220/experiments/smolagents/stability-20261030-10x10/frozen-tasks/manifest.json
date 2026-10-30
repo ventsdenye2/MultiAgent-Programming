@@ -1,0 +1,52 @@
+{
+  "schema_version": 1,
+  "max_requests_per_run": 20,
+  "profile": "generic",
+  "verify_commands": [
+    [
+      "python",
+      "-m",
+      "pytest",
+      "-q"
+    ]
+  ],
+  "tasks": [
+    {
+      "id": "config_layers",
+      "editable": [
+        "merge.py",
+        "settings.py"
+      ],
+      "expected_tests": 17
+    },
+    {
+      "id": "csv_ledger",
+      "editable": [
+        "ledger.py"
+      ],
+      "expected_tests": 16
+    },
+    {
+      "id": "unicode_words",
+      "editable": [
+        "words.py"
+      ],
+      "expected_tests": 10
+    },
+    {
+      "id": "dependency_paths",
+      "editable": [
+        "paths.py",
+        "graph.py"
+      ],
+      "expected_tests": 15
+    },
+    {
+      "id": "ttl_cache",
+      "editable": [
+        "cache.py"
+      ],
+      "expected_tests": 14
+    }
+  ]
+}
