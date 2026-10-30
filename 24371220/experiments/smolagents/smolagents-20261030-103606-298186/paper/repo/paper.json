@@ -1,0 +1,12 @@
+{
+  "title": "Agentic Large Language Models, a survey",
+  "arxiv": "2503.23037v3",
+  "version_date": "2025-11-22",
+  "pdf_pages": 76,
+  "required_pages": [
+    1,
+    52
+  ],
+  "text_extraction": "由 agent 调用 read_pdf.py，使用 pdftotext -layout 按 PDF 页序号提取文字；不预先提供 TXT。",
+  "pdf_file": "paper.pdf"
+}
