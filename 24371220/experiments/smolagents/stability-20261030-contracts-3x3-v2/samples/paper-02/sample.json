@@ -1,0 +1,26 @@
+{
+  "task": "paper",
+  "exit_code": 1,
+  "archive": "/mnt/d/Muiti-Agent Programing/experiments/code-agent-smolagents/24371220/experiments/smolagents/stability-20261030-contracts-3x3-v2/samples/paper-02/evaluation",
+  "status": "failed",
+  "passed": false,
+  "requests": 40,
+  "prompt_tokens": 317531,
+  "completion_tokens": 18319,
+  "usage_complete": true,
+  "max_request_chars": 31762,
+  "agent_errors": {
+    "AgentParsingError": 1,
+    "AgentExecutionError": 1
+  },
+  "failure_reason": "MAX_STEPS_NO_EXTRA_REQUEST",
+  "agent_status": "failed",
+  "score": 0.0,
+  "max_score": 5,
+  "checks": {
+    "学生程序与报告生成": "agent 退出码 1，查看 agent-console.log；未产生 file_write，尚未完成指定文件；先检查 agent-console.log 中的退出原因；report.json 与初始内容相同或为空，尚未生成阅读报告",
+    "其他文件保持原样": true
+  },
+  "number": 2,
+  "native": "/home/ventsdenye/.local/state/code-agent/evaluations/stability-paper-02-c5oz7dyc"
+}

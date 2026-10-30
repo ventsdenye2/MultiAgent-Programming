@@ -1,0 +1,20 @@
+{
+  "status": "failed",
+  "engine": "smolagents",
+  "upstream_version": "1.26.0",
+  "context_mode": "evidence",
+  "reason": "AgentGenerationError: Error in generating model output:\nError code: 500 - {'error': {'message': 'Internal Server Error (request_id: 2ee58fae-df34-4044-be85-ec11d403218c)', 'type': 'internal_error', 'param': None, 'code': 'internal_error'}}",
+  "usage": {
+    "requests": 36,
+    "complete": false,
+    "prompt_tokens": 284968,
+    "completion_tokens": 18610
+  },
+  "remaining": [
+    "write/reuse final section note: reasoning",
+    "write/reuse final section note: multi_agent",
+    "make the requested change",
+    "verify current files: python -m pytest -q",
+    "finish all plan items after their work and checks"
+  ]
+}

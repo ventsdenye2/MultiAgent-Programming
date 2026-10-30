@@ -1,0 +1,403 @@
+{
+  "path": "/mnt/d/Muiti-Agent Programing/experiments/code-agent-smolagents/24371220/experiments/smolagents/stability-20261030-contracts-3x3-v2/samples/paper-01/evaluation/paper/development/run.log",
+  "requests": 36,
+  "responses": 35,
+  "model_errors": 1,
+  "usage_complete": false,
+  "known_prompt_tokens": 284968,
+  "known_completion_tokens": 18610,
+  "known_total_tokens": 303578,
+  "cache_hit_tokens": 152064,
+  "cache_miss_tokens": 132904,
+  "max_request_chars": 31674,
+  "response_classes": {
+    "ok": 35
+  },
+  "last_request_parameters": {
+    "model": "deepseek-flash",
+    "max_tokens": 16384,
+    "thinking": {
+      "type": "enabled"
+    },
+    "reasoning_effort": "high"
+  },
+  "counts": {
+    "snapshot": 1,
+    "run_start": 1,
+    "file_read": 3,
+    "context_selection": 36,
+    "request_budget": 36,
+    "model_request": 36,
+    "model_response": 35,
+    "usage": 35,
+    "context_exposure": 35,
+    "tool_call": 46,
+    "plan": 2,
+    "tool_result": 46,
+    "command_result": 19,
+    "verification_result": 1,
+    "evidence": 54,
+    "agent_step": 36,
+    "context_drop": 24,
+    "section_note": 4,
+    "paper_answer": 2,
+    "context_clip": 12,
+    "agent_error": 3,
+    "model_error": 1,
+    "run_error": 1,
+    "run_result": 1
+  },
+  "commands": [
+    {
+      "argv": [
+        "/mnt/d/Muiti-Agent Programing/experiments/code-agent-smolagents/24371220/.venv/bin/python",
+        "-m",
+        "pytest",
+        "-q"
+      ],
+      "rc": 1,
+      "timed_out": false
+    },
+    {
+      "argv": [
+        "/mnt/d/Muiti-Agent Programing/experiments/code-agent-smolagents/24371220/.venv/bin/python",
+        "read_pdf.py",
+        "--start-page",
+        "1",
+        "--end-page",
+        "52"
+      ],
+      "rc": 0,
+      "timed_out": false
+    },
+    {
+      "argv": [
+        "/mnt/d/Muiti-Agent Programing/experiments/code-agent-smolagents/24371220/.venv/bin/python",
+        "read_pdf.py",
+        "--start-page",
+        "10",
+        "--end-page",
+        "13"
+      ],
+      "rc": 0,
+      "timed_out": false
+    },
+    {
+      "argv": [
+        "/mnt/d/Muiti-Agent Programing/experiments/code-agent-smolagents/24371220/.venv/bin/python",
+        "read_pdf.py",
+        "--start-page",
+        "14",
+        "--end-page",
+        "17"
+      ],
+      "rc": 0,
+      "timed_out": false
+    },
+    {
+      "argv": [
+        "/mnt/d/Muiti-Agent Programing/experiments/code-agent-smolagents/24371220/.venv/bin/python",
+        "read_pdf.py",
+        "--start-page",
+        "18",
+        "--end-page",
+        "21"
+      ],
+      "rc": 0,
+      "timed_out": false
+    },
+    {
+      "argv": [
+        "/mnt/d/Muiti-Agent Programing/experiments/code-agent-smolagents/24371220/.venv/bin/python",
+        "read_pdf.py",
+        "--start-page",
+        "22",
+        "--end-page",
+        "25"
+      ],
+      "rc": 0,
+      "timed_out": false
+    },
+    {
+      "argv": [
+        "/mnt/d/Muiti-Agent Programing/experiments/code-agent-smolagents/24371220/.venv/bin/python",
+        "read_pdf.py",
+        "--start-page",
+        "26",
+        "--end-page",
+        "30"
+      ],
+      "rc": 0,
+      "timed_out": false
+    },
+    {
+      "argv": [
+        "/mnt/d/Muiti-Agent Programing/experiments/code-agent-smolagents/24371220/.venv/bin/python",
+        "read_pdf.py",
+        "--start-page",
+        "10",
+        "--end-page",
+        "13"
+      ],
+      "rc": 0,
+      "timed_out": false
+    },
+    {
+      "argv": [
+        "/mnt/d/Muiti-Agent Programing/experiments/code-agent-smolagents/24371220/.venv/bin/python",
+        "read_pdf.py",
+        "--start-page",
+        "12",
+        "--end-page",
+        "12"
+      ],
+      "rc": 0,
+      "timed_out": false
+    },
+    {
+      "argv": [
+        "/mnt/d/Muiti-Agent Programing/experiments/code-agent-smolagents/24371220/.venv/bin/python",
+        "read_pdf.py",
+        "--start-page",
+        "14",
+        "--end-page",
+        "15"
+      ],
+      "rc": 0,
+      "timed_out": false
+    },
+    {
+      "argv": [
+        "/mnt/d/Muiti-Agent Programing/experiments/code-agent-smolagents/24371220/.venv/bin/python",
+        "read_pdf.py",
+        "--start-page",
+        "24",
+        "--end-page",
+        "30"
+      ],
+      "rc": 0,
+      "timed_out": false
+    },
+    {
+      "argv": [
+        "/mnt/d/Muiti-Agent Programing/experiments/code-agent-smolagents/24371220/.venv/bin/python",
+        "read_pdf.py",
+        "--start-page",
+        "46",
+        "--end-page",
+        "52"
+      ],
+      "rc": 0,
+      "timed_out": false
+    },
+    {
+      "argv": [
+        "/mnt/d/Muiti-Agent Programing/experiments/code-agent-smolagents/24371220/.venv/bin/python",
+        "read_pdf.py",
+        "--start-page",
+        "9",
+        "--end-page",
+        "11"
+      ],
+      "rc": 0,
+      "timed_out": false
+    },
+    {
+      "argv": [
+        "/mnt/d/Muiti-Agent Programing/experiments/code-agent-smolagents/24371220/.venv/bin/python",
+        "read_pdf.py",
+        "--start-page",
+        "20",
+        "--end-page",
+        "22"
+      ],
+      "rc": 0,
+      "timed_out": false
+    },
+    {
+      "argv": [
+        "/mnt/d/Muiti-Agent Programing/experiments/code-agent-smolagents/24371220/.venv/bin/python",
+        "read_pdf.py",
+        "--start-page",
+        "31",
+        "--end-page",
+        "34"
+      ],
+      "rc": 0,
+      "timed_out": false
+    },
+    {
+      "argv": [
+        "/mnt/d/Muiti-Agent Programing/experiments/code-agent-smolagents/24371220/.venv/bin/python",
+        "read_pdf.py",
+        "--start-page",
+        "9",
+        "--end-page",
+        "13"
+      ],
+      "rc": 0,
+      "timed_out": false
+    },
+    {
+      "argv": [
+        "/mnt/d/Muiti-Agent Programing/experiments/code-agent-smolagents/24371220/.venv/bin/python",
+        "read_pdf.py",
+        "--start-page",
+        "20",
+        "--end-page",
+        "24"
+      ],
+      "rc": 0,
+      "timed_out": false
+    },
+    {
+      "argv": [
+        "/mnt/d/Muiti-Agent Programing/experiments/code-agent-smolagents/24371220/.venv/bin/python",
+        "read_pdf.py",
+        "--start-page",
+        "43",
+        "--end-page",
+        "47"
+      ],
+      "rc": 0,
+      "timed_out": false
+    },
+    {
+      "argv": [
+        "/mnt/d/Muiti-Agent Programing/experiments/code-agent-smolagents/24371220/.venv/bin/python",
+        "read_pdf.py",
+        "--start-page",
+        "50",
+        "--end-page",
+        "52"
+      ],
+      "rc": 0,
+      "timed_out": false
+    }
+  ],
+  "paper_pages_exposed": [
+    1,
+    2,
+    3,
+    4,
+    5,
+    6,
+    7,
+    8,
+    9,
+    10,
+    11,
+    12,
+    13,
+    14,
+    15,
+    16,
+    17,
+    18,
+    19,
+    20,
+    21,
+    22,
+    23,
+    24,
+    25,
+    26,
+    27,
+    28,
+    29,
+    30,
+    31,
+    32,
+    33,
+    34,
+    35,
+    36,
+    37,
+    38,
+    39,
+    40,
+    41,
+    42,
+    43,
+    44,
+    45,
+    46,
+    47,
+    48,
+    49,
+    50,
+    51,
+    52
+  ],
+  "paper_page_count": 52,
+  "section_note_count": 4,
+  "section_topics": [
+    "outlook",
+    "overview",
+    "tool_use"
+  ],
+  "changed_files": [],
+  "agent_error_types": {
+    "AgentParsingError": 2,
+    "AgentExecutionError": 1
+  },
+  "recent_actions": [
+    {
+      "event": "tool_call",
+      "tool": "run_command",
+      "error_type": null,
+      "error": null
+    },
+    {
+      "event": "tool_call",
+      "tool": "read_pdf",
+      "error_type": null,
+      "error": null
+    },
+    {
+      "event": "tool_call",
+      "tool": "read_pdf",
+      "error_type": null,
+      "error": null
+    },
+    {
+      "event": "tool_call",
+      "tool": "recall",
+      "error_type": null,
+      "error": null
+    },
+    {
+      "event": "tool_call",
+      "tool": "write_note",
+      "error_type": null,
+      "error": null
+    },
+    {
+      "event": "tool_call",
+      "tool": "recall",
+      "error_type": null,
+      "error": null
+    }
+  ],
+  "result": {
+    "status": "failed",
+    "engine": "smolagents",
+    "upstream_version": "1.26.0",
+    "context_mode": "evidence",
+    "reason": "AgentGenerationError: Error in generating model output:\nError code: 500 - {'error': {'message': 'Internal Server Error (request_id: 2ee58fae-df34-4044-be85-ec11d403218c)', 'type': 'internal_error', 'param': None, 'code': 'internal_error'}}",
+    "usage": {
+      "requests": 36,
+      "complete": false,
+      "prompt_tokens": 284968,
+      "completion_tokens": 18610
+    },
+    "remaining": [
+      "write/reuse final section note: reasoning",
+      "write/reuse final section note: multi_agent",
+      "make the requested change",
+      "verify current files: python -m pytest -q",
+      "finish all plan items after their work and checks"
+    ]
+  },
+  "invalid_lines": 0
+}

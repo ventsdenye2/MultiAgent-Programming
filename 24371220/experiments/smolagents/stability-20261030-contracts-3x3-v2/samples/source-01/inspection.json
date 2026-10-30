@@ -1,0 +1,137 @@
+{
+  "path": "/mnt/d/Muiti-Agent Programing/experiments/code-agent-smolagents/24371220/experiments/smolagents/stability-20261030-contracts-3x3-v2/samples/source-01/evaluation/source/development/run.log",
+  "requests": 9,
+  "responses": 9,
+  "model_errors": 0,
+  "usage_complete": true,
+  "known_prompt_tokens": 64051,
+  "known_completion_tokens": 5512,
+  "known_total_tokens": 69563,
+  "cache_hit_tokens": 36608,
+  "cache_miss_tokens": 27443,
+  "max_request_chars": 31104,
+  "response_classes": {
+    "ok": 9
+  },
+  "last_request_parameters": {
+    "model": "deepseek-flash",
+    "max_tokens": 16384,
+    "thinking": {
+      "type": "enabled"
+    },
+    "reasoning_effort": "high"
+  },
+  "counts": {
+    "snapshot": 3,
+    "run_start": 1,
+    "file_read": 11,
+    "context_selection": 9,
+    "request_budget": 9,
+    "model_request": 9,
+    "model_response": 9,
+    "usage": 9,
+    "context_exposure": 9,
+    "tool_call": 20,
+    "plan": 4,
+    "tool_result": 19,
+    "evidence": 23,
+    "agent_step": 9,
+    "context_clip": 5,
+    "command_result": 2,
+    "verification_result": 2,
+    "file_write": 3,
+    "evidence_invalidated": 3,
+    "tool_error": 1,
+    "agent_error": 2,
+    "run_result": 1
+  },
+  "commands": [
+    {
+      "argv": [
+        "/mnt/d/Muiti-Agent Programing/experiments/code-agent-smolagents/24371220/.venv/bin/python",
+        "-m",
+        "pytest",
+        "-q"
+      ],
+      "rc": 1,
+      "timed_out": false
+    },
+    {
+      "argv": [
+        "/mnt/d/Muiti-Agent Programing/experiments/code-agent-smolagents/24371220/.venv/bin/python",
+        "-m",
+        "pytest",
+        "-q"
+      ],
+      "rc": 0,
+      "timed_out": false
+    }
+  ],
+  "paper_pages_exposed": [],
+  "paper_page_count": 0,
+  "section_note_count": 0,
+  "section_topics": [],
+  "changed_files": [
+    "deepinfer/engine/stats_logger.py",
+    "deepinfer/environ.py",
+    "deepinfer/logger.py"
+  ],
+  "agent_error_types": {
+    "AgentExecutionError": 1,
+    "AgentParsingError": 1
+  },
+  "recent_actions": [
+    {
+      "event": "tool_call",
+      "tool": "read_file",
+      "error_type": null,
+      "error": null
+    },
+    {
+      "event": "tool_call",
+      "tool": "read_file",
+      "error_type": null,
+      "error": null
+    },
+    {
+      "event": "tool_call",
+      "tool": "read_file",
+      "error_type": null,
+      "error": null
+    },
+    {
+      "event": "tool_call",
+      "tool": "search_code",
+      "error_type": null,
+      "error": null
+    },
+    {
+      "event": "tool_call",
+      "tool": "run_command",
+      "error_type": null,
+      "error": null
+    },
+    {
+      "event": "tool_call",
+      "tool": "update_plan",
+      "error_type": null,
+      "error": null
+    }
+  ],
+  "result": {
+    "status": "completed",
+    "engine": "smolagents",
+    "upstream_version": "1.26.0",
+    "context_mode": "evidence",
+    "reason": null,
+    "usage": {
+      "requests": 9,
+      "complete": true,
+      "prompt_tokens": 64051,
+      "completion_tokens": 5512
+    },
+    "answer": "Implemented DEEPINFER_LOG_MAX_MESSAGE_CHARS across deepinfer/environ.py (EnvVar.positive_int_or_none(minimum=32)), deepinfer/logger.py (NewLineFormatter max_message_chars keyword-only budget with '...<omitted>...' marker and keep_full_message check via copied LogRecord, wired into _setup_logger from envs), and deepinfer/engine/stats_logger.py (_log_worker emits logger.info(m, extra={'keep_full_message': True})). Full suite passes: 60 passed.",
+    "remaining": []
+  },
+  "invalid_lines": 0
+}

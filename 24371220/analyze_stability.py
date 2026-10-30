@@ -1,5 +1,6 @@
 """Read-only per-request milestones for a recorded course cohort."""
 import argparse
+from collections import Counter
 import json
 import re
 from pathlib import Path
@@ -11,6 +12,7 @@ def milestones(path):
     request = 0
     writes, tests, finishes, errors, saved, version_checks, plans = [], [], [], [], [], [], []
     evidence, last_arguments, quote_rejections = {}, {}, []
+    tool_counts = Counter()
     for line in path.read_text(encoding='utf-8').splitlines():
         event = json.loads(line)
         kind = event.get('event')
@@ -21,6 +23,7 @@ def milestones(path):
             evidence[event['id']] = event
         elif kind == 'tool_call':
             last_arguments[event['tool']] = event.get('arguments', {})
+            tool_counts[event['tool']] += 1
         elif kind == 'tool_error' and event.get('tool') == 'save_answer':
             args = last_arguments.get('save_answer', {})
             item = evidence.get(args.get('evidence_id'), {})
@@ -57,6 +60,7 @@ def milestones(path):
             'finish': finishes, 'errors': errors, 'saved_answer_events': saved,
             'version_checks': version_checks, 'completed_plan_events': plans,
             'quote_rejections': quote_rejections,
+            'tool_calls': dict(tool_counts),
             'protocol_errors': sum(e['type'] == 'AgentParsingError' for e in errors),
             'tool_errors': sum(e['event'] == 'tool_error' for e in errors),
             'infrastructure_errors': sum(e['event'] == 'model_error' for e in errors)}

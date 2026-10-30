@@ -1,0 +1,139 @@
+{
+  "path": "/mnt/d/Muiti-Agent Programing/experiments/code-agent-smolagents/24371220/experiments/smolagents/stability-20261030-contracts-3x3-v2/samples/source-02/evaluation/source/development/run.log",
+  "requests": 20,
+  "responses": 20,
+  "model_errors": 0,
+  "usage_complete": true,
+  "known_prompt_tokens": 158452,
+  "known_completion_tokens": 12809,
+  "known_total_tokens": 171261,
+  "cache_hit_tokens": 81792,
+  "cache_miss_tokens": 76660,
+  "max_request_chars": 31550,
+  "response_classes": {
+    "ok": 20
+  },
+  "last_request_parameters": {
+    "model": "deepseek-flash",
+    "max_tokens": 16384,
+    "thinking": {
+      "type": "enabled"
+    },
+    "reasoning_effort": "high"
+  },
+  "counts": {
+    "snapshot": 3,
+    "run_start": 1,
+    "file_read": 16,
+    "context_selection": 20,
+    "request_budget": 20,
+    "model_request": 20,
+    "model_response": 20,
+    "usage": 20,
+    "context_exposure": 20,
+    "tool_call": 26,
+    "plan": 1,
+    "tool_result": 25,
+    "agent_step": 20,
+    "evidence": 28,
+    "context_clip": 9,
+    "command_result": 2,
+    "verification_result": 2,
+    "agent_error": 5,
+    "file_write": 3,
+    "evidence_invalidated": 3,
+    "tool_error": 1,
+    "run_error": 1,
+    "run_result": 1
+  },
+  "commands": [
+    {
+      "argv": [
+        "/mnt/d/Muiti-Agent Programing/experiments/code-agent-smolagents/24371220/.venv/bin/python",
+        "-m",
+        "pytest",
+        "-q"
+      ],
+      "rc": 1,
+      "timed_out": false
+    },
+    {
+      "argv": [
+        "/mnt/d/Muiti-Agent Programing/experiments/code-agent-smolagents/24371220/.venv/bin/python",
+        "-m",
+        "pytest",
+        "-q"
+      ],
+      "rc": 0,
+      "timed_out": false
+    }
+  ],
+  "paper_pages_exposed": [],
+  "paper_page_count": 0,
+  "section_note_count": 0,
+  "section_topics": [],
+  "changed_files": [
+    "deepinfer/engine/stats_logger.py",
+    "deepinfer/environ.py",
+    "deepinfer/logger.py"
+  ],
+  "agent_error_types": {
+    "AgentParsingError": 2,
+    "AgentExecutionError": 3
+  },
+  "recent_actions": [
+    {
+      "event": "tool_call",
+      "tool": "run_command",
+      "error_type": null,
+      "error": null
+    },
+    {
+      "event": "agent_error",
+      "tool": null,
+      "error_type": "AgentExecutionError",
+      "error": "Code execution failed at line 'import os, subprocess, sys' due to: InterpreterError: Import of os is not allowed. Authorized imports are: ['time', 'queue', 'math', 'itertools', 're', 'json', 'collections', 'random', 'datetime', 'stat', 'unicodedata', 'statistics']"
+    },
+    {
+      "event": "tool_call",
+      "tool": "run_command",
+      "error_type": null,
+      "error": null
+    },
+    {
+      "event": "tool_error",
+      "tool": "run_command",
+      "error_type": "ValueError",
+      "error": "command is not allowed"
+    },
+    {
+      "event": "agent_error",
+      "tool": null,
+      "error_type": "AgentExecutionError",
+      "error": "Code execution failed at line 'chk = run_command([\"python\", \"-c\", \"import os;print(os.path.exists('run.log'), os.path.exists('patch.diff'));print(open('patch.diff').read().count('diff --git'));print([l for l in open('patch.diff') if l.startswith('diff --git')])\"], '.')' due to: ValueError: command is not allowed"
+    },
+    {
+      "event": "tool_call",
+      "tool": "task_status",
+      "error_type": null,
+      "error": null
+    }
+  ],
+  "result": {
+    "status": "failed",
+    "engine": "smolagents",
+    "upstream_version": "1.26.0",
+    "context_mode": "evidence",
+    "reason": "MAX_STEPS_NO_EXTRA_REQUEST",
+    "usage": {
+      "requests": 20,
+      "complete": true,
+      "prompt_tokens": 158452,
+      "completion_tokens": 12809
+    },
+    "remaining": [
+      "finish all plan items after their work and checks"
+    ]
+  },
+  "invalid_lines": 0
+}

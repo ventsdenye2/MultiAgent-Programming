@@ -1,0 +1,8 @@
+正在运行题目1；本轮会真实调用模型。完整输出写入 agent-console.log。
+仍在执行｜已等待约 30 秒；日志：/home/ventsdenye/.local/state/code-agent/evaluations/stability-paper-01-zqnr3ak2/results/paper/agent-console.log
+仍在执行｜已等待约 60 秒；日志：/home/ventsdenye/.local/state/code-agent/evaluations/stability-paper-01-zqnr3ak2/results/paper/agent-console.log
+仍在执行｜已等待约 90 秒；日志：/home/ventsdenye/.local/state/code-agent/evaluations/stability-paper-01-zqnr3ak2/results/paper/agent-console.log
+仍在执行｜已等待约 120 秒；日志：/home/ventsdenye/.local/state/code-agent/evaluations/stability-paper-01-zqnr3ak2/results/paper/agent-console.log
+仍在执行｜已等待约 150 秒；日志：/home/ventsdenye/.local/state/code-agent/evaluations/stability-paper-01-zqnr3ak2/results/paper/agent-console.log
+仍在执行｜已等待约 180 秒；日志：/home/ventsdenye/.local/state/code-agent/evaluations/stability-paper-01-zqnr3ak2/results/paper/agent-console.log
+未完成评测｜本轮真实 API 请求未完整完成；未给分。查看 /home/ventsdenye/.local/state/code-agent/evaluations/stability-paper-01-zqnr3ak2/results/paper/api-development/records.json

@@ -1,0 +1,23 @@
+命令：["/mnt/d/Muiti-Agent Programing/experiments/code-agent-smolagents/24371220/.venv/bin/python", "/home/ventsdenye/.local/state/code-agent/evaluations/stability-paper-02-c5oz7dyc/results/paper/submission/agent.py", "--task", "/home/ventsdenye/.local/state/code-agent/evaluations/stability-paper-02-c5oz7dyc/course/公开任务/题目1/task.md", "--repo", "/home/ventsdenye/.local/state/code-agent/evaluations/stability-paper-02-c5oz7dyc/results/paper/repo", "--model", "deepseek-flash", "--auto"]
+Error in code parsing:
+Your code snippet is invalid, because the regex pattern ```python(.*?)``` was 
+not found in it.
+            Here is your code snippet:
+
+
+<｜｜DSML｜｜ calls>
+<｜｜DSML｜｜ invoke name="task_status">
+
+</｜｜DSML｜｜ invoke>
+</｜｜DSML｜｜ calls>```
+            Make sure to include code with the correct pattern, for instance:
+            Thoughts: Your thoughts
+            ```python
+            # Your python code here
+            ```
+Make sure to provide correct code blobs.
+Code execution failed at line 'for n in s.get('notes',[]):
+    print(n.get('title') or n.get('section'), n.get('section'), n.get('pages'), 
+len(n.get('content','')), n.get('evidence_ids'))' due to: InterpreterError: 
+Object overview has no attribute get
+{"status": "failed", "engine": "smolagents", "upstream_version": "1.26.0", "context_mode": "evidence", "reason": "MAX_STEPS_NO_EXTRA_REQUEST", "usage": {"requests": 40, "complete": true, "prompt_tokens": 317531, "completion_tokens": 18319}, "remaining": ["make the requested change", "verify current files: python -m pytest -q", "finish all plan items after their work and checks"]}
