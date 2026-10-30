@@ -3,6 +3,7 @@ from dataclasses import asdict, dataclass
 import ast
 import hashlib
 import json
+import copy
 
 from .audit import contains
 
@@ -11,6 +12,14 @@ SOURCE_UNITS = {
     "deepinfer/environ.py": {"EnvVar", "rearm", "rearm_all"},
     "deepinfer/logger.py": {"NewLineFormatter", "_setup_logger", "init_logger"},
     "deepinfer/engine/stats_logger.py": {"_log_worker", "_emit_logs"},
+}
+
+PAPER_QUESTIONS = {
+    'overview': {'categories': list, 'search_methods': list},
+    'reasoning': {'self_consistency_selection': str, 'tot_search': list},
+    'tool_use': {'toolformer_tools': list, 'toolbench_api_count': int},
+    'multi_agent': {'camel_prompting': str, 'generative_agents_evaluators': int},
+    'outlook': {'agenda_topics': list, 'shared_foundations': list},
 }
 
 
@@ -37,6 +46,8 @@ class EvidenceStore:
         self.exposed = set()
         self.current = set()
         self.notes = {}
+        self.answers = {}
+        self.section_text = {}
         self.current_notes = set()
         self.pending = []
         self.last_response = None
@@ -170,6 +181,52 @@ class EvidenceStore:
             if invalid.intersection(note['evidence_ids']):
                 note['valid'] = False
         self.log('evidence_invalidated', source=source, evidence_ids=sorted(invalid))
+
+    def _validate_answer(self, section, question_id, answer, evidence_id, page, quote):
+        if section not in self.contract.topics or not isinstance(question_id, str) or not question_id.strip():
+            raise ValueError('Invalid section or question id')
+        expected = PAPER_QUESTIONS.get(section, {}).get(question_id)
+        if expected is None or type(answer) is not expected: raise ValueError('Unexpected question id or answer type')
+        if not (type(answer) in (str, int) or (type(answer) is list and answer and all(type(x) is str and x.strip() for x in answer))):
+            raise ValueError('answer must be a string, integer, or nonempty array of strings')
+        if type(answer) is str and not answer.strip(): raise ValueError('answer must be nonempty')
+        if type(answer) is list and len(set(answer)) != len(answer): raise ValueError('answer array items must be distinct')
+        if type(page) is not int or page not in self.contract.paper_pages:
+            raise ValueError('page must be an integer in the required page range')
+        if type(evidence_id) is not str or evidence_id not in self.exposed or evidence_id not in self.items:
+            raise ValueError('evidence must already have been delivered')
+        item = self.items[evidence_id]
+        if not item.valid or item.source != 'paper.pdf' or item.page != page or item.version != self.workspace.current_hash('paper.pdf'):
+            raise ValueError('evidence source, page or version mismatch')
+        if type(quote) is not str or not 20 <= len(quote.strip()) <= 1500 or quote not in item.text:
+            raise ValueError('quote must be a continuous exact excerpt of the cited page')
+    def save_answer(self, section, question_id, answer, evidence_id, page, quote):
+        self.refresh()
+        self._validate_answer(section, question_id, answer, evidence_id, page, quote)
+        self.answers.setdefault(section, {})[question_id] = {'answer': copy.deepcopy(answer), 'evidence_id': evidence_id, 'page': page, 'quote': quote}
+        self.log('paper_answer', section=section, question_id=question_id, answer=answer, evidence_id=evidence_id, page=page, quote=quote)
+        return {'section': section, 'question_id': question_id, 'saved': True}
+
+    def save_section(self, section, summary, application):
+        if section not in self.contract.topics: raise ValueError('invalid section')
+        for name, value, limit in [('summary', summary, 600), ('application', application, 300)]:
+            if type(value) is not str or not value.strip() or len(value) > limit: raise ValueError(name + ' is invalid')
+        self.section_text[section] = {'summary': summary, 'application': application}
+        self.log('paper_section', section=section, summary=summary, application=application, request=self.request_number)
+        return {'section': section, 'saved': True}
+
+    def report(self, overview):
+        self.refresh()
+        if type(overview) is not str or not overview.strip() or len(overview) > 600: raise ValueError('invalid overview')
+        sections = []
+        for section in self.contract.topics:
+            answers = self.answers.get(section, {})
+            if section not in self.section_text or len(answers) != 2: raise ValueError('Each section needs text and exactly two saved answers: ' + section)
+            for question, value in answers.items():
+                self._validate_answer(section, question, value['answer'], value['evidence_id'], value['page'], value['quote'])
+            sections.append({'id': section, **self.section_text[section], 'answers': {k: v['answer'] for k,v in answers.items()},
+                             'evidence': [{'question': k, 'page': v['page'], 'quote': v['quote']} for k,v in answers.items()]})
+        return {'overview': overview, 'sections': sections}
 
     def refresh(self):
         sources = {e.source for e in self.items.values() if e.valid}
@@ -376,7 +433,7 @@ class EvidenceStore:
 
     def save(self, path):
         path.write_text(json.dumps({'evidence': [asdict(x) for x in self.items.values()],
-                                   'notes': self.notes, 'exposed': sorted(self.exposed),
+                                   'notes': self.notes, 'answers': self.answers, 'section_text': self.section_text, 'exposed': sorted(self.exposed),
                                    'received_ranges': self.received_ranges,
                                    'full_read_ids': self.full_read_ids},
                                   ensure_ascii=False, indent=2), encoding='utf-8')

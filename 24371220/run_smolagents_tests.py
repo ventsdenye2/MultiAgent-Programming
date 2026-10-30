@@ -29,7 +29,9 @@ def main():
     tests = args.tests or ['test_smolagents.py', 'test_smolagents_materials.py',
                           'test_context_delivery.py', 'test_paper_delivery.py',
                           'test_sending_state.py', 'test_sending_state_review.py',
-                          'test_paper_recall_order.py']
+                          'test_paper_recall_order.py', 'test_stability_contract.py',
+                          'test_stability_review.py', 'test_stability_runner.py',
+                          'test_stability_milestones.py']
     cmd = [sys.executable, '-m', 'pytest', '-q', *tests,
            '--basetemp', str(native / 'pytest'), '--junitxml', str(out / 'junit.xml')]
     with (out / 'pytest.log').open('w', encoding='utf-8') as log:

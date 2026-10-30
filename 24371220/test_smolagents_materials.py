@@ -161,7 +161,8 @@ def test_real_three_file_preedit_coverage_and_source_notes(tmp_path, build_sessi
     assert not session.evidence.source_reused(targets[0])
 
 
-def test_real_pdf_52_pages_fit_batched_and_five_notes_reused(tmp_path, build_session):
+@pytest.mark.parametrize('saved_answers', [False, True])
+def test_real_pdf_52_pages_fit_batched_and_five_notes_reused(tmp_path, build_session, saved_answers):
     assert shutil.which('pdftotext'), 'Run this course test in WSL with poppler-utils installed'
     source = MATERIALS / '公开任务/题目1'
     repo = tmp_path / 'repo'
@@ -202,6 +203,16 @@ def test_real_pdf_52_pages_fit_batched_and_five_notes_reused(tmp_path, build_ses
                                           'evidence_ids': [sorted(delivered_pages)[0]]})
         if len(session.evidence.notes) == 5 and not set(page_ids).issubset(seen):
             full_notes_before_last_page = True
+            if saved_answers and not session.evidence.answers:
+                from course_agent.evidence import PAPER_QUESTIONS
+                eid = next(eid for eid in sorted(session.evidence.exposed) if session.evidence.items[eid].page and len(session.evidence.items[eid].text.strip()) >= 20)
+                item = session.evidence.items[eid]
+                quote = item.text.strip()[:100]
+                for section, questions in PAPER_QUESTIONS.items():
+                    session.evidence.save_section(section, 'synthetic summary', 'synthetic application')
+                    for question, kind in questions.items():
+                        value = ['synthetic'] if kind is list else 1 if kind is int else 'synthetic'
+                        session.evidence.save_answer(section, question, value, eid, item.page, quote)
         if set(page_ids).issubset(seen):
             break
     assert set(page_ids).issubset(seen), {'missing': len(set(page_ids) - seen), 'sizes': sizes}

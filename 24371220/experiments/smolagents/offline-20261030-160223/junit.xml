@@ -1,0 +1,210 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="0" failures="5" skipped="0" tests="69" time="131.100" timestamp="2026-10-30T16:02:26.759482+08:00" hostname="VENTSDENYE5"><testcase classname="test_smolagents" name="test_vendor_and_no_forked_kernel" time="0.324" /><testcase classname="test_smolagents" name="test_upstream_variable_persistence_and_error_recovery" time="13.734" /><testcase classname="test_smolagents" name="test_official_parser_recovers_and_records_error" time="0.034" /><testcase classname="test_smolagents" name="test_markdown_protocol_ignores_xml_marker_in_prose_and_matches_wire_size" time="0.040" /><testcase classname="test_smolagents" name="test_dsml_failure_uses_upstream_recovery_without_a_second_action_parser" time="0.039" /><testcase classname="test_smolagents" name="test_unsupported_os_import_recovers_with_declared_file_tools" time="0.049" /><testcase classname="test_smolagents" name="test_empty_truncated_response_has_distinct_classification" time="0.040" /><testcase classname="test_smolagents" name="test_budget_has_no_extra_final_answer_request" time="0.039" /><testcase classname="test_smolagents" name="test_no_sdk_or_framework_network_retry" time="0.031" /><testcase classname="test_smolagents" name="test_actual_body_has_protocol_and_balanced_raw_audit[sampling0]" time="0.032" /><testcase classname="test_smolagents" name="test_actual_body_has_protocol_and_balanced_raw_audit[sampling1]" time="0.035" /><testcase classname="test_smolagents" name="test_actual_body_has_protocol_and_balanced_raw_audit[sampling2]" time="0.034" /><testcase classname="test_smolagents" name="test_structured_note_provenance_survives_json_and_python_escaping" time="0.041" /><testcase classname="test_smolagents" name="test_course_markdown_protocol_uses_upstream_parser_and_configured_sampling" time="2.799" /><testcase classname="test_smolagents" name="test_real_file_tools_pytest_and_final_checks" time="5.799" /><testcase classname="test_smolagents" name="test_final_answer_check_is_upstream_recoverable" time="0.038" /><testcase classname="test_smolagents" name="test_context_guard_prevents_wire_request" time="0.026" /><testcase classname="test_smolagents" name="test_actual_http_guard_in_upstream_context_mode" time="0.029" /><testcase classname="test_smolagents" name="test_official_upstream_context_mode_runs" time="0.041" /><testcase classname="test_smolagents" name="test_workspace_boundaries_and_stale_hash" time="0.039" /><testcase classname="test_smolagents" name="test_dedup_repeated_full_reads_and_version_invalidation" time="0.028" /><testcase classname="test_smolagents" name="test_eight_evidence_items_recalled_in_bounded_batches" time="0.065" /><testcase classname="test_smolagents_materials" name="test_real_three_file_preedit_coverage_and_source_notes" time="0.234" /><testcase classname="test_smolagents_materials" name="test_real_pdf_52_pages_fit_batched_and_five_notes_reused" time="1.985"><failure message="AssertionError: Reserve at least ten requests for setup, report delivery and verification&#10;assert 34 &lt;= 30">tmp_path = PosixPath('/tmp/smolagents-offline-lxt_6bzk/pytest/test_real_pdf_52_pages_fit_bat0')
+build_session = &lt;function build_session.&lt;locals&gt;.build at 0x7f1f43f05580&gt;
+
+    def test_real_pdf_52_pages_fit_batched_and_five_notes_reused(tmp_path, build_session):
+        assert shutil.which('pdftotext'), 'Run this course test in WSL with poppler-utils installed'
+        source = MATERIALS / '公开任务/题目1'
+        repo = tmp_path / 'repo'
+        repo.mkdir()
+        for name in ('paper.pdf', 'paper.json', 'read_pdf.py', 'report.json'):
+            shutil.copy2(source / 'repo' / name, repo / name)
+        task = (source / 'task.md').read_text(encoding='utf-8')
+        session, context, agent, model = build_session('paper', repo, task)
+        session.invoke('read_file', {'path': 'report.json'})
+        session.invoke('read_pdf', {'start_page': 1, 'end_page': 52})
+        page_ids = [eid for eid, e in session.evidence.items.items() if e.page]
+        assert len(page_ids) == 52
+        assert sum(len(session.evidence.items[eid].text) for eid in page_ids) &gt; 100000
+        session.evidence.recall(page_ids)
+        seen = set()
+        sizes = []
+        full_notes_before_last_page = False
+        for number in range(1, 36):
+            messages = context.build(agent.memory, model)
+            sizes.append(model.estimate(messages))
+            body = {'messages': [m.dict() for m in messages]}
+            session.evidence.mark_exposed(body, response(code('print(1)')), number)
+            seen |= session.evidence.current
+            # A successful reading action advances to new pages without a per-page
+            # note gate. Only the final five topic notes are required by the course.
+            delivered_pages = {eid for eid in session.evidence.current if eid in page_ids}
+            assert delivered_pages
+            agent.memory.steps.append(ActionStep(
+                step_number=number, timing=Timing(start_time=0, end_time=1),
+                code_action='print("Read this PDF batch.")', observations='Read this PDF batch.'))
+            if number % 2 == 0:
+                topic = session.contract.topics[(number // 2 - 1) % 5]
+                content = ('Model note for ' + topic + '; keep observed claims and evidence locators. ').ljust(1500, '.')
+                session.evidence.last_response = response(code(f'write_note(content={content!r})'))
+                # One observed page grounds this note; other pages do not need a
+                # per-page acknowledgement before the next original batch advances.
+                session.invoke('write_note', {'title': topic, 'section': topic, 'content': content,
+                                              'evidence_ids': [sorted(delivered_pages)[0]]})
+            if len(session.evidence.notes) == 5 and not set(page_ids).issubset(seen):
+                full_notes_before_last_page = True
+            if set(page_ids).issubset(seen):
+                break
+        assert set(page_ids).issubset(seen), {'missing': len(set(page_ids) - seen), 'sizes': sizes}
+        assert full_notes_before_last_page, 'Exercise remaining originals with all five maximum-size notes retained'
+&gt;       assert number &lt;= 30, 'Reserve at least ten requests for setup, report delivery and verification'
+E       AssertionError: Reserve at least ten requests for setup, report delivery and verification
+E       assert 34 &lt;= 30
+
+test_smolagents_materials.py:209: AssertionError</failure></testcase><testcase classname="test_smolagents_materials" name="test_recorded_source_note_uses_source_limit_and_source_log_event" time="0.095" /><testcase classname="test_smolagents_materials" name="test_large_source_cannot_evict_latest_error" time="0.034" /><testcase classname="test_smolagents_materials" name="test_real_source_first_write_directly_reuses_mechanisms_without_notes" time="5.339" /><testcase classname="test_smolagents_materials" name="test_source_surrounding_ranges_remain_across_turns_and_expire_with_version" time="0.148" /><testcase classname="test_smolagents_materials" name="test_oversized_surrounding_range_cannot_evict_required_source_mechanisms" time="0.220" /><testcase classname="test_context_delivery" name="test_recorded_smoke_reaches_edit_and_passes_public_checks" time="7.665" /><testcase classname="test_context_delivery" name="test_reading_without_delivery_cannot_authorize_a_write" time="0.059" /><testcase classname="test_context_delivery" name="test_partial_file_delivery_requires_complete_actual_ranges" time="0.064" /><testcase classname="test_context_delivery" name="test_repeated_large_feedback_never_grows_fixed_status" time="0.049" /><testcase classname="test_context_delivery" name="test_long_command_summary_is_observable_without_model_print" time="0.075" /><testcase classname="test_context_delivery" name="test_recorded_plan_error_does_not_starve_source_or_restart_plan" time="9.493" /><testcase classname="test_context_delivery" name="test_plan_churn_stops_before_spending_full_call_budget" time="0.085" /><testcase classname="test_context_delivery" name="test_ready_to_edit_status_precedes_post_change_verification" time="0.030" /><testcase classname="test_context_delivery" name="test_concurrent_evaluation_is_rejected_before_preflight" time="0.112" /><testcase classname="test_context_delivery" name="test_recorded_missing_plan_is_retained_and_can_recover" time="9.375" /><testcase classname="test_context_delivery" name="test_project_tools_bind_positional_and_keyword_arguments" time="0.037" /><testcase classname="test_context_delivery" name="test_verified_changes_remain_visible_until_final_answer" time="8.661" /><testcase classname="test_context_delivery" name="test_shared_request_cap_applies_across_task_runs" time="0.198" /><testcase classname="test_context_delivery" name="test_assistant_history_contains_only_complete_code_actions" time="0.032" /><testcase classname="test_context_delivery" name="test_distinct_executor_work_is_not_a_repeated_action_cycle" time="0.190" /><testcase classname="test_context_delivery" name="test_progress_snapshot_and_final_gate_share_verified_versions" time="0.041" /><testcase classname="test_paper_delivery" name="test_failed_http_batch_recovers_then_success_advances[empty]" time="0.049" /><testcase classname="test_paper_delivery" name="test_failed_http_batch_recovers_then_success_advances[truncated-empty]" time="0.053" /><testcase classname="test_paper_delivery" name="test_failed_http_batch_recovers_then_success_advances[parser-error]" time="0.051" /><testcase classname="test_paper_delivery" name="test_failed_http_batch_recovers_then_success_advances[action-error]" time="0.062" /><testcase classname="test_paper_delivery" name="test_final_note_revision_requires_new_http_before_report_and_finish" time="4.341"><failure message="course_agent.audit.BudgetExceeded: MAX_STEPS_NO_EXTRA_REQUEST">tmp_path = PosixPath('/tmp/smolagents-offline-lxt_6bzk/pytest/test_final_note_revision_requi0')
+paper_runtime = &lt;function paper_runtime.&lt;locals&gt;.build at 0x7f1f43e49800&gt;
+
+    def test_final_note_revision_requires_new_http_before_report_and_finish(tmp_path, paper_runtime):
+        notes = {topic: f'Model reading note for {topic}: retain the observed claim and page evidence.'
+                 for topic in ('overview', 'reasoning', 'tool_use', 'multi_agent', 'outlook')}
+    
+        def read_and_note(session):
+            ids = [eid for eid, item in session.evidence.items.items() if item.page]
+            action = ("update_plan(items=[{'title':'read and report','status':'doing'}])\n"
+                      "run_command(argv=['python','-m','pytest','-q'])\n"
+                      "r=read_file(path='report.json')\n")
+            for index, (topic, note) in enumerate(notes.items()):
+                action += (f"write_note(title={topic!r}, section={topic!r}, content={note!r}, "
+                           f"evidence_ids={[ids[index]]!r})\n")
+            return response(code(action))
+    
+        updated_note = 'Updated model overview note retaining the observed claim and exact evidence locator.'
+    
+        def revise_then_premature_report(session):
+            overview = next(eid for eid, item in session.evidence.items.items() if item.page == 1)
+            action = (f"write_note(title='overview', section='overview', content={updated_note!r}, evidence_ids={[overview]!r})\n"
+                      "write_file(path='report.json',content='{\"premature\":true}',expected_hash=r['file_hash'])")
+            return response(code(action))
+    
+        session, agent, calls, _, ids = paper_runtime([f'Observed PDF page {n} with substantive text.' for n in range(5)], [
+            read_and_note,
+            revise_then_premature_report,
+            response(code("r=write_file(path='report.json',content='{\"draft\":true}',expected_hash=r['file_hash'])")),
+            response(code("r=write_file(path='report.json',content='{\"complete\":true}',expected_hash=r['file_hash'])\n"
+                          "run_command(argv=['python','-m','pytest','-q'])\n"
+                          "update_plan(items=[{'title':'read and report','status':'done'}])\nfinal_answer('Report verified')")),
+        ], verify=True)
+&gt;       assert agent.run(session.task_prompt()) == 'Report verified'
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+test_paper_delivery.py:127: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+vendor/smolagents/src/smolagents/agents.py:499: in run
+    steps = list(self._run_stream(task=self.task, max_steps=max_steps, images=images))
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+vendor/smolagents/src/smolagents/agents.py:607: in _run_stream
+    final_answer = self._handle_max_steps_reached(task)
+                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+vendor/smolagents/src/smolagents/agents.py:627: in _handle_max_steps_reached
+    final_answer = self.provide_final_answer(task)
+                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = &lt;course_agent.engine.CourseCodeAgent object at 0x7f1f43f496a0&gt;
+task = 'Read the PDF and update report.json.\n\nCourse execution contract:\n{"profile": "paper", "editable": ["report.json"],...e, tools and verification.\nMulti-agent collaboration and training are future suggestions, not implemented features.\n'
+
+    def provide_final_answer(self, task):
+        # Upstream's max-step fallback normally makes an extra model request.
+        # A course run must stop at its stated budget instead.
+&gt;       raise BudgetExceeded("MAX_STEPS_NO_EXTRA_REQUEST")
+E       course_agent.audit.BudgetExceeded: MAX_STEPS_NO_EXTRA_REQUEST
+
+course_agent/engine.py:53: BudgetExceeded</failure></testcase><testcase classname="test_paper_delivery" name="test_building_views_does_not_acknowledge_delivery_and_note_quote_cannot_hide_page" time="0.039" /><testcase classname="test_paper_delivery" name="test_completed_reading_combines_two_explicit_page_recalls" time="0.050" /><testcase classname="test_paper_delivery" name="test_completed_reading_prioritizes_new_recall_over_previous_large_page" time="0.152"><failure message="AssertionError: assert False&#10; +  where False = &lt;built-in method issubset of set object at 0x7f1f4c62d9a0&gt;({'ev-0bb88db782dbb846de19', 'ev-43852c44687baca48e12', 'ev-4609a2662ec458fe5e71', 'ev-61009ffb1fbc87271698', 'ev-82ae75f5539e2e6ba21d', 'ev-c86a87a1f4e38c6715bf', ...})&#10; +    where &lt;built-in method issubset of set object at 0x7f1f4c62d9a0&gt; = {'ev-43852c44687baca48e12', 'ev-4609a2662ec458fe5e71', 'ev-61009ffb1fbc87271698', 'ev-82ae75f5539e2e6ba21d', 'ev-b029687907fe3fd6371a', 'ev-c86a87a1f4e38c6715bf', ...}.issubset&#10; +      where {'ev-43852c44687baca48e12', 'ev-4609a2662ec458fe5e71', 'ev-61009ffb1fbc87271698', 'ev-82ae75f5539e2e6ba21d', 'ev-b029687907fe3fd6371a', 'ev-c86a87a1f4e38c6715bf', ...} = set(['ev-43852c44687baca48e12', 'ev-4609a2662ec458fe5e71', 'ev-c86a87a1f4e38c6715bf', 'ev-82ae75f5539e2e6ba21d', 'ev-e8bfd076b2d75736f2e6', 'ev-61009ffb1fbc87271698', ...])">paper_runtime = &lt;function paper_runtime.&lt;locals&gt;.build at 0x7f1f43f04360&gt;
+
+    def test_completed_reading_prioritizes_new_recall_over_previous_large_page(paper_runtime):
+        pages = [f'FULL_PAGE_{n}_' + str(n) * 14500 for n in (1, 2)]
+    
+        def recall_first(session):
+            eid = next(eid for eid, item in session.evidence.items.items() if item.page == 1)
+            return response(code(f'recall(evidence_ids={[eid]!r})'))
+    
+        session, agent, calls, snapshots, ids = paper_runtime(pages, [
+            response(code("print('Read initial page one.')")), recall_first,
+            response(code("print('Recalled page one takes priority.')")),
+        ])
+        with pytest.raises(BudgetExceeded, match='MAX_STEPS_NO_EXTRA_REQUEST'):
+            agent.run(session.task_prompt())
+        assert contains(calls[0], pages[0]) and not contains(calls[0], pages[1])
+        assert contains(calls[1], pages[1]) and not contains(calls[1], pages[0])
+        assert set(ids).issubset(snapshots[2]['exposed'])
+        assert ids[0] in snapshots[2]['pending']
+        assert contains(calls[2], pages[0]), 'New requested original must be admitted before optional previous-page carry'
+        assert not contains(calls[2], pages[1]), 'Omit the older page when both originals cannot fit'
+        assert not session.evidence.pending
+    
+    
+        # With room for three originals, a chain of recalls must carry the newest
+        # prior originals rather than preferring unrelated lower page numbers.
+        chain_pages = [f'CHAIN_PAGE_{n}_' + str(n) * 7000 for n in range(1, 8)]
+    
+        def recall_pages(*numbers):
+            def reply(session):
+                selected = [eid for number in numbers for eid, item in session.evidence.items.items()
+                            if item.page == number]
+                return response(code(f'recall(evidence_ids={selected!r})'))
+            return reply
+    
+        chained, chain_agent, chain_calls, chain_snapshots, chain_ids = paper_runtime(chain_pages, [
+            response(code("print('Initial batch one.')")),
+            response(code("print('Initial batch two.')")),
+            recall_pages(1, 2), recall_pages(3), recall_pages(4, 5), recall_pages(6, 7),
+            response(code("print('Merge the newest recalled originals.')")),
+        ])
+        with pytest.raises(BudgetExceeded, match='MAX_STEPS_NO_EXTRA_REQUEST'):
+            chain_agent.run(chained.task_prompt())
+&gt;       assert set(chain_ids).issubset(chain_snapshots[3]['exposed'])
+E       AssertionError: assert False
+E        +  where False = &lt;built-in method issubset of set object at 0x7f1f4c62d9a0&gt;({'ev-0bb88db782dbb846de19', 'ev-43852c44687baca48e12', 'ev-4609a2662ec458fe5e71', 'ev-61009ffb1fbc87271698', 'ev-82ae75f5539e2e6ba21d', 'ev-c86a87a1f4e38c6715bf', ...})
+E        +    where &lt;built-in method issubset of set object at 0x7f1f4c62d9a0&gt; = {'ev-43852c44687baca48e12', 'ev-4609a2662ec458fe5e71', 'ev-61009ffb1fbc87271698', 'ev-82ae75f5539e2e6ba21d', 'ev-b029687907fe3fd6371a', 'ev-c86a87a1f4e38c6715bf', ...}.issubset
+E        +      where {'ev-43852c44687baca48e12', 'ev-4609a2662ec458fe5e71', 'ev-61009ffb1fbc87271698', 'ev-82ae75f5539e2e6ba21d', 'ev-b029687907fe3fd6371a', 'ev-c86a87a1f4e38c6715bf', ...} = set(['ev-43852c44687baca48e12', 'ev-4609a2662ec458fe5e71', 'ev-c86a87a1f4e38c6715bf', 'ev-82ae75f5539e2e6ba21d', 'ev-e8bfd076b2d75736f2e6', 'ev-61009ffb1fbc87271698', ...])
+
+test_paper_delivery.py:241: AssertionError</failure></testcase><testcase classname="test_paper_delivery" name="test_initial_pdf_reading_does_not_skip_blocked_page_for_later_small_page" time="0.049" /><testcase classname="test_sending_state" name="test_wire_view_and_last_response_complete_with_real_test" time="6.529" /><testcase classname="test_sending_state" name="test_source_wire_state_tracks_actual_exposure_and_write" time="0.145" /><testcase classname="test_sending_state_review" name="test_large_originals_keep_complete_write_hash_path_and_failure_on_http" time="0.032" /><testcase classname="test_sending_state_review" name="test_registered_read_is_not_http_delivery_and_write_does_not_reopen_first_read" time="0.040" /><testcase classname="test_paper_recall_order" name="test_recall_order_after_initial_coverage" time="0.107" /><testcase classname="test_stability_contract" name="test_batch_atomic_and_versions" time="0.006" /><testcase classname="test_stability_contract" name="test_paper_saved_answer_validation_and_serialization" time="0.005" /><testcase classname="test_stability_contract" name="test_official_final_runs_verification_and_recovers[good]" time="10.616"><failure message="assert False&#10; +  where False = any(&lt;generator object test_official_final_runs_verification_and_recovers.&lt;locals&gt;.&lt;genexpr&gt; at 0x7f1f43cba0c0&gt;)">tmp_path = PosixPath('/tmp/smolagents-offline-lxt_6bzk/pytest/test_official_final_runs_verif0')
+monkeypatch = &lt;_pytest.monkeypatch.MonkeyPatch object at 0x7f1f43c681d0&gt;
+first_edit = 'good'
+
+        (tmp_path / 'paper.pdf').write_text('changed', encoding='utf-8')
+        with pytest.raises(ValueError): store.report('overview')
+    
+    
+    @pytest.mark.parametrize('first_edit', ['good', 'bad'])
+    def test_official_final_runs_verification_and_recovers(tmp_path, monkeypatch, first_edit):
+        from test_smolagents import run_script
+        monkeypatch.setattr(EvidenceStore, 'missing', lambda self, first_write=True: [])
+        def setup(repo):
+            (repo / 'data.py').write_text('value = 0\n')
+            (repo / 'test_data.py').write_text("from pathlib import Path\ndef test_value():\n    assert Path('data.py').read_text() == 'value = 1\\n'\n")
+        replies = [
+            "update_plan(items=[{'title':'change','status':'doing'}])\nrun_command(argv=['python','-m','pytest','-q'])\nr=read_file(path='data.py')",
+            "r=replace_text_batch(path='data.py', edits=[{'old_text':'value = 0','new_text':'value = " + ('1' if first_edit == 'good' else '2') + "'}], expected_hash=r['file_hash'])\nfinal_answer('done')",
+        ]
+        if first_edit == 'bad':
+&gt;           replies.append("r=read_file(path='data.py')\nr=replace_text_batch(path='data.py', edits=[{'old_text':'value = 2','new_text':'value = 1'}], expected_hash=r['file_hash'])\nfinal_answer('done')")
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E           assert False
+E            +  where False = any(&lt;generator object test_official_final_runs_verification_and_recovers.&lt;locals&gt;.&lt;genexpr&gt; at 0x7f1f43cba0c0&gt;)
+
+test_stability_contract.py:70: AssertionError</failure></testcase><testcase classname="test_stability_contract" name="test_official_final_runs_verification_and_recovers[bad]" time="12.902"><failure message="assert False&#10; +  where False = any(&lt;generator object test_official_final_runs_verification_and_recovers.&lt;locals&gt;.&lt;genexpr&gt; at 0x7f1f48caa670&gt;)">tmp_path = PosixPath('/tmp/smolagents-offline-lxt_6bzk/pytest/test_official_final_runs_verif1')
+monkeypatch = &lt;_pytest.monkeypatch.MonkeyPatch object at 0x7f1f43e65220&gt;
+first_edit = 'bad'
+
+        (tmp_path / 'paper.pdf').write_text('changed', encoding='utf-8')
+        with pytest.raises(ValueError): store.report('overview')
+    
+    
+    @pytest.mark.parametrize('first_edit', ['good', 'bad'])
+    def test_official_final_runs_verification_and_recovers(tmp_path, monkeypatch, first_edit):
+        from test_smolagents import run_script
+        monkeypatch.setattr(EvidenceStore, 'missing', lambda self, first_write=True: [])
+        def setup(repo):
+            (repo / 'data.py').write_text('value = 0\n')
+            (repo / 'test_data.py').write_text("from pathlib import Path\ndef test_value():\n    assert Path('data.py').read_text() == 'value = 1\\n'\n")
+        replies = [
+            "update_plan(items=[{'title':'change','status':'doing'}])\nrun_command(argv=['python','-m','pytest','-q'])\nr=read_file(path='data.py')",
+            "r=replace_text_batch(path='data.py', edits=[{'old_text':'value = 0','new_text':'value = " + ('1' if first_edit == 'good' else '2') + "'}], expected_hash=r['file_hash'])\nfinal_answer('done')",
+        ]
+        if first_edit == 'bad':
+&gt;           replies.append("r=read_file(path='data.py')\nr=replace_text_batch(path='data.py', edits=[{'old_text':'value = 2','new_text':'value = 1'}], expected_hash=r['file_hash'])\nfinal_answer('done')")
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E           assert False
+E            +  where False = any(&lt;generator object test_official_final_runs_verification_and_recovers.&lt;locals&gt;.&lt;genexpr&gt; at 0x7f1f48caa670&gt;)
+
+test_stability_contract.py:70: AssertionError</failure></testcase><testcase classname="test_stability_runner" name="test_declared_failures_count_and_resume_does_not_repeat" time="0.029" /><testcase classname="test_stability_runner" name="test_changed_runtime_and_interrupted_sample_stop_before_provider" time="0.003" /><testcase classname="test_stability_runner" name="test_success_interval_does_not_claim_certainty" time="0.000" /><testcase classname="test_stability_runner" name="test_three_per_task_is_frozen_and_cannot_expand_on_resume" time="0.009" /><testcase classname="test_stability_runner" name="test_host_verified_commit_creates_cohort_without_wsl_git" time="0.025" /><testcase classname="test_stability_milestones" name="test_only_executed_events_count_after_partial_action_failure" time="0.002" /></testsuite></testsuites>

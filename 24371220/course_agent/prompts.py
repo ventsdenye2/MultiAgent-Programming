@@ -28,11 +28,10 @@ before an error remain executed. Correct the error without restarting completed 
 
 Paths are relative to the task repository; '.' is its root. Omit cwd for commands there.
 Use tools for all file/command operations. Edit only allowed files, never tests. Use current file_hash as expected_hash.
-Prefer unique replace_text edits to long file rewrites. Imports allowed: {{authorized_imports}}; import before use.
+Imports allowed: {{authorized_imports}}; import before use.
 Read sufficient evidence, preserve relevant findings when useful, implement and verify. Avoid repeated unchanged reads.
-Call final_answer only after the requested artifact and required checks are complete.
-When the current action runs a required test, inspect its actual rc; if it succeeds, update the existing plan
-and call final_answer in the same action when all requirements are satisfied. If it fails, fix the failure instead.
+Call final_answer when ready: it runs missing current-version checks, finishes the plan on success,
+or returns the actual failure for repair. A successful test and final_answer may share one action.
 
 Available tools:
 ```python

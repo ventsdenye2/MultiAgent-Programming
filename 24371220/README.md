@@ -55,6 +55,12 @@ Markdown 模式将同一份完整笔记写在代码块前的说明与工具参�
 
 ## 离线验证
 
+课程源码通过 `replace_text_batch(path, edits, expected_hash)` 对同一版本原文的一组唯一、不重叠文本修改进行原子提交。成功返回 `ok/path/before_hash/file_hash/changed`；`rc` 仅属于命令结果。旧单次替换在底层保留兼容，共用同一实现，源码模型工具列表只公开批量替换及整文件写入。
+
+论文通过 `save_answer` 保存模型选择的答案、问题标识和原文来源，通过 `save_section` 保存摘要与应用，再由 `submit_report` 序列化 report.json。类型、页码、真实曝光版本和连续原文匹配由工具检查；匹配仅证明出处，不证明语义支撑。成果随 evidence.json 保存。原有五主题笔记及最新版本后续共同入模门槛保留。
+
+源码/论文模型显式调用官方 `final_answer` 后，现有完成检查会执行尚缺的当前版本验证，失败返回实际问题，成功才完成计划并允许官方结束。不会自行发起额外模型请求。当前小批量验证及局限见 [接口改进记录](experiments/smolagents/STABILITY-INTERFACES-20261030.md)。
+
 ```bash
 .venv/bin/python run_smolagents_tests.py
 .venv/bin/python evaluate_course.py --preflight-only

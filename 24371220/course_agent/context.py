@@ -79,7 +79,7 @@ class EvidenceContext:
         if error_step:
             # Errors are reserved before document selection. Never drop the
             # entire failing step to make room for another source excerpt.
-            result.append(message('Current action failed; correct this error and continue:\n' +
+            result.append(message('Current action failed; calls completed before the error remain applied; subsequent statements did not execute. Correct this error and continue:\n' +
                                   clip(str(error_step.error), limits[2])))
         return result
 
@@ -95,12 +95,23 @@ class EvidenceContext:
                          'evidence_delivery': 'Registered full reads are logged tool reads; Evidence headers show selected ranges, whose delivery requires HTTP confirmation.'})
             if self.session.writes:
                 data['reading_after_write'] = 'First-write prerequisites satisfied; changed-source evidence may be invalidated.'
+                data['current_versions'] = self.session.versions()
+                data['applied_writes'] = dict(self.session.written_versions)
+                data['verified_versions'] = [{'command': list(cmd), 'versions': versions} for cmd, versions in self.session.verified.items()]
+                if self.session.last_test:
+                    data['latest_test'] = {key: self.session.last_test[key] for key in ('rc', 'versions')}
         if self.session.contract.profile == 'source':
             data['required_mechanisms_exposed'] = {source: {'exposed': len(ids & self.store.exposed), 'registered': len(ids)}
                                                    for source, ids in self.store.required.items()}
         if self.session.contract.profile == 'paper':
             pages = {self.store.items[eid].page for eid in self.store.exposed if self.store.items[eid].valid}
             data['pdf_pages_missing'] = sorted(set(self.session.contract.paper_pages) - pages)
+            if self.store.answers:
+                data['saved_answers'] = {section: {question: [value['evidence_id'], value['page'], self.store.items[value['evidence_id']].valid] for question, value in answers.items()} for section, answers in self.store.answers.items()}
+                from .evidence import PAPER_QUESTIONS
+                data['missing_answers'] = {section: sorted(set(questions) - set(self.store.answers.get(section, {}))) for section, questions in PAPER_QUESTIONS.items() if set(questions) - set(self.store.answers.get(section, {}))}
+            if self.store.section_text:
+                data['saved_sections'] = list(self.store.section_text)
         if self.session.audit and self.session.audit.last_classification not in {None, 'ok'}:
             data['last_response_classification'] = self.session.audit.last_classification
         # Required workflow facts remain intact; never clip JSON in the middle

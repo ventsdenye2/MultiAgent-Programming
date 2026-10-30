@@ -28,6 +28,7 @@ TOOL_SPECS = {
     "read_symbol": {"description": "Read a complete Python class or function including decorators.", "parameters": _schema({"path": {"type": "string"}, "symbol": {"type": "string"}}, ["path", "symbol"])},
     "write_file": {"description": "Replace an editable text file after checking its current hash.", "parameters": _schema({"path": {"type": "string"}, "content": {"type": "string"}, "expected_hash": {"type": "string"}}, ["path", "content", "expected_hash"])},
     "replace_text": {"description": "Replace one unique text occurrence after checking its current hash.", "parameters": _schema({"path": {"type": "string"}, "old_text": {"type": "string"}, "new_text": {"type": "string"}, "expected_hash": {"type": "string"}}, ["path", "old_text", "new_text", "expected_hash"])},
+    "replace_text_batch": {"description": "Atomically replace unique nonoverlapping occurrences from one file version. Returns ok, path, before_hash, file_hash, changed.", "parameters": _schema({"path": {"type": "string"}, "edits": {"type": "array", "description": "Python list of objects, e.g. [{'old_text':'before','new_text':'after'}]; all refer to the original file.", "items": _schema({"old_text": {"type": "string"}, "new_text": {"type": "string"}}, ["old_text", "new_text"])}, "expected_hash": {"type": "string"}}, ["path", "edits", "expected_hash"])},
     "read_pdf": {"description": "Read pages using the repository's read_pdf.py helper.", "parameters": _schema({"start_page": {"type": "integer"}, "end_page": {"type": "integer"}}, ["start_page"])},
     "run_command": {"description": "Run one allowed argv command without a shell. Omit cwd or use '.' for the task repository root.", "parameters": _schema({"argv": {"type": "array", "items": {"type": "string"}}, "cwd": {"type": "string"}}, ["argv"])},
 }
@@ -155,7 +156,7 @@ class WorkspaceTools:
         if changed: self._atomic_write(path, content)
         after = self.current_hash(rel)
         self.log("file_write", path=rel, content=content, before_hash=before, file_hash=after, changed=changed)
-        return {"path": rel, "file_hash": after, "before_hash": before, "changed": changed}
+        return {"ok": True, "path": rel, "file_hash": after, "before_hash": before, "changed": changed}
 
     def _files(self, start: str):
         base = self._resolve(start, allow_dir=True)
@@ -328,12 +329,21 @@ class WorkspaceTools:
             start = min([n.lineno] + [d.lineno for d in n.decorator_list]); text = "".join(content.splitlines(keepends=True)[start - 1:n.end_lineno])
             return self._result_read(rel, text, digest, start_line=start, end_line=n.end_lineno)
         if name == "write_file": return self._write(arguments["path"], arguments["content"], arguments["expected_hash"])
-        if name == "replace_text":
+        if name in {"replace_text", "replace_text_batch"}:
             rel = self._check_editable(arguments["path"]); _, content, digest = self._read(rel)
             if digest != arguments["expected_hash"]: raise ValueError("file hash changed; reread before writing")
-            old = arguments["old_text"]
-            if not old or content.count(old) != 1: raise ValueError("old_text must occur exactly once")
-            return self._write(rel, content.replace(old, arguments["new_text"]), digest)
+            edits = arguments.get("edits") if name == "replace_text_batch" else [{"old_text": arguments["old_text"], "new_text": arguments["new_text"]}]
+            if not edits: raise ValueError("edits must be nonempty")
+            spans = []
+            for edit in edits:
+                old = edit["old_text"]
+                start = content.find(old) if old else -1
+                if start < 0 or content.find(old, start + 1) >= 0: raise ValueError("old_text must occur exactly once")
+                spans.append((start, start + len(old), edit["new_text"]))
+            spans.sort()
+            if any(left[1] > right[0] for left, right in zip(spans, spans[1:])): raise ValueError("edit spans overlap")
+            for start, end, new in reversed(spans): content = content[:start] + new + content[end:]
+            return self._write(rel, content, digest)
         if name == "read_pdf":
             start, end = arguments["start_page"], arguments.get("end_page")
             if not isinstance(start, int) or start < 1 or (end is not None and (not isinstance(end, int) or end < start)): raise ValueError("invalid PDF page range")

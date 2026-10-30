@@ -103,8 +103,16 @@ def main():
     parser.add_argument('--run-paid', action='store_true')
     parser.add_argument('--study', type=Path)
     parser.add_argument('--baseline-commit', help='Verified host Git SHA for Windows-created WSL worktrees')
+    parser.add_argument('--repetitions', type=int, default=None,
+                        help='Course samples per task; frozen in the study manifest (default 10)')
+    parser.add_argument('--max-new-samples', type=int,
+                        help='Return after this many new samples so results can be reviewed before resuming')
     parser.add_argument('--phase', choices=['course', 'additional', 'summary'], default='course')
     args = parser.parse_args()
+    if args.repetitions is not None and not 1 <= args.repetitions <= 10:
+        parser.error('--repetitions must be between 1 and 10')
+    if args.max_new_samples is not None and args.max_new_samples < 1:
+        parser.error('--max-new-samples must be positive')
     root = Path(__file__).resolve().parent
     if args.phase == 'summary':
         print(json.dumps(summarize(args.study), ensure_ascii=False, indent=2))
@@ -124,17 +132,22 @@ def main():
         study.mkdir(parents=True, exist_ok=False)
         fingerprint = course.copy_submission(root, study / 'frozen-agent')
         course.save(study / 'study.json', {'baseline_commit': commit, 'runtime_sha256': fingerprint,
-            'course_repetitions': 10, 'additional_repetitions': 3,
+            'course_repetitions': args.repetitions or 10, 'additional_repetitions': 3,
             'course_request_caps': {'source': 20, 'paper': 40}, 'additional_request_cap': 20,
-            'total_request_upper_bound': 900, 'context_mode': 'evidence',
+            'course_request_upper_bound': 60 * (args.repetitions or 10),
+            'total_request_upper_bound': 60 * (args.repetitions or 10) + 300, 'context_mode': 'evidence',
             'automatic_retries': False, 'sampling': read(root / 'config.json')})
     print('STUDY ' + str(study), flush=True)
     assert_baseline(root, study)
     if args.phase == 'additional':
         from additional_stability import run
         return run(root, study)
+    repetitions = read(study / 'study.json').get('course_repetitions', 10)
+    if args.repetitions is not None and args.repetitions != repetitions:
+        raise RuntimeError('Course repetitions differ from the frozen study manifest')
     consecutive_infra = 0
-    for number in range(1, 11):
+    started = 0
+    for number in range(1, repetitions + 1):
         for task, cap in [('source', 20), ('paper', 40)]:
             sample = study / 'samples' / f'{task}-{number:02d}'
             existing = read(sample / 'sample.json')
@@ -152,7 +165,7 @@ def main():
             archive = sample / 'evaluation'
             course.save(sample / 'sample.json', {'task': task, 'number': number, 'status': 'running',
                         'native': str(native), 'archive': str(archive)})
-            print(f'START {task} {number}/10 native={native}', flush=True)
+            print(f'START {task} {number}/{repetitions} native={native}', flush=True)
             try:
                 rc = course.execute(root, native, archive, False, task, cap)
             except Exception as exc:
@@ -161,8 +174,9 @@ def main():
             result = collect_sample(sample, task, rc, archive)
             result.update(number=number, native=str(native))
             course.save(sample / 'sample.json', result)
+            started += 1
             summarize(study)
-            print(f"DONE {task} {number}/10 passed={result['passed']} requests={result.get('requests', 0)}", flush=True)
+            print(f"DONE {task} {number}/{repetitions} passed={result['passed']} requests={result.get('requests', 0)}", flush=True)
             assert_baseline(root, study)
             if result['status'] == 'infrastructure_failure':
                 consecutive_infra += 1
@@ -170,6 +184,9 @@ def main():
                     raise RuntimeError('Infrastructure failure; no further paid samples started')
             else:
                 consecutive_infra = 0
+            if args.max_new_samples is not None and started >= args.max_new_samples:
+                print('SAMPLE REVIEW BOUNDARY ' + str(study), flush=True)
+                return 0
     print('COURSE COHORT COMPLETE ' + str(study), flush=True)
     return 0
 

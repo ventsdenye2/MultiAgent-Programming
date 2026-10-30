@@ -67,6 +67,42 @@ def test_success_interval_does_not_claim_certainty():
     assert runner.interval(0, 0) is None
 
 
+def test_three_per_task_is_frozen_and_cannot_expand_on_resume(tmp_path, monkeypatch):
+    root, study = fixture_study(tmp_path, monkeypatch)
+    manifest = runner.read(study / 'study.json')
+    manifest['course_repetitions'] = 3
+    runner.course.save(study / 'study.json', manifest)
+    monkeypatch.setattr(sys, 'argv', ['run_stability.py', '--run-paid', '--study', str(study),
+                                     '--repetitions', '3'])
+    calls = []
+    monkeypatch.setattr(runner.course, 'execute', lambda *a: calls.append(a) or 0)
+    monkeypatch.setattr(runner, 'collect_sample', lambda sample, task, rc, archive:
+                        {'task': task, 'status': 'passed', 'passed': True, 'usage_complete': True})
+    assert runner.main() == 0
+    assert len(calls) == 6
+    assert runner.main() == 0 and len(calls) == 6
+    monkeypatch.setattr(sys, 'argv', ['run_stability.py', '--run-paid', '--study', str(study),
+                                     '--repetitions', '10'])
+    with pytest.raises(RuntimeError, match='repetitions differ'):
+        runner.main()
+    assert len(calls) == 6
+
+
+def test_review_boundary_starts_only_next_unfinished_sample(tmp_path, monkeypatch):
+    root, study = fixture_study(tmp_path, monkeypatch)
+    monkeypatch.setattr(sys, 'argv', ['run_stability.py', '--run-paid', '--study', str(study),
+                                     '--max-new-samples', '1'])
+    tasks = []
+    monkeypatch.setattr(runner.course, 'execute', lambda root, native, archive, preflight, task, cap:
+                        tasks.append(task) or 1)
+    monkeypatch.setattr(runner, 'collect_sample', lambda sample, task, rc, archive:
+                        {'task': task, 'status': 'failed', 'passed': False, 'usage_complete': True})
+    assert runner.main() == 0
+    assert tasks == ['source']
+    assert runner.main() == 0
+    assert tasks == ['source', 'paper']
+
+
 def test_host_verified_commit_creates_cohort_without_wsl_git(tmp_path, monkeypatch):
     root, unused = fixture_study(tmp_path, monkeypatch)
     study = root / 'new-study'

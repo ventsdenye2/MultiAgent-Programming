@@ -1,0 +1,152 @@
+........................F............................F.................. [ 93%]
+.....                                                                    [100%]
+=================================== FAILURES ===================================
+________ test_real_pdf_52_pages_fit_batched_and_five_notes_reused[True] ________
+
+tmp_path = PosixPath('/tmp/smolagents-offline-l220ii86/pytest/test_real_pdf_52_pages_fit_bat1')
+build_session = <function build_session.<locals>.build at 0x7fb2a9e56200>
+saved_answers = True
+
+    @pytest.mark.parametrize('saved_answers', [False, True])
+    def test_real_pdf_52_pages_fit_batched_and_five_notes_reused(tmp_path, build_session, saved_answers):
+        assert shutil.which('pdftotext'), 'Run this course test in WSL with poppler-utils installed'
+        source = MATERIALS / '公开任务/题目1'
+        repo = tmp_path / 'repo'
+        repo.mkdir()
+        for name in ('paper.pdf', 'paper.json', 'read_pdf.py', 'report.json'):
+            shutil.copy2(source / 'repo' / name, repo / name)
+        task = (source / 'task.md').read_text(encoding='utf-8')
+        session, context, agent, model = build_session('paper', repo, task)
+        session.invoke('read_file', {'path': 'report.json'})
+        session.invoke('read_pdf', {'start_page': 1, 'end_page': 52})
+        page_ids = [eid for eid, e in session.evidence.items.items() if e.page]
+        assert len(page_ids) == 52
+        assert sum(len(session.evidence.items[eid].text) for eid in page_ids) > 100000
+        session.evidence.recall(page_ids)
+        seen = set()
+        sizes = []
+        full_notes_before_last_page = False
+        for number in range(1, 36):
+            messages = context.build(agent.memory, model)
+            sizes.append(model.estimate(messages))
+            body = {'messages': [m.dict() for m in messages]}
+            session.evidence.mark_exposed(body, response(code('print(1)')), number)
+            seen |= session.evidence.current
+            # A successful reading action advances to new pages without a per-page
+            # note gate. Only the final five topic notes are required by the course.
+            delivered_pages = {eid for eid in session.evidence.current if eid in page_ids}
+            assert delivered_pages
+            agent.memory.steps.append(ActionStep(
+                step_number=number, timing=Timing(start_time=0, end_time=1),
+                code_action='print("Read this PDF batch.")', observations='Read this PDF batch.'))
+            if number % 2 == 0:
+                topic = session.contract.topics[(number // 2 - 1) % 5]
+                content = ('Model note for ' + topic + '; keep observed claims and evidence locators. ').ljust(1500, '.')
+                session.evidence.last_response = response(code(f'write_note(content={content!r})'))
+                # One observed page grounds this note; other pages do not need a
+                # per-page acknowledgement before the next original batch advances.
+                session.invoke('write_note', {'title': topic, 'section': topic, 'content': content,
+                                              'evidence_ids': [sorted(delivered_pages)[0]]})
+            if len(session.evidence.notes) == 5 and not set(page_ids).issubset(seen):
+                full_notes_before_last_page = True
+                if saved_answers and not session.evidence.answers:
+                    from course_agent.evidence import PAPER_QUESTIONS
+                    eid = next(eid for eid in session.evidence.exposed if session.evidence.items[eid].page and len(session.evidence.items[eid].text.strip()) >= 20)
+                    item = session.evidence.items[eid]
+                    quote = item.text[:min(100, len(item.text))]
+                    for section, questions in PAPER_QUESTIONS.items():
+                        session.evidence.save_section(section, 'synthetic summary', 'synthetic application')
+                        for question, kind in questions.items():
+                            value = ['synthetic'] if kind is list else 1 if kind is int else 'synthetic'
+>                           session.evidence.save_answer(section, question, value, eid, item.page, quote)
+
+test_smolagents_materials.py:215: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+course_agent/evidence.py:205: in save_answer
+    self._validate_answer(section, question_id, answer, evidence_id, page, quote)
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = <course_agent.evidence.EvidenceStore object at 0x7fb2a9cda180>
+section = 'overview', question_id = 'categories', answer = ['synthetic']
+evidence_id = 'ev-4049593a30e2846f8394', page = 13
+quote = '                                                                                                    '
+
+    def _validate_answer(self, section, question_id, answer, evidence_id, page, quote):
+        if section not in self.contract.topics or not isinstance(question_id, str) or not question_id.strip():
+            raise ValueError('Invalid section or question id')
+        expected = PAPER_QUESTIONS.get(section, {}).get(question_id)
+        if expected is None or type(answer) is not expected: raise ValueError('Unexpected question id or answer type')
+        if not (type(answer) in (str, int) or (type(answer) is list and answer and all(type(x) is str and x.strip() for x in answer))):
+            raise ValueError('answer must be a string, integer, or nonempty array of strings')
+        if type(answer) is str and not answer.strip(): raise ValueError('answer must be nonempty')
+        if type(answer) is list and len(set(answer)) != len(answer): raise ValueError('answer array items must be distinct')
+        if type(page) is not int or page not in self.contract.paper_pages:
+            raise ValueError('page must be an integer in the required page range')
+        if type(evidence_id) is not str or evidence_id not in self.exposed or evidence_id not in self.items:
+            raise ValueError('evidence must already have been delivered')
+        item = self.items[evidence_id]
+        if not item.valid or item.source != 'paper.pdf' or item.page != page or item.version != self.workspace.current_hash('paper.pdf'):
+            raise ValueError('evidence source, page or version mismatch')
+        if type(quote) is not str or not 20 <= len(quote.strip()) <= 1500 or quote not in item.text:
+>           raise ValueError('quote must be a continuous exact excerpt of the cited page')
+E           ValueError: quote must be a continuous exact excerpt of the cited page
+
+course_agent/evidence.py:202: ValueError
+____ test_completed_reading_prioritizes_new_recall_over_previous_large_page ____
+
+paper_runtime = <function paper_runtime.<locals>.build at 0x7fb2a9b698a0>
+
+    def test_completed_reading_prioritizes_new_recall_over_previous_large_page(paper_runtime):
+        pages = [f'FULL_PAGE_{n}_' + str(n) * 14500 for n in (1, 2)]
+    
+        def recall_first(session):
+            eid = next(eid for eid, item in session.evidence.items.items() if item.page == 1)
+            return response(code(f'recall(evidence_ids={[eid]!r})'))
+    
+        session, agent, calls, snapshots, ids = paper_runtime(pages, [
+            response(code("print('Read initial page one.')")), recall_first,
+            response(code("print('Recalled page one takes priority.')")),
+        ])
+        with pytest.raises(BudgetExceeded, match='MAX_STEPS_NO_EXTRA_REQUEST'):
+            agent.run(session.task_prompt())
+        assert contains(calls[0], pages[0]) and not contains(calls[0], pages[1])
+        assert contains(calls[1], pages[1]) and not contains(calls[1], pages[0])
+        assert set(ids).issubset(snapshots[2]['exposed'])
+        assert ids[0] in snapshots[2]['pending']
+        assert contains(calls[2], pages[0]), 'New requested original must be admitted before optional previous-page carry'
+        assert not contains(calls[2], pages[1]), 'Omit the older page when both originals cannot fit'
+        assert not session.evidence.pending
+    
+    
+        # With room for three originals, a chain of recalls must carry the newest
+        # prior originals rather than preferring unrelated lower page numbers.
+        chain_pages = [f'CHAIN_PAGE_{n}_' + str(n) * 7000 for n in range(1, 8)]
+    
+        def recall_pages(*numbers):
+            def reply(session):
+                selected = [eid for number in numbers for eid, item in session.evidence.items.items()
+                            if item.page == number]
+                return response(code(f'recall(evidence_ids={selected!r})'))
+            return reply
+    
+        chained, chain_agent, chain_calls, chain_snapshots, chain_ids = paper_runtime(chain_pages, [
+            response(code("print('Initial batch one.')")),
+            response(code("print('Initial batch two.')")),
+            recall_pages(1, 2), recall_pages(3), recall_pages(4, 5), recall_pages(6, 7),
+            response(code("print('Merge the newest recalled originals.')")),
+        ])
+        with pytest.raises(BudgetExceeded, match='MAX_STEPS_NO_EXTRA_REQUEST'):
+            chain_agent.run(chained.task_prompt())
+        assert set(chain_ids).issubset(chain_snapshots[3]['exposed'])
+        assert all(contains(chain_calls[4], chain_pages[number - 1]) for number in (1, 2, 3))
+        assert all(contains(chain_calls[5], chain_pages[number - 1]) for number in (3, 4, 5))
+>       assert all(contains(chain_calls[6], chain_pages[number - 1]) for number in (4, 6, 7))
+E       assert False
+E        +  where False = all(<generator object test_completed_reading_prioritizes_new_recall_over_previous_large_page.<locals>.<genexpr> at 0x7fb2aa6ff540>)
+
+test_paper_delivery.py:250: AssertionError
+- generated xml file: /mnt/d/Muiti-Agent Programing/experiments/code-agent-smolagents/24371220/experiments/smolagents/offline-20261030-160948/junit.xml -
+=========================== short test summary info ============================
+FAILED test_smolagents_materials.py::test_real_pdf_52_pages_fit_batched_and_five_notes_reused[True]
+FAILED test_paper_delivery.py::test_completed_reading_prioritizes_new_recall_over_previous_large_page
+2 failed, 75 passed in 264.19s (0:04:24)

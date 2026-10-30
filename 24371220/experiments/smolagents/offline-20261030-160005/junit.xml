@@ -1,0 +1,1 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="0" failures="0" skipped="0" tests="1" time="0.257" timestamp="2026-10-30T16:00:12.946928+08:00" hostname="VENTSDENYE5"><testcase classname="test_stability_milestones" name="test_only_executed_events_count_after_partial_action_failure" time="0.002" /></testsuite></testsuites>

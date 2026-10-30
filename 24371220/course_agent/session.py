@@ -2,6 +2,7 @@
 import json
 import ast
 import re
+import copy
 from inspect import Parameter, Signature
 
 from smolagents import Tool
@@ -86,12 +87,22 @@ class CourseSession:
 
     def tools(self):
         detailed = self.contract.profile in {'source', 'paper'}
-        excluded = {'list_files', 'search_code', 'read_range', 'read_symbol', 'replace_text'} if self.contract.profile == 'paper' else {'read_pdf'}
+        excluded = {'list_files', 'search_code', 'read_range', 'read_symbol', 'replace_text', 'replace_text_batch', 'write_file'} if self.contract.profile == 'paper' else {'read_pdf'}
+        if self.contract.profile != 'source': excluded.add('replace_text_batch')
+        if self.contract.profile == 'source': excluded.add('replace_text')
         result = [CourseTool(self, name, spec['description'] + (COURSE_TOOL_DETAILS.get(name, '') if detailed else ''), spec['parameters']['properties'],
                              spec['parameters']['required']) for name, spec in TOOL_SPECS.items()
                   if name not in excluded]
         for name, (description, properties, required) in EXTRA_TOOLS.items():
             result.append(CourseTool(self, name, description, properties, required))
+        if self.contract.profile == 'paper':
+            specs = {
+                'save_answer': ('Save an answer with exact cited page text.', {'section': {'type':'string'}, 'question_id': {'type':'string'}, 'answer': {'type':'object', 'description':"{'value': string, integer or list of strings}"}, 'evidence_id': {'type':'string'}, 'page': {'type':'integer'}, 'quote': {'type':'string'}}),
+                'save_section': ('Save section prose.', {'section': {'type':'string'}, 'summary': {'type':'string'}, 'application': {'type':'string'}}),
+                'submit_report': ('Serialize saved results to report.json.', {'overview': {'type':'string'}, 'expected_hash': {'type':'string'}}),
+            }
+            for name, (description, properties) in specs.items():
+                result.append(CourseTool(self, name, description, properties, list(properties)))
         paper = self.contract.profile == 'paper'
         note_properties = {
             'title': {'type': 'string', 'description': 'Stable note title; reuse it when updating the same note.'},
@@ -120,6 +131,16 @@ class CourseSession:
         commands = tuple(tuple(cmd) for cmd in self.contract.verify_commands)
         unverified = tuple(cmd for cmd in commands if self.verified.get(cmd) != versions)
         targets = self.contract.editable if self.contract.require_write and self.contract.profile == 'source' else set()
+        completion_missing = []
+        if self.two_stage and not self.stage_one_verified:
+            completion_missing.append('intermediate first-subtask verification and plan update')
+        if self.contract.profile == 'paper' and self.writes:
+            try:
+                _, content, _ = self.workspace._read('report.json')
+                report = json.loads(content)
+                if report != self.evidence.report(report['overview']): raise ValueError('report differs from saved results')
+            except (ValueError, KeyError, TypeError, OSError):
+                completion_missing.append('submit report from current saved answers and evidence')
         return TaskProgress(
             plan=tuple((i['title'], i['status']) for i in self.plan),
             evidence_missing=tuple(missing),
@@ -130,14 +151,15 @@ class CourseSession:
             baseline_done=len(self.baselines), verified_current=len(commands)-len(unverified),
             required_checks=len(commands),
             requests_left=max(0, self.contract.max_calls-(self.audit.calls if self.audit else 0)-int(sending)),
-            completion_missing=('intermediate first-subtask verification and plan update',)
-            if self.two_stage and not self.stage_one_verified else ())
+            completion_missing=tuple(completion_missing),
+            final_completes_plan=self.contract.profile in {'source', 'paper'})
 
     def progress_token(self):
         """Material progress for the run monitor; plan churn alone is not work."""
         return json.dumps({
             'reads':self.evidence.full_reads, 'exposed':sorted(self.evidence.exposed),
             'ranges':self.evidence.received_ranges, 'notes':self.evidence.notes,
+            'answers':self.evidence.answers, 'section_text':self.evidence.section_text,
             'writes':self.written_versions, 'baselines':sorted(self.baselines),
             'verified':sorted((list(cmd), versions) for cmd,versions in self.verified.items()),
             'ready':self.progress().ready_for_final,
@@ -156,6 +178,9 @@ class CourseSession:
         if not compact:
             data['evidence'] = self.evidence.catalog()
             data['notes'] = self.evidence.notes
+            if self.contract.profile == 'paper':
+                data['answers'] = copy.deepcopy(self.evidence.answers)
+                data['section_text'] = copy.deepcopy(self.evidence.section_text)
         return data
 
     def _confirm(self, name, args):
@@ -229,9 +254,17 @@ class CourseSession:
                 raise ValueError('Verify the net-only change with full pytest and mark the first plan item done before CSV export')
         self._confirm('write', args)
 
-    def _record_command(self, args, result):
+    def _record_command(self, args, result, before_versions=None):
         command = tuple(args['argv'])
         if command not in {tuple(x) for x in self.contract.verify_commands}:
+            return
+        self.verified.pop(command, None)
+        self.last_test = None
+        self.log('verification_result', command=list(command), rc=result['rc'],
+                 before_versions=before_versions, after_versions=self.versions(),
+                 timed_out=result.get('timed_out', False))
+        if before_versions is not None and before_versions != self.versions():
+            self.log('verification_invalidated', command=list(command), before_versions=before_versions, after_versions=self.versions())
             return
         if not result.get('timed_out') and result['rc'] in (0, 1):
             if not self.writes and self.versions() == self._baseline_snapshot:
@@ -243,7 +276,7 @@ class CourseSession:
             failures = re.findall(r'^FAILED (.+?)(?: - |$)', output, re.M)
             summaries = re.findall(r'^(?:=+\s*)?(\d+ \w+(?:, \d+ \w+)*) in [\d.]+s\b.*$', output, re.M)
             counts = {name: int(n) for n, name in re.findall(r'(\d+) (\w+)', summaries[-1])} if summaries else {}
-            self.last_test = {'rc': result['rc'], 'stage_one_passed': bool(self.writes) and
+            self.last_test = {'rc': result['rc'], 'versions': self.versions(), 'stage_one_passed': bool(self.writes) and
                               not result.get('timed_out') and result['rc'] == 1 and
                               set(counts) <= {'passed', 'failed', 'warning', 'warnings'} and
                               counts.get('passed', 0) >= 2 and
@@ -262,24 +295,35 @@ class CourseSession:
                 result = self._plan(args['items'])
             elif name == 'write_note':
                 result = self.evidence.write_note(**args)
+            elif name == 'save_answer':
+                answer = args['answer']
+                if type(answer) is not dict or set(answer) != {'value'}: raise ValueError('answer must have exactly one value key')
+                result = self.evidence.save_answer(args['section'], args['question_id'], answer['value'], args['evidence_id'], args['page'], args['quote'])
+            elif name == 'save_section':
+                result = self.evidence.save_section(**args)
+            elif name == 'submit_report':
+                content = json.dumps(self.evidence.report(args['overview']), ensure_ascii=False, indent=2) + '\n'
+                result = self.invoke('write_file', {'path': 'report.json', 'content': content, 'expected_hash': args['expected_hash']})
             elif name == 'recall':
                 result = self.evidence.recall(args['evidence_ids'])
             elif name == 'task_status':
                 result = self.status()
             else:
-                if name in {'write_file', 'replace_text'}:
+                command_versions = None
+                if name in {'write_file', 'replace_text', 'replace_text_batch'}:
                     self._before_write(args)
                 elif name == 'run_command':
                     self._confirm(name, args)
+                    command_versions = self.versions()
                 result = self.workspace.invoke(name, args)
-                if name in {'write_file', 'replace_text'} and result.get('changed'):
+                if name in {'write_file', 'replace_text', 'replace_text_batch'} and result.get('changed'):
                     self.writes.add(result['path'])
                     self.written_versions[result['path']] = result['file_hash']
                     self.verified.clear()
                     self.last_test = None
                     self.evidence.invalidate(result['path'], result['file_hash'])
                 if name == 'run_command':
-                    self._record_command(args, result)
+                    self._record_command(args, result, command_versions)
             result = self.evidence.observe(name, args, result)
             self.log('tool_result', action={'tool': name, **args}, result=result)
             return result
@@ -288,6 +332,17 @@ class CourseSession:
             raise
 
     def check_final(self, answer, memory, agent=None):
+        if self.contract.profile in {'source', 'paper'}:
+            progress = self.progress()
+            blockers = list(progress.evidence_missing) + list(progress.baseline_missing) + list(progress.changes_missing) + list(progress.completion_missing)
+            if progress.require_change: blockers.append('make the requested change')
+            if blockers: raise ValueError('; '.join(map(str, blockers)))
+            for command in progress.verification_missing:
+                result = self.invoke('run_command', {'argv': list(command)})
+                if result['rc'] != 0 or result.get('timed_out'):
+                    raise ValueError('Verification failed; repair the issue: ' + result['stdout'][-3000:] + result['stderr'][-3000:])
+            if self.progress().work_complete and self.plan:
+                self._plan([{**item, 'status': 'done'} for item in self.plan])
         remaining = self.progress().remaining
         if remaining:
             raise ValueError('; '.join(remaining))
@@ -298,8 +353,10 @@ class CourseSession:
 Use update_plan before editing, run baseline checks, then read the required files with read_file.
 Tools return Python dicts; use their file_hash for expected_hash. Variables persist across actions.
 Do not reset a successful plan or repeat completed baseline checks. Continue the next unfinished action.
-All writes and tests must use these tools. Call final_answer only after current-file verification.
+All writes and tests must use these tools.
 '''
+        if self.contract.profile not in {'source', 'paper'}:
+            instructions += 'Call final_answer only after current-file verification.\n'
         # The official system prompt already renders the actual import list.
         # Keep the task-specific capability boundary concise to preserve the
         # basic assignment's much smaller context budget.
@@ -319,19 +376,9 @@ When progress says phase=edit, the initial reading and baseline are satisfied. A
 A note may replace original text only after its mechanisms were exposed. Do not repeat full reads to register them again.
 '''
         elif self.contract.profile == 'paper':
-            instructions += '''Paper workflow:
-1. Plan, baseline pytest, read report.json and paper.json; call read_pdf ONCE for the task's full page range.
-This extracts to local storage and logs read_pdf.py; only bounded batches reach the model. Do not print all pages.
-2. Read the delivered page batches in order. Record a topic's supported findings as soon as useful; do not
-wait until both questions are answered. The next batch follows successful actions automatically. On an
-action error, correct it using the retained batch. Do not call read_pdf/task_status just to advance.
-Use only evidence ids from delivered Evidence headers.
-3. Update the same topic note incrementally, preserving earlier confirmed facts and citations. Each final
-topic note must contain its two answers, PDF page numbers and continuous exact quotations supporting ALL
-answer items, within 1500 characters.
-Use write_note(title=..., content=..., evidence_ids=['ev-...'], section='overview') with the actual topic.
-4. After full coverage, reuse all five final notes, build report.json across actions if needed, test, finish plan.
-This agent already has versioned evidence, bounded page selection, note reuse, tools and verification.
+            instructions += '''Paper workflow: Plan, baseline pytest, read report.json and paper.json, then call read_pdf once for the full range. Read the delivered batches; they advance automatically after successful actions. On error use the retained batch. Do not print all pages or reread just to advance.
+Incrementally write_note for each topic, citing delivered evidence ids. Each final note must contain both answers, page numbers and continuous exact quotations supporting every answer item, within 1500 characters. Preserve earlier facts when updating.
+Save each answer via save_answer(section, question_id, answer={'value': ...}, evidence_id, page, quote); save prose via save_section. Choose answers and citations yourself: exact matching proves provenance, not semantic support. Support every array item. After all pages and all five latest notes have appeared together in a later request, call submit_report(overview, expected_hash), then final_answer.
 Multi-agent collaboration and training are future suggestions, not implemented features.
 '''
         return (self.contract.text + '\n\nCourse execution contract:\n' +

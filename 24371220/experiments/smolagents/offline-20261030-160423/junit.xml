@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="0" failures="1" skipped="0" tests="10" time="126.606" timestamp="2026-10-30T16:04:27.863708+08:00" hostname="VENTSDENYE5"><testcase classname="test_stability_contract" name="test_batch_atomic_and_versions" time="0.008" /><testcase classname="test_stability_contract" name="test_paper_saved_answer_validation_and_serialization" time="0.005" /><testcase classname="test_stability_contract" name="test_official_final_runs_verification_and_recovers[good]" time="30.175" /><testcase classname="test_stability_contract" name="test_official_final_runs_verification_and_recovers[bad]" time="13.340" /><testcase classname="test_stability_review" name="test_saved_answer_detaches_mutable_model_list" time="0.005" /><testcase classname="test_stability_review" name="test_official_final_check_runs_current_verification_and_records_success" time="6.974"><failure message="assert False&#10; +  where False = any(&lt;generator object test_official_final_check_runs_current_verification_and_records_success.&lt;locals&gt;.&lt;genexpr&gt; at 0x7f549a96f100&gt;)">tmp_path = PosixPath('/tmp/smolagents-offline-o23z1ncc/pytest/test_official_final_check_runs0')
+
+    def test_official_final_check_runs_current_verification_and_records_success(tmp_path):
+        rc, result, calls, events, memory = run_final_check(tmp_path, [start(42), "final_answer('finished')"])
+        assert rc == 0, result
+        assert len(calls) == 2
+        assert [e['rc'] for e in events if e['event'] == 'command_result'] == [1, 0]
+        assert any(e['event'] == 'agent_step' and e['step'].get('is_final_answer') for e in events)
+        assert any(step.get('is_final_answer') for step in memory)
+&gt;       assert result['remaining'] == []
+E       assert False
+E        +  where False = any(&lt;generator object test_official_final_check_runs_current_verification_and_records_success.&lt;locals&gt;.&lt;genexpr&gt; at 0x7f549a96f100&gt;)
+
+test_stability_review.py:63: AssertionError</failure></testcase><testcase classname="test_stability_review" name="test_official_final_check_failure_recovers_after_model_repairs" time="10.479" /><testcase classname="test_stability_review" name="test_official_final_check_cannot_accept_no_written_artifact" time="9.889" /><testcase classname="test_stability_review" name="test_official_final_check_rejects_passed_test_from_previous_version" time="24.065" /><testcase classname="test_stability_milestones" name="test_only_executed_events_count_after_partial_action_failure" time="0.004" /></testsuite></testsuites>

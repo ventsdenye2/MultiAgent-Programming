@@ -1,0 +1,24 @@
+--- a/deepinfer/engine/stats_logger.py
++++ b/deepinfer/engine/stats_logger.py
+@@ -475,3 +475,5 @@
+         eng.last_step_time = now
+         for _, timer in get_timers():
+             timer.clear_latest()
++
++# Offline delivery regression.
+--- a/deepinfer/environ.py
++++ b/deepinfer/environ.py
+@@ -219,3 +219,5 @@
+     """Rearm all descriptors."""
+     for name, descriptor in _descriptors.items():
+         setattr(envs, name, descriptor)
++
++# Offline delivery regression.
+--- a/deepinfer/logger.py
++++ b/deepinfer/logger.py
+@@ -172,3 +172,5 @@
+ 
+ class ForkProcessWithCrashHeader(_CrashHeaderProcessMixin, ForkProcess):
+     pass
++
++# Offline delivery regression.

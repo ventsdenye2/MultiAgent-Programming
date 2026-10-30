@@ -20,6 +20,7 @@ class TaskProgress:
     required_checks: int
     requests_left: int
     completion_missing: tuple[str, ...] = ()
+    final_completes_plan: bool = False
 
     @property
     def plan_items(self):
@@ -75,6 +76,8 @@ class TaskProgress:
         if self.ready_for_final:
             return 'final_answer when ready'
         if self.work_complete:
+            if self.final_completes_plan:
+                return 'Current files are verified. Call final_answer to complete the plan and finish.'
             return 'Changes and current-file tests are complete. Mark the existing plan done, then final_answer.'
         return self.work_requirements[0]
 

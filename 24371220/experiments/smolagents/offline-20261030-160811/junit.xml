@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="0" failures="1" skipped="0" tests="4" time="68.317" timestamp="2026-10-30T16:08:19.051042+08:00" hostname="VENTSDENYE5"><testcase classname="test_smolagents_materials" name="test_real_pdf_52_pages_fit_batched_and_five_notes_reused[False]" time="16.729" /><testcase classname="test_smolagents_materials" name="test_real_pdf_52_pages_fit_batched_and_five_notes_reused[True]" time="2.113" /><testcase classname="test_paper_delivery" name="test_final_note_revision_requires_new_http_before_report_and_finish" time="16.700" /><testcase classname="test_paper_delivery" name="test_completed_reading_prioritizes_new_recall_over_previous_large_page" time="0.162"><failure message="assert False&#10; +  where False = all(&lt;generator object test_completed_reading_prioritizes_new_recall_over_previous_large_page.&lt;locals&gt;.&lt;genexpr&gt; at 0x7f34e2b1ba40&gt;)">paper_runtime = &lt;function paper_runtime.&lt;locals&gt;.build at 0x7f34e419e660&gt;
+
+    def test_completed_reading_prioritizes_new_recall_over_previous_large_page(paper_runtime):
+        pages = [f'FULL_PAGE_{n}_' + str(n) * 14500 for n in (1, 2)]
+    
+        def recall_first(session):
+            eid = next(eid for eid, item in session.evidence.items.items() if item.page == 1)
+            return response(code(f'recall(evidence_ids={[eid]!r})'))
+    
+        session, agent, calls, snapshots, ids = paper_runtime(pages, [
+            response(code("print('Read initial page one.')")), recall_first,
+            response(code("print('Recalled page one takes priority.')")),
+        ])
+        with pytest.raises(BudgetExceeded, match='MAX_STEPS_NO_EXTRA_REQUEST'):
+            agent.run(session.task_prompt())
+        assert contains(calls[0], pages[0]) and not contains(calls[0], pages[1])
+        assert contains(calls[1], pages[1]) and not contains(calls[1], pages[0])
+        assert set(ids).issubset(snapshots[2]['exposed'])
+        assert ids[0] in snapshots[2]['pending']
+        assert contains(calls[2], pages[0]), 'New requested original must be admitted before optional previous-page carry'
+        assert not contains(calls[2], pages[1]), 'Omit the older page when both originals cannot fit'
+        assert not session.evidence.pending
+    
+    
+        # With room for three originals, a chain of recalls must carry the newest
+        # prior originals rather than preferring unrelated lower page numbers.
+        chain_pages = [f'CHAIN_PAGE_{n}_' + str(n) * 7000 for n in range(1, 8)]
+    
+        def recall_pages(*numbers):
+            def reply(session):
+                selected = [eid for number in numbers for eid, item in session.evidence.items.items()
+                            if item.page == number]
+                return response(code(f'recall(evidence_ids={selected!r})'))
+            return reply
+    
+        chained, chain_agent, chain_calls, chain_snapshots, chain_ids = paper_runtime(chain_pages, [
+            response(code("print('Initial batch one.')")),
+            response(code("print('Initial batch two.')")),
+            recall_pages(1, 2), recall_pages(3), recall_pages(4, 5), recall_pages(6, 7),
+            response(code("print('Merge the newest recalled originals.')")),
+        ])
+        with pytest.raises(BudgetExceeded, match='MAX_STEPS_NO_EXTRA_REQUEST'):
+            chain_agent.run(chained.task_prompt())
+        assert set(chain_ids).issubset(chain_snapshots[3]['exposed'])
+        assert all(contains(chain_calls[4], chain_pages[number - 1]) for number in (1, 2, 3))
+        assert all(contains(chain_calls[5], chain_pages[number - 1]) for number in (3, 4, 5))
+&gt;       assert all(contains(chain_calls[6], chain_pages[number - 1]) for number in (4, 6, 7))
+E       assert False
+E        +  where False = all(&lt;generator object test_completed_reading_prioritizes_new_recall_over_previous_large_page.&lt;locals&gt;.&lt;genexpr&gt; at 0x7f34e2b1ba40&gt;)
+
+test_paper_delivery.py:250: AssertionError</failure></testcase></testsuite></testsuites>

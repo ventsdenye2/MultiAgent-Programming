@@ -27,7 +27,7 @@ def paper_runtime(tmp_path):
         if verify:
             (repo / 'test_report.py').write_text(
                 "import json\nfrom pathlib import Path\n"
-                "def test_report():\n    assert json.loads(Path('report.json').read_text()).get('complete') is True\n")
+                "def test_report():\n    assert json.loads(Path('report.json').read_text()).get('overview') == 'complete'\n")
         cfg = CONFIG | {'read_only': not verify, 'max_steps': len(replies)}
         spec = load_task('Read the PDF and update report.json.', repo, cfg, 'paper')
         if not verify:
@@ -106,6 +106,12 @@ def test_final_note_revision_requires_new_http_before_report_and_finish(tmp_path
         for index, (topic, note) in enumerate(notes.items()):
             action += (f"write_note(title={topic!r}, section={topic!r}, content={note!r}, "
                        f"evidence_ids={[ids[index]]!r})\n")
+            from course_agent.evidence import PAPER_QUESTIONS
+            action += f"save_section(section={topic!r}, summary='summary', application='application')\n"
+            for question, kind in PAPER_QUESTIONS[topic].items():
+                value = ['answer'] if kind is list else 1 if kind is int else 'answer'
+                quote = session.evidence.items[ids[index]].text
+                action += f"save_answer(section={topic!r}, question_id={question!r}, answer={{'value': {value!r}}}, evidence_id={ids[index]!r}, page={index + 1}, quote={quote!r})\n"
         return response(code(action))
 
     updated_note = 'Updated model overview note retaining the observed claim and exact evidence locator.'
@@ -113,14 +119,14 @@ def test_final_note_revision_requires_new_http_before_report_and_finish(tmp_path
     def revise_then_premature_report(session):
         overview = next(eid for eid, item in session.evidence.items.items() if item.page == 1)
         action = (f"write_note(title='overview', section='overview', content={updated_note!r}, evidence_ids={[overview]!r})\n"
-                  "write_file(path='report.json',content='{\"premature\":true}',expected_hash=r['file_hash'])")
+                  "submit_report(overview='premature',expected_hash=r['file_hash'])")
         return response(code(action))
 
     session, agent, calls, _, ids = paper_runtime([f'Observed PDF page {n} with substantive text.' for n in range(5)], [
         read_and_note,
         revise_then_premature_report,
-        response(code("r=write_file(path='report.json',content='{\"draft\":true}',expected_hash=r['file_hash'])")),
-        response(code("r=write_file(path='report.json',content='{\"complete\":true}',expected_hash=r['file_hash'])\n"
+        response(code("r=submit_report(overview='draft',expected_hash=r['file_hash'])")),
+        response(code("r=submit_report(overview='complete',expected_hash=r['file_hash'])\n"
                       "run_command(argv=['python','-m','pytest','-q'])\n"
                       "update_plan(items=[{'title':'read and report','status':'done'}])\nfinal_answer('Report verified')")),
     ], verify=True)

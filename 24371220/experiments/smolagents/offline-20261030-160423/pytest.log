@@ -1,0 +1,22 @@
+.....F....                                                               [100%]
+=================================== FAILURES ===================================
+___ test_official_final_check_runs_current_verification_and_records_success ____
+
+tmp_path = PosixPath('/tmp/smolagents-offline-o23z1ncc/pytest/test_official_final_check_runs0')
+
+    def test_official_final_check_runs_current_verification_and_records_success(tmp_path):
+        rc, result, calls, events, memory = run_final_check(tmp_path, [start(42), "final_answer('finished')"])
+        assert rc == 0, result
+        assert len(calls) == 2
+        assert [e['rc'] for e in events if e['event'] == 'command_result'] == [1, 0]
+        assert any(e['event'] == 'agent_step' and e['step'].get('is_final_answer') for e in events)
+        assert any(step.get('is_final_answer') for step in memory)
+>       assert result['remaining'] == []
+E       assert False
+E        +  where False = any(<generator object test_official_final_check_runs_current_verification_and_records_success.<locals>.<genexpr> at 0x7f549a96f100>)
+
+test_stability_review.py:63: AssertionError
+- generated xml file: /mnt/d/Muiti-Agent Programing/experiments/code-agent-smolagents/24371220/experiments/smolagents/offline-20261030-160423/junit.xml -
+=========================== short test summary info ============================
+FAILED test_stability_review.py::test_official_final_check_runs_current_verification_and_records_success
+1 failed, 9 passed in 126.68s (0:02:06)

@@ -1,0 +1,270 @@
+.......................F.........................F..F........FF......    [100%]
+=================================== FAILURES ===================================
+___________ test_real_pdf_52_pages_fit_batched_and_five_notes_reused ___________
+
+tmp_path = PosixPath('/tmp/smolagents-offline-lxt_6bzk/pytest/test_real_pdf_52_pages_fit_bat0')
+build_session = <function build_session.<locals>.build at 0x7f1f43f05580>
+
+    def test_real_pdf_52_pages_fit_batched_and_five_notes_reused(tmp_path, build_session):
+        assert shutil.which('pdftotext'), 'Run this course test in WSL with poppler-utils installed'
+        source = MATERIALS / '公开任务/题目1'
+        repo = tmp_path / 'repo'
+        repo.mkdir()
+        for name in ('paper.pdf', 'paper.json', 'read_pdf.py', 'report.json'):
+            shutil.copy2(source / 'repo' / name, repo / name)
+        task = (source / 'task.md').read_text(encoding='utf-8')
+        session, context, agent, model = build_session('paper', repo, task)
+        session.invoke('read_file', {'path': 'report.json'})
+        session.invoke('read_pdf', {'start_page': 1, 'end_page': 52})
+        page_ids = [eid for eid, e in session.evidence.items.items() if e.page]
+        assert len(page_ids) == 52
+        assert sum(len(session.evidence.items[eid].text) for eid in page_ids) > 100000
+        session.evidence.recall(page_ids)
+        seen = set()
+        sizes = []
+        full_notes_before_last_page = False
+        for number in range(1, 36):
+            messages = context.build(agent.memory, model)
+            sizes.append(model.estimate(messages))
+            body = {'messages': [m.dict() for m in messages]}
+            session.evidence.mark_exposed(body, response(code('print(1)')), number)
+            seen |= session.evidence.current
+            # A successful reading action advances to new pages without a per-page
+            # note gate. Only the final five topic notes are required by the course.
+            delivered_pages = {eid for eid in session.evidence.current if eid in page_ids}
+            assert delivered_pages
+            agent.memory.steps.append(ActionStep(
+                step_number=number, timing=Timing(start_time=0, end_time=1),
+                code_action='print("Read this PDF batch.")', observations='Read this PDF batch.'))
+            if number % 2 == 0:
+                topic = session.contract.topics[(number // 2 - 1) % 5]
+                content = ('Model note for ' + topic + '; keep observed claims and evidence locators. ').ljust(1500, '.')
+                session.evidence.last_response = response(code(f'write_note(content={content!r})'))
+                # One observed page grounds this note; other pages do not need a
+                # per-page acknowledgement before the next original batch advances.
+                session.invoke('write_note', {'title': topic, 'section': topic, 'content': content,
+                                              'evidence_ids': [sorted(delivered_pages)[0]]})
+            if len(session.evidence.notes) == 5 and not set(page_ids).issubset(seen):
+                full_notes_before_last_page = True
+            if set(page_ids).issubset(seen):
+                break
+        assert set(page_ids).issubset(seen), {'missing': len(set(page_ids) - seen), 'sizes': sizes}
+        assert full_notes_before_last_page, 'Exercise remaining originals with all five maximum-size notes retained'
+>       assert number <= 30, 'Reserve at least ten requests for setup, report delivery and verification'
+E       AssertionError: Reserve at least ten requests for setup, report delivery and verification
+E       assert 34 <= 30
+
+test_smolagents_materials.py:209: AssertionError
+_____ test_final_note_revision_requires_new_http_before_report_and_finish ______
+
+tmp_path = PosixPath('/tmp/smolagents-offline-lxt_6bzk/pytest/test_final_note_revision_requi0')
+paper_runtime = <function paper_runtime.<locals>.build at 0x7f1f43e49800>
+
+    def test_final_note_revision_requires_new_http_before_report_and_finish(tmp_path, paper_runtime):
+        notes = {topic: f'Model reading note for {topic}: retain the observed claim and page evidence.'
+                 for topic in ('overview', 'reasoning', 'tool_use', 'multi_agent', 'outlook')}
+    
+        def read_and_note(session):
+            ids = [eid for eid, item in session.evidence.items.items() if item.page]
+            action = ("update_plan(items=[{'title':'read and report','status':'doing'}])\n"
+                      "run_command(argv=['python','-m','pytest','-q'])\n"
+                      "r=read_file(path='report.json')\n")
+            for index, (topic, note) in enumerate(notes.items()):
+                action += (f"write_note(title={topic!r}, section={topic!r}, content={note!r}, "
+                           f"evidence_ids={[ids[index]]!r})\n")
+            return response(code(action))
+    
+        updated_note = 'Updated model overview note retaining the observed claim and exact evidence locator.'
+    
+        def revise_then_premature_report(session):
+            overview = next(eid for eid, item in session.evidence.items.items() if item.page == 1)
+            action = (f"write_note(title='overview', section='overview', content={updated_note!r}, evidence_ids={[overview]!r})\n"
+                      "write_file(path='report.json',content='{\"premature\":true}',expected_hash=r['file_hash'])")
+            return response(code(action))
+    
+        session, agent, calls, _, ids = paper_runtime([f'Observed PDF page {n} with substantive text.' for n in range(5)], [
+            read_and_note,
+            revise_then_premature_report,
+            response(code("r=write_file(path='report.json',content='{\"draft\":true}',expected_hash=r['file_hash'])")),
+            response(code("r=write_file(path='report.json',content='{\"complete\":true}',expected_hash=r['file_hash'])\n"
+                          "run_command(argv=['python','-m','pytest','-q'])\n"
+                          "update_plan(items=[{'title':'read and report','status':'done'}])\nfinal_answer('Report verified')")),
+        ], verify=True)
+>       assert agent.run(session.task_prompt()) == 'Report verified'
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+test_paper_delivery.py:127: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+vendor/smolagents/src/smolagents/agents.py:499: in run
+    steps = list(self._run_stream(task=self.task, max_steps=max_steps, images=images))
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+vendor/smolagents/src/smolagents/agents.py:607: in _run_stream
+    final_answer = self._handle_max_steps_reached(task)
+                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+vendor/smolagents/src/smolagents/agents.py:627: in _handle_max_steps_reached
+    final_answer = self.provide_final_answer(task)
+                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = <course_agent.engine.CourseCodeAgent object at 0x7f1f43f496a0>
+task = 'Read the PDF and update report.json.\n\nCourse execution contract:\n{"profile": "paper", "editable": ["report.json"],...e, tools and verification.\nMulti-agent collaboration and training are future suggestions, not implemented features.\n'
+
+    def provide_final_answer(self, task):
+        # Upstream's max-step fallback normally makes an extra model request.
+        # A course run must stop at its stated budget instead.
+>       raise BudgetExceeded("MAX_STEPS_NO_EXTRA_REQUEST")
+E       course_agent.audit.BudgetExceeded: MAX_STEPS_NO_EXTRA_REQUEST
+
+course_agent/engine.py:53: BudgetExceeded
+----------------------------- Captured stdout call -----------------------------
+Code execution failed at line 
+'write_file(path='report.json',content='{"premature":true}',expected_hash=r['fil
+e_hash'])' due to: InterpreterError: Forbidden function evaluation: 'write_file'
+is not among the explicitly allowed tools or defined/imported in the preceding 
+code
+Code execution failed at line 
+'r=write_file(path='report.json',content='{"draft":true}',expected_hash=r['file_
+hash'])' due to: InterpreterError: Forbidden function evaluation: 'write_file' 
+is not among the explicitly allowed tools or defined/imported in the preceding 
+code
+Code execution failed at line 
+'r=write_file(path='report.json',content='{"complete":true}',expected_hash=r['fi
+le_hash'])' due to: InterpreterError: Forbidden function evaluation: 
+'write_file' is not among the explicitly allowed tools or defined/imported in 
+the preceding code
+____ test_completed_reading_prioritizes_new_recall_over_previous_large_page ____
+
+paper_runtime = <function paper_runtime.<locals>.build at 0x7f1f43f04360>
+
+    def test_completed_reading_prioritizes_new_recall_over_previous_large_page(paper_runtime):
+        pages = [f'FULL_PAGE_{n}_' + str(n) * 14500 for n in (1, 2)]
+    
+        def recall_first(session):
+            eid = next(eid for eid, item in session.evidence.items.items() if item.page == 1)
+            return response(code(f'recall(evidence_ids={[eid]!r})'))
+    
+        session, agent, calls, snapshots, ids = paper_runtime(pages, [
+            response(code("print('Read initial page one.')")), recall_first,
+            response(code("print('Recalled page one takes priority.')")),
+        ])
+        with pytest.raises(BudgetExceeded, match='MAX_STEPS_NO_EXTRA_REQUEST'):
+            agent.run(session.task_prompt())
+        assert contains(calls[0], pages[0]) and not contains(calls[0], pages[1])
+        assert contains(calls[1], pages[1]) and not contains(calls[1], pages[0])
+        assert set(ids).issubset(snapshots[2]['exposed'])
+        assert ids[0] in snapshots[2]['pending']
+        assert contains(calls[2], pages[0]), 'New requested original must be admitted before optional previous-page carry'
+        assert not contains(calls[2], pages[1]), 'Omit the older page when both originals cannot fit'
+        assert not session.evidence.pending
+    
+    
+        # With room for three originals, a chain of recalls must carry the newest
+        # prior originals rather than preferring unrelated lower page numbers.
+        chain_pages = [f'CHAIN_PAGE_{n}_' + str(n) * 7000 for n in range(1, 8)]
+    
+        def recall_pages(*numbers):
+            def reply(session):
+                selected = [eid for number in numbers for eid, item in session.evidence.items.items()
+                            if item.page == number]
+                return response(code(f'recall(evidence_ids={selected!r})'))
+            return reply
+    
+        chained, chain_agent, chain_calls, chain_snapshots, chain_ids = paper_runtime(chain_pages, [
+            response(code("print('Initial batch one.')")),
+            response(code("print('Initial batch two.')")),
+            recall_pages(1, 2), recall_pages(3), recall_pages(4, 5), recall_pages(6, 7),
+            response(code("print('Merge the newest recalled originals.')")),
+        ])
+        with pytest.raises(BudgetExceeded, match='MAX_STEPS_NO_EXTRA_REQUEST'):
+            chain_agent.run(chained.task_prompt())
+>       assert set(chain_ids).issubset(chain_snapshots[3]['exposed'])
+E       AssertionError: assert False
+E        +  where False = <built-in method issubset of set object at 0x7f1f4c62d9a0>({'ev-0bb88db782dbb846de19', 'ev-43852c44687baca48e12', 'ev-4609a2662ec458fe5e71', 'ev-61009ffb1fbc87271698', 'ev-82ae75f5539e2e6ba21d', 'ev-c86a87a1f4e38c6715bf', ...})
+E        +    where <built-in method issubset of set object at 0x7f1f4c62d9a0> = {'ev-43852c44687baca48e12', 'ev-4609a2662ec458fe5e71', 'ev-61009ffb1fbc87271698', 'ev-82ae75f5539e2e6ba21d', 'ev-b029687907fe3fd6371a', 'ev-c86a87a1f4e38c6715bf', ...}.issubset
+E        +      where {'ev-43852c44687baca48e12', 'ev-4609a2662ec458fe5e71', 'ev-61009ffb1fbc87271698', 'ev-82ae75f5539e2e6ba21d', 'ev-b029687907fe3fd6371a', 'ev-c86a87a1f4e38c6715bf', ...} = set(['ev-43852c44687baca48e12', 'ev-4609a2662ec458fe5e71', 'ev-c86a87a1f4e38c6715bf', 'ev-82ae75f5539e2e6ba21d', 'ev-e8bfd076b2d75736f2e6', 'ev-61009ffb1fbc87271698', ...])
+
+test_paper_delivery.py:241: AssertionError
+___________ test_official_final_runs_verification_and_recovers[good] ___________
+
+tmp_path = PosixPath('/tmp/smolagents-offline-lxt_6bzk/pytest/test_official_final_runs_verif0')
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x7f1f43c681d0>
+first_edit = 'good'
+
+        (tmp_path / 'paper.pdf').write_text('changed', encoding='utf-8')
+        with pytest.raises(ValueError): store.report('overview')
+    
+    
+    @pytest.mark.parametrize('first_edit', ['good', 'bad'])
+    def test_official_final_runs_verification_and_recovers(tmp_path, monkeypatch, first_edit):
+        from test_smolagents import run_script
+        monkeypatch.setattr(EvidenceStore, 'missing', lambda self, first_write=True: [])
+        def setup(repo):
+            (repo / 'data.py').write_text('value = 0\n')
+            (repo / 'test_data.py').write_text("from pathlib import Path\ndef test_value():\n    assert Path('data.py').read_text() == 'value = 1\\n'\n")
+        replies = [
+            "update_plan(items=[{'title':'change','status':'doing'}])\nrun_command(argv=['python','-m','pytest','-q'])\nr=read_file(path='data.py')",
+            "r=replace_text_batch(path='data.py', edits=[{'old_text':'value = 0','new_text':'value = " + ('1' if first_edit == 'good' else '2') + "'}], expected_hash=r['file_hash'])\nfinal_answer('done')",
+        ]
+        if first_edit == 'bad':
+>           replies.append("r=read_file(path='data.py')\nr=replace_text_batch(path='data.py', edits=[{'old_text':'value = 2','new_text':'value = 1'}], expected_hash=r['file_hash'])\nfinal_answer('done')")
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E           assert False
+E            +  where False = any(<generator object test_official_final_runs_verification_and_recovers.<locals>.<genexpr> at 0x7f1f43cba0c0>)
+
+test_stability_contract.py:70: AssertionError
+___________ test_official_final_runs_verification_and_recovers[bad] ____________
+
+tmp_path = PosixPath('/tmp/smolagents-offline-lxt_6bzk/pytest/test_official_final_runs_verif1')
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x7f1f43e65220>
+first_edit = 'bad'
+
+        (tmp_path / 'paper.pdf').write_text('changed', encoding='utf-8')
+        with pytest.raises(ValueError): store.report('overview')
+    
+    
+    @pytest.mark.parametrize('first_edit', ['good', 'bad'])
+    def test_official_final_runs_verification_and_recovers(tmp_path, monkeypatch, first_edit):
+        from test_smolagents import run_script
+        monkeypatch.setattr(EvidenceStore, 'missing', lambda self, first_write=True: [])
+        def setup(repo):
+            (repo / 'data.py').write_text('value = 0\n')
+            (repo / 'test_data.py').write_text("from pathlib import Path\ndef test_value():\n    assert Path('data.py').read_text() == 'value = 1\\n'\n")
+        replies = [
+            "update_plan(items=[{'title':'change','status':'doing'}])\nrun_command(argv=['python','-m','pytest','-q'])\nr=read_file(path='data.py')",
+            "r=replace_text_batch(path='data.py', edits=[{'old_text':'value = 0','new_text':'value = " + ('1' if first_edit == 'good' else '2') + "'}], expected_hash=r['file_hash'])\nfinal_answer('done')",
+        ]
+        if first_edit == 'bad':
+>           replies.append("r=read_file(path='data.py')\nr=replace_text_batch(path='data.py', edits=[{'old_text':'value = 2','new_text':'value = 1'}], expected_hash=r['file_hash'])\nfinal_answer('done')")
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E           assert False
+E            +  where False = any(<generator object test_official_final_runs_verification_and_recovers.<locals>.<genexpr> at 0x7f1f48caa670>)
+
+test_stability_contract.py:70: AssertionError
+----------------------------- Captured stdout call -----------------------------
+Check check_final failed with error: Verification failed; repair the issue: F   
+[100%]
+=================================== FAILURES ===================================
+__________________________________ test_value __________________________________
+
+    def test_value():
+>       assert Path('data.py').read_text() == 'value = 1\n'
+E       AssertionError: assert 'value = 2\n' == 'value = 1\n'
+E         
+E         - value = 1
+E         ?         ^
+E         + value = 2
+E         ?         ^
+
+test_data.py:3: AssertionError
+=========================== short test summary info ============================
+FAILED test_data.py::test_value - AssertionError: assert 'value = 2\n' == 'va...
+1 failed in 1.20s
+
+- generated xml file: /mnt/d/Muiti-Agent Programing/experiments/code-agent-smolagents/24371220/experiments/smolagents/offline-20261030-160223/junit.xml -
+=========================== short test summary info ============================
+FAILED test_smolagents_materials.py::test_real_pdf_52_pages_fit_batched_and_five_notes_reused
+FAILED test_paper_delivery.py::test_final_note_revision_requires_new_http_before_report_and_finish
+FAILED test_paper_delivery.py::test_completed_reading_prioritizes_new_recall_over_previous_large_page
+FAILED test_stability_contract.py::test_official_final_runs_verification_and_recovers[good]
+FAILED test_stability_contract.py::test_official_final_runs_verification_and_recovers[bad]
+5 failed, 64 passed in 131.13s (0:02:11)
