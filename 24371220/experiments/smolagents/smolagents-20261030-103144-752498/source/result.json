@@ -1,0 +1,35 @@
+{
+  "task": "题目2开发自测",
+  "passed": true,
+  "checks": {
+    "真实开发过程与修改范围": true,
+    "补丁可还原实际修改": true,
+    "相关源码真实读取并入模": true,
+    "首次修改复用相关源码或模型笔记": true,
+    "独立兼容与新增功能测试": true,
+    "真实日志处理链路": true,
+    "运行后修改范围仍合规": true,
+    "学生代码与本轮开始一致": true,
+    "服务端真实用量完整": true
+  },
+  "score": 1,
+  "max_score": 1,
+  "usage": {
+    "complete": true,
+    "requests": 19,
+    "input_tokens": 150846,
+    "output_tokens": 15795,
+    "total_tokens": 166641
+  },
+  "actual_models": [
+    "deepseek-flash"
+  ],
+  "status": "complete",
+  "source_sha256": {
+    "deepinfer/logger.py": "ecada6d76be24a8fc8880636dac16b831557e0481d5b937d7f5ca8f7cb7de8a2",
+    "deepinfer/environ.py": "114d8ae717167ae75859ace203a653ba0173cb7512efc4defa288e5514ae402d",
+    "deepinfer/engine/stats_logger.py": "554e54ac42df2277016bff89f7ab3deb6cc62af0dc6a89945312751606af5481"
+  },
+  "student_sha256": "c1388c934f2cc06ba2c68fdb8c212550eb386b513029ae04d8596b0463fd2405",
+  "profile": "d03108378642da240a373be897a5b8deb1326447e85e51a4852b10ce92aa2807"
+}

@@ -1,0 +1,15 @@
+{
+  "status": "completed",
+  "engine": "smolagents",
+  "upstream_version": "1.26.0",
+  "context_mode": "evidence",
+  "reason": null,
+  "usage": {
+    "requests": 19,
+    "complete": true,
+    "prompt_tokens": 150846,
+    "completion_tokens": 15795
+  },
+  "answer": "Implemented DEEPINFER_LOG_MAX_MESSAGE_CHARS across deepinfer/environ.py (cached EnvVar with int>=32 validation, refresh support), deepinfer/logger.py (NewLineFormatter max_message_chars keyword-only budget with '...<omitted>...' middle truncation, keep_full_message is True honoring, default init wired to config, no duplicate handlers), and deepinfer/engine/stats_logger.py (logger.info(m, extra={'keep_full_message': True})). Full suite: 60 passed.",
+  "remaining": []
+}

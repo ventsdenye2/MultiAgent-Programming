@@ -1,0 +1,4 @@
+命令：["patch", "--batch", "--forward", "-p1", "--input", "/home/ventsdenye/.local/state/code-agent/evaluations/run-k0wpmk2c/results/source/development/patch.diff"]
+patching file deepinfer/engine/stats_logger.py
+patching file deepinfer/environ.py
+patching file deepinfer/logger.py
