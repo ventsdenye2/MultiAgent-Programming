@@ -1,0 +1,54 @@
+FF                                                                       [100%]
+=================================== FAILURES ===================================
+____ test_large_originals_keep_complete_write_hash_path_and_failure_on_http ____
+
+wire_session = (<course_agent.session.CourseSession object at 0x7f2b1d8cc440>, <course_agent.context.EvidenceContext object at 0x7f2b...ectory_long_directory_long_directory_long_directory_long_directory_long_directory_long_directory_long_directory_/a.py')
+
+    def test_large_originals_keep_complete_write_hash_path_and_failure_on_http(wire_session):
+        session, context, agent, model, bodies, path = wire_session
+        session.invoke('read_file', {'path': path})
+        digest = 'abc12345' * 8
+        session.evidence.recent_results = [
+            {'tool': 'replace_text', 'result': {'path': path, 'changed': True, 'file_hash': digest}},
+            {'tool': 'run_command', 'result': {'rc': 1, 'timed_out': False,
+              'stdout': 'FAILED_HEAD\n' + 'long output\n' * 4000 + 'FAILED_TAIL',
+              'stderr': 'ERROR_HEAD\n' + 'details\n' * 4000 + 'ERROR_TAIL'}},
+        ]
+>       agent.memory.steps.append(ActionStep(model_output=code('print(1)'), code_action='print(1)',
+                                              observations='long executor output\n' * 4000))
+E       TypeError: ActionStep.__init__() missing 2 required positional arguments: 'step_number' and 'timing'
+
+test_sending_state_review.py:56: TypeError
+_ test_registered_read_is_not_http_delivery_and_write_does_not_reopen_first_read _
+
+wire_session = (<course_agent.session.CourseSession object at 0x7f2b1c1b5b80>, <course_agent.context.EvidenceContext object at 0x7f2b...ectory_long_directory_long_directory_long_directory_long_directory_long_directory_long_directory_long_directory_/a.py')
+
+    def test_registered_read_is_not_http_delivery_and_write_does_not_reopen_first_read(wire_session):
+        session, context, agent, model, bodies, path = wire_session
+        original = session.invoke('read_file', {'path': path})
+        assert path in session.evidence.full_reads
+        assert not session.evidence.file_exposed(path)
+        with pytest.raises(ValueError, match='Edit prerequisites'):
+            session._before_write({'path': path})
+        for _ in range(12):
+            model.generate(context.build(agent.memory, model))
+            if session.evidence.file_exposed(path):
+                break
+        assert session.evidence.file_exposed(path)
+        session.invoke('replace_text', {'path': path, 'old_text': 'value = 1',
+                                      'new_text': 'value = 2', 'expected_hash': original['file_hash']})
+        assert not session.evidence.file_exposed(path)
+        assert path not in session.evidence.full_reads
+        assert not session.progress().evidence_missing
+        assert session.progress().phase == 'finish_plan'
+        model.generate(context.build(agent.memory, model))
+>       assert contains(bodies[-1], '"first_write_reading_required": false')
+E       assert False
+E        +  where False = contains({'messages': [{'content': [{'text': "You are an expert assistant who can solve any task using code blobs. You will be ...umber":2,"max_requests":8,"requests_after_response":6}', 'type': 'text'}], 'role': 'user'}], 'model': 'deepseek-flash'}, '"first_write_reading_required": false')
+
+test_sending_state_review.py:89: AssertionError
+- generated xml file: /mnt/d/Muiti-Agent Programing/experiments/code-agent-smolagents/24371220/experiments/smolagents/offline-20261030-101352/junit.xml -
+=========================== short test summary info ============================
+FAILED test_sending_state_review.py::test_large_originals_keep_complete_write_hash_path_and_failure_on_http
+FAILED test_sending_state_review.py::test_registered_read_is_not_http_delivery_and_write_does_not_reopen_first_read
+2 failed in 37.84s

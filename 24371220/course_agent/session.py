@@ -113,7 +113,7 @@ class CourseSession:
                                  note_properties, note_required))
         return result
 
-    def progress(self):
+    def progress(self, sending=False):
         """One state snapshot; presentation and completion use the same facts."""
         missing = self.evidence.missing(first_write=not self.writes) if not self.writes or self.contract.profile == 'paper' else []
         versions = self.versions()
@@ -129,7 +129,7 @@ class CourseSession:
             verification_missing=unverified, changed_files=tuple(sorted(self.writes)),
             baseline_done=len(self.baselines), verified_current=len(commands)-len(unverified),
             required_checks=len(commands),
-            requests_left=self.contract.max_calls-(self.audit.calls if self.audit else 0),
+            requests_left=max(0, self.contract.max_calls-(self.audit.calls if self.audit else 0)-int(sending)),
             completion_missing=('intermediate first-subtask verification and plan update',)
             if self.two_stage and not self.stage_one_verified else ())
 
@@ -263,7 +263,7 @@ class CourseSession:
             elif name == 'write_note':
                 result = self.evidence.write_note(**args)
             elif name == 'recall':
-                result = self.evidence.recall(args['evidence_ids'], self.context.capacity if self.context else 12000)
+                result = self.evidence.recall(args['evidence_ids'])
             elif name == 'task_status':
                 result = self.status()
             else:

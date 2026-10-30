@@ -175,7 +175,7 @@ def test_real_pdf_52_pages_fit_batched_and_five_notes_reused(tmp_path, build_ses
     page_ids = [eid for eid, e in session.evidence.items.items() if e.page]
     assert len(page_ids) == 52
     assert sum(len(session.evidence.items[eid].text) for eid in page_ids) > 100000
-    session.evidence.recall(page_ids, 12000)
+    session.evidence.recall(page_ids)
     seen = set()
     sizes = []
     full_notes_before_last_page = False

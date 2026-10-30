@@ -146,7 +146,7 @@ class EvidenceStore:
                 self.log('context_clip', scope='recent_tool_summary', tool=name,
                          original_chars=len(result['stdout']), sent_chars=len(summary['stdout']),
                          retained=True)
-        self.recent_results.append({'tool': name, 'result': summary})
+        self.recent_results.append({'tool': name, 'arguments': {k: arguments[k] for k in ('argv', 'start_line', 'end_line') if k in arguments}, 'result': summary})
         self.recent_results = self.recent_results[-8:]
         return result
 
@@ -311,16 +311,15 @@ class EvidenceStore:
             result.append(eid)
         return list(dict.fromkeys(result))
 
-    def recall(self, evidence_ids, capacity):
+    def recall(self, evidence_ids):
         self.request_originals(evidence_ids)
-        ready, queued, used = [], [], 0
-        for eid in dict.fromkeys(evidence_ids):
-            cost = len(json.dumps(self.items[eid].text, ensure_ascii=False)) + 200
-            (ready if used + cost <= capacity else queued).append(eid)
-            if used + cost <= capacity:
-                used += cost
-        return {'scheduled': ready, 'pending': queued, 'capacity_chars': capacity,
-                'message': 'The selector confirms each actual batch; remaining items stay queued.'}
+        requested = list(dict.fromkeys(evidence_ids))
+        return {'requested': [{'id': eid, 'source': self.items[eid].source,
+                               'locator': self.items[eid].locator} for eid in requested[:8]],
+                'queued': [{'id': eid, 'source': self.items[eid].source,
+                            'locator': self.items[eid].locator} for eid in self.pending[:8]],
+                'requested_count': len(requested), 'queued_count': len(self.pending),
+                'message': 'Queued, not delivered; the selector chooses the actual next batch.'}
 
     def source_reused(self, source):
         needed = self.required.get(source, set())

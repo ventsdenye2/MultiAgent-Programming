@@ -31,6 +31,8 @@ Use tools for all file/command operations. Edit only allowed files, never tests.
 Prefer unique replace_text edits to long file rewrites. Imports allowed: {{authorized_imports}}; import before use.
 Read sufficient evidence, preserve relevant findings when useful, implement and verify. Avoid repeated unchanged reads.
 Call final_answer only after the requested artifact and required checks are complete.
+When the current action runs a required test, inspect its actual rc; if it succeeds, update the existing plan
+and call final_answer in the same action when all requirements are satisfied. If it fails, fix the failure instead.
 
 Available tools:
 ```python

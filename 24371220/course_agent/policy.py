@@ -87,7 +87,8 @@ def load_task(text, repo, config, profile="auto", allow=None):
         spec.paper_pages = tuple(range(bounds[0], bounds[1] + 1))
         spec.topics = TOPICS
     spec.hard_chars = min(32000, int(config.get("request_chars", 32000)))
-    spec.soft_chars = min(spec.hard_chars, int(config.get("context_chars_smol", 30000)))
+    default_soft = 31800 if profile in {"source", "paper"} else 30000
+    spec.soft_chars = min(spec.hard_chars, int(config.get("context_chars_smol", default_soft)))
     if spec.max_calls < 1 or spec.timeout <= 0 or spec.soft_chars < 1000:
         raise ValueError("Invalid task budget")
     return spec

@@ -10,6 +10,6 @@
   "use_structured_outputs_internally": false,
   "code_block_tags": "markdown",
   "timeout": 210,
-  "context_chars_smol": 30000,
+  "context_chars_smol": 31800,
   "request_chars": 32000
 }

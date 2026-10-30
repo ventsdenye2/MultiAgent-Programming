@@ -316,9 +316,13 @@ def test_verified_changes_remain_visible_until_final_answer(tmp_path):
         (repo / 'calc.py').write_text('def answer():\n    return 0\n')
         (repo / 'test_calc.py').write_text('from calc import answer\ndef test_answer():\n    assert answer() == 42\n')
     def finish(body):
-        assert contains(body, '"baseline_done": 1')
-        assert contains(body, '"changed_files": ["calc.py"]')
-        assert contains(body, '"verified_current": 1')
+        from course_agent.audit import strings
+        marker = 'Course progress before this request (evidence offered below may satisfy pending items after delivery):\n'
+        text = next(s for s in strings(body['messages']) if marker in s)
+        status = json.JSONDecoder().raw_decode(text.split(marker, 1)[1])[0]
+        assert status['baseline_done'] == 1
+        assert status['changed_files'] == ['calc.py']
+        assert status['verified_current'] == 1
         assert contains(body, 'Changes and current-file tests are complete')
         return "update_plan([{'title':'Fix and verify','status':'done'}])\nfinal_answer('Verified')"
     rc, result, calls, events = run_script(tmp_path, [

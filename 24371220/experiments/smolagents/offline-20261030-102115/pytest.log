@@ -1,0 +1,145 @@
+.......................F................F...........F......              [100%]
+=================================== FAILURES ===================================
+___________ test_real_pdf_52_pages_fit_batched_and_five_notes_reused ___________
+
+tmp_path = PosixPath('/tmp/smolagents-offline-zuu6ac2o/pytest/test_real_pdf_52_pages_fit_bat0')
+build_session = <function build_session.<locals>.build at 0x7f5123e1e660>
+
+    def test_real_pdf_52_pages_fit_batched_and_five_notes_reused(tmp_path, build_session):
+        assert shutil.which('pdftotext'), 'Run this course test in WSL with poppler-utils installed'
+        source = MATERIALS / '公开任务/题目1'
+        repo = tmp_path / 'repo'
+        repo.mkdir()
+        for name in ('paper.pdf', 'paper.json', 'read_pdf.py', 'report.json'):
+            shutil.copy2(source / 'repo' / name, repo / name)
+        task = (source / 'task.md').read_text(encoding='utf-8')
+        session, context, agent, model = build_session('paper', repo, task)
+        session.invoke('read_file', {'path': 'report.json'})
+        session.invoke('read_pdf', {'start_page': 1, 'end_page': 52})
+        page_ids = [eid for eid, e in session.evidence.items.items() if e.page]
+        assert len(page_ids) == 52
+        assert sum(len(session.evidence.items[eid].text) for eid in page_ids) > 100000
+        session.evidence.recall(page_ids)
+        seen = set()
+        sizes = []
+        full_notes_before_last_page = False
+        for number in range(1, 36):
+            messages = context.build(agent.memory, model)
+            sizes.append(model.estimate(messages))
+            body = {'messages': [m.dict() for m in messages]}
+            session.evidence.mark_exposed(body, response(code('print(1)')), number)
+            seen |= session.evidence.current
+            # A successful reading action advances to new pages without a per-page
+            # note gate. Only the final five topic notes are required by the course.
+            delivered_pages = {eid for eid in session.evidence.current if eid in page_ids}
+            assert delivered_pages
+            agent.memory.steps.append(ActionStep(
+                step_number=number, timing=Timing(start_time=0, end_time=1),
+                code_action='print("Read this PDF batch.")', observations='Read this PDF batch.'))
+            if number % 2 == 0:
+                topic = session.contract.topics[(number // 2 - 1) % 5]
+                content = ('Model note for ' + topic + '; keep observed claims and evidence locators. ').ljust(1500, '.')
+                session.evidence.last_response = response(code(f'write_note(content={content!r})'))
+                # One observed page grounds this note; other pages do not need a
+                # per-page acknowledgement before the next original batch advances.
+                session.invoke('write_note', {'title': topic, 'section': topic, 'content': content,
+                                              'evidence_ids': [sorted(delivered_pages)[0]]})
+            if len(session.evidence.notes) == 5 and not set(page_ids).issubset(seen):
+                full_notes_before_last_page = True
+            if set(page_ids).issubset(seen):
+                break
+        assert set(page_ids).issubset(seen), {'missing': len(set(page_ids) - seen), 'sizes': sizes}
+        assert full_notes_before_last_page, 'Exercise remaining originals with all five maximum-size notes retained'
+>       assert number <= 30, 'Reserve at least ten requests for setup, report delivery and verification'
+E       AssertionError: Reserve at least ten requests for setup, report delivery and verification
+E       assert 33 <= 30
+
+test_smolagents_materials.py:209: AssertionError
+___________ test_verified_changes_remain_visible_until_final_answer ____________
+
+tmp_path = PosixPath('/tmp/smolagents-offline-zuu6ac2o/pytest/test_verified_changes_remain_v0')
+
+    def test_verified_changes_remain_visible_until_final_answer(tmp_path):
+        def setup(repo):
+            (repo / 'calc.py').write_text('def answer():\n    return 0\n')
+            (repo / 'test_calc.py').write_text('from calc import answer\ndef test_answer():\n    assert answer() == 42\n')
+        def finish(body):
+            assert contains(body, '"baseline_done": 1')
+            assert contains(body, '"changed_files": ["calc.py"]')
+            assert contains(body, '"verified_current": 1')
+            assert contains(body, 'Changes and current-file tests are complete')
+            return "update_plan([{'title':'Fix and verify','status':'done'}])\nfinal_answer('Verified')"
+        rc, result, calls, events = run_script(tmp_path, [
+            "update_plan([{'title':'Fix and verify','status':'doing'}])\n"
+            "run_command(['python','-m','pytest','-q'], '.')\nr=read_file('calc.py')",
+            "write_file('calc.py', 'def answer():\\n    return 42\\n', r['file_hash'])",
+            "run_command(['python','-m','pytest','-q'], '.')",
+            finish,
+        ], {'read_only':False, 'editable':['calc.py'], 'context_chars':15000}, profile='basic', setup=setup)
+>       assert rc == 0, result
+E       AssertionError: {'context_mode': 'evidence', 'engine': 'smolagents', 'reason': 'AgentGenerationError: Error in generating model output:
+E         Connection error.', 'remaining': ['finish all plan items after their work and checks'], ...}
+E       assert 1 == 0
+
+test_context_delivery.py:331: AssertionError
+----------------------------- Captured stdout call -----------------------------
+Error in generating model output:
+Connection error.
+____ test_completed_reading_prioritizes_new_recall_over_previous_large_page ____
+
+paper_runtime = <function paper_runtime.<locals>.build at 0x7f51233e3240>
+
+    def test_completed_reading_prioritizes_new_recall_over_previous_large_page(paper_runtime):
+        pages = [f'FULL_PAGE_{n}_' + str(n) * 14500 for n in (1, 2)]
+    
+        def recall_first(session):
+            eid = next(eid for eid, item in session.evidence.items.items() if item.page == 1)
+            return response(code(f'recall(evidence_ids={[eid]!r})'))
+    
+        session, agent, calls, snapshots, ids = paper_runtime(pages, [
+            response(code("print('Read initial page one.')")), recall_first,
+            response(code("print('Recalled page one takes priority.')")),
+        ])
+        with pytest.raises(BudgetExceeded, match='MAX_STEPS_NO_EXTRA_REQUEST'):
+            agent.run(session.task_prompt())
+        assert contains(calls[0], pages[0]) and not contains(calls[0], pages[1])
+        assert contains(calls[1], pages[1]) and not contains(calls[1], pages[0])
+        assert set(ids).issubset(snapshots[2]['exposed'])
+        assert ids[0] in snapshots[2]['pending']
+        assert contains(calls[2], pages[0]), 'New requested original must be admitted before optional previous-page carry'
+        assert not contains(calls[2], pages[1]), 'Omit the older page when both originals cannot fit'
+        assert not session.evidence.pending
+    
+    
+        # With room for three originals, a chain of recalls must carry the newest
+        # prior originals rather than preferring unrelated lower page numbers.
+        chain_pages = [f'CHAIN_PAGE_{n}_' + str(n) * 7000 for n in range(1, 8)]
+    
+        def recall_pages(*numbers):
+            def reply(session):
+                selected = [eid for number in numbers for eid, item in session.evidence.items.items()
+                            if item.page == number]
+                return response(code(f'recall(evidence_ids={selected!r})'))
+            return reply
+    
+        chained, chain_agent, chain_calls, chain_snapshots, chain_ids = paper_runtime(chain_pages, [
+            response(code("print('Initial batch one.')")),
+            response(code("print('Initial batch two.')")),
+            recall_pages(1, 2), recall_pages(3), recall_pages(4, 5), recall_pages(6, 7),
+            response(code("print('Merge the newest recalled originals.')")),
+        ])
+        with pytest.raises(BudgetExceeded, match='MAX_STEPS_NO_EXTRA_REQUEST'):
+            chain_agent.run(chained.task_prompt())
+>       assert set(chain_ids).issubset(chain_snapshots[3]['exposed'])
+E       AssertionError: assert False
+E        +  where False = <built-in method issubset of set object at 0x7f51230e89e0>({'ev-0bb88db782dbb846de19', 'ev-43852c44687baca48e12', 'ev-4609a2662ec458fe5e71', 'ev-61009ffb1fbc87271698', 'ev-82ae75f5539e2e6ba21d', 'ev-c86a87a1f4e38c6715bf', ...})
+E        +    where <built-in method issubset of set object at 0x7f51230e89e0> = {'ev-43852c44687baca48e12', 'ev-4609a2662ec458fe5e71', 'ev-61009ffb1fbc87271698', 'ev-82ae75f5539e2e6ba21d', 'ev-b029687907fe3fd6371a', 'ev-c86a87a1f4e38c6715bf', ...}.issubset
+E        +      where {'ev-43852c44687baca48e12', 'ev-4609a2662ec458fe5e71', 'ev-61009ffb1fbc87271698', 'ev-82ae75f5539e2e6ba21d', 'ev-b029687907fe3fd6371a', 'ev-c86a87a1f4e38c6715bf', ...} = set(['ev-43852c44687baca48e12', 'ev-4609a2662ec458fe5e71', 'ev-c86a87a1f4e38c6715bf', 'ev-82ae75f5539e2e6ba21d', 'ev-e8bfd076b2d75736f2e6', 'ev-61009ffb1fbc87271698', ...])
+
+test_paper_delivery.py:241: AssertionError
+- generated xml file: /mnt/d/Muiti-Agent Programing/experiments/code-agent-smolagents/24371220/experiments/smolagents/offline-20261030-102115/junit.xml -
+=========================== short test summary info ============================
+FAILED test_smolagents_materials.py::test_real_pdf_52_pages_fit_batched_and_five_notes_reused
+FAILED test_context_delivery.py::test_verified_changes_remain_visible_until_final_answer
+FAILED test_paper_delivery.py::test_completed_reading_prioritizes_new_recall_over_previous_large_page
+3 failed, 56 passed in 108.29s (0:01:48)

@@ -359,8 +359,9 @@ def test_eight_evidence_items_recalled_in_bounded_batches(tmp_path):
             path = session.contract.repo / f'doc{i}.txt'
             path.write_text(f'DOC_{i}_' + str(i) * 4000)
             ids += session.invoke('read_file', {'path': path.name})['evidence_ids']
-        accepted = session.evidence.recall(ids, 8000)
-        assert accepted['scheduled'] and accepted['pending']
+        accepted = session.evidence.recall(ids)
+        assert accepted['requested_count'] == 8 and accepted['queued_count'] == 8
+        assert 'not delivered' in accepted['message']
         seen = set()
         for number in range(1, 9):
             messages = context.build(agent.memory, model)

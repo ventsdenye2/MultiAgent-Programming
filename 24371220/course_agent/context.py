@@ -27,7 +27,6 @@ class EvidenceContext:
         self.store = session.evidence
         self.log = session.log
         self.last_manifest = {}
-        self.capacity = 0
 
     def fits(self, messages, model, reserve=0):
         spec = self.session.contract
@@ -51,8 +50,21 @@ class EvidenceContext:
                 text = text.replace(form, '[versioned evidence retained separately]')
         feedback = 'Executor output:\n' + clip(text, limits[1] // 2)
         if self.store.recent_results:
-            feedback += '\nRecent project tool results:\n' + clip(
-                json.dumps(self.store.recent_results[-4:], ensure_ascii=False), limits[1] // 2)
+            # Keep complete JSON and useful execution facts, never clipped dicts.
+            budget = max(80, limits[1] // 8)
+            facts = []
+            for entry in self.store.recent_results[-(1 if limits[1] < 700 else 4):]:
+                result = entry['result']
+                fields = ('path', 'changed', 'file_hash', 'rc', 'timed_out', 'stdout', 'stderr',
+                          'note_id', 'sources', 'chars', 'requested', 'queued', 'requested_count', 'queued_count')
+                compact_result = {key: (clip(value, budget) if key in {'stdout', 'stderr', 'delivery'} and isinstance(value, str) else value)
+                                  for key, value in result.items() if key in fields}
+                for key in ('requested', 'queued'):
+                    if key in compact_result:
+                        compact_result[key] = compact_result[key][:3]
+                facts.append({'tool': entry['tool'], 'arguments': entry.get('arguments', {}), 'result': compact_result})
+            feedback += '\nRecent project tool results:\n' + json.dumps(
+                facts, ensure_ascii=False, separators=(',', ':'))
         output = step.model_output or ''
         if step.code_action and output and len(output) <= limits[0]:
             previous = message(output, MessageRole.ASSISTANT)
@@ -71,27 +83,30 @@ class EvidenceContext:
                                   clip(str(error_step.error), limits[2])))
         return result
 
-    def _status(self, progress, limit):
+    def _status(self, progress):
         """A sending projection, never a second copy of tool results."""
-        unseen = [eid for eid, item in self.store.items.items() if item.valid and eid not in self.store.exposed]
         data = progress.prompt_state()
-        optional = {'unseen_evidence_count': len(unseen), 'queued_recall_count': len(self.store.pending)}
-        if unseen or self.store.pending:
-            optional['delivery'] = 'Pending originals are sent below; do not reread unchanged files.'
-        monitor = self.session.progress_monitor
-        if monitor and monitor.stalled_steps >= 2:
-            optional['no_progress_steps'] = monitor.stalled_steps
+        calls = self.session.audit.calls if self.session.audit else 0
+        data.update({'request_number': calls + 1, 'max_requests': self.session.contract.max_calls,
+                     'requests_after_response': progress.requests_left})
+        if self.session.contract.profile in {'source', 'paper'}:
+            data.update({'first_write_reading_required': not bool(self.session.writes),
+                         'full_reads_registered': dict(self.store.full_reads),
+                         'evidence_delivery': 'Registered full reads are logged tool reads; Evidence headers show selected ranges, whose delivery requires HTTP confirmation.'})
+            if self.session.writes:
+                data['reading_after_write'] = 'First-write prerequisites satisfied; changed-source evidence may be invalidated.'
+        if self.session.contract.profile == 'source':
+            data['required_mechanisms_exposed'] = {source: {'exposed': len(ids & self.store.exposed), 'registered': len(ids)}
+                                                   for source, ids in self.store.required.items()}
+        if self.session.contract.profile == 'paper':
+            pages = {self.store.items[eid].page for eid in self.store.exposed if self.store.items[eid].valid}
+            data['pdf_pages_missing'] = sorted(set(self.session.contract.paper_pages) - pages)
         if self.session.audit and self.session.audit.last_classification not in {None, 'ok'}:
             data['last_response_classification'] = self.session.audit.last_classification
-        if progress.requests_left <= 6:
-            optional['delivery_reserve'] = 'Complete notes/changes, verify, then final_answer.'
-        for key, value in optional.items():
-            if len(json.dumps({**data, key:value}, ensure_ascii=False)) <= limit:
-                data[key] = value
         # Required workflow facts remain intact; never clip JSON in the middle
         # or omit proof of changes/tests merely to make the projection shorter.
-        return message('Course progress (new evidence below can satisfy pending items):\n' +
-                       json.dumps(data, ensure_ascii=False))
+        return message('Course progress before this request (evidence offered below may satisfy pending items after delivery):\n' +
+                       json.dumps(data, ensure_ascii=False, separators=(',', ':')))
 
     def _part(self, eid, messages, model):
         """Fit an ordinary-file range; PDF pages and source mechanisms stay whole."""
@@ -118,7 +133,7 @@ class EvidenceContext:
     def build(self, memory, model):
         self.store.refresh()
         self.store.offered = []
-        progress = self.session.progress()
+        progress = self.session.progress(sending=True)
         fixed = memory.system_prompt.to_messages()
         for step in memory.steps:
             if isinstance(step, TaskStep):
@@ -128,8 +143,9 @@ class EvidenceContext:
             # state, not optional feedback: never hide it while enforcing it.
             fixed.append(message('Current plan; retain these exact titles and order, update status only:\n' +
                                  json.dumps(progress.plan_items, ensure_ascii=False)))
-        minimum = (80, 160, 256)
-        prefix, recent = fixed + [self._status(progress, 300)], self._recent(memory, minimum)
+        minimum = ((80, 160, 256) if self.session.contract.profile in {'basic', 'generic'}
+                   else (250, 700, 1200))
+        prefix, recent = fixed + [self._status(progress)], self._recent(memory, minimum)
         base = prefix + recent
         if not self.fits(base, model):
             size = model.measure(base)
@@ -146,11 +162,6 @@ class EvidenceContext:
                 selected_notes.append(key)
             else:
                 optional_notes.append((key, candidate))
-        available = model.measure(base + payload)
-        rooms = [self.session.contract.soft_chars - available['chars']]
-        if self.session.contract.content_chars:
-            rooms.append(self.session.contract.content_chars - available['course_content_chars'])
-        self.capacity = max(0, min(rooms) - 400)
         valid = [eid for eid, item in self.store.items.items() if item.valid]
         unseen = [eid for eid in valid if eid not in self.store.exposed]
         required_unseen = [eid for eid in unseen if self.store.items[eid].required or
@@ -187,7 +198,12 @@ class EvidenceContext:
                            key=lambda eid: self.store.items[eid].page)
             exposed_pages = {self.store.items[eid].page for eid in self.store.exposed
                              if self.store.items[eid].valid and self.store.items[eid].page is not None}
-            if not recovery and set(self.session.contract.paper_pages).issubset(exposed_pages):
+            all_pages_exposed = set(self.session.contract.paper_pages).issubset(exposed_pages)
+            if all_pages_exposed:
+                # After initial coverage, explicit recalls retain queue order.
+                queued = [eid for eid in self.store.pending if eid in pages]
+                pages = list(dict.fromkeys(queued + pages))
+            if not recovery and all_pages_exposed:
                 carry = [eid for eid in self.last_manifest.get('evidence_ids', [])
                          if eid in self.store.current and eid not in pages
                          and self.store.items[eid].valid and self.store.items[eid].page is not None]
@@ -266,7 +282,7 @@ class EvidenceContext:
                 payload.append(candidate)
                 selected_notes.append(key)
         # Expansion happens only after sources needed for progress are reserved.
-        for limits in ((1800, 2200, 4000), (800, 900, 2000), (250, 500, 1200), minimum):
+        for limits in ((1800, 2200, 4000), (800, 900, 2000), minimum):
             candidate = self._recent(memory, limits)
             if self.fits(prefix + candidate + payload, model):
                 recent = candidate
