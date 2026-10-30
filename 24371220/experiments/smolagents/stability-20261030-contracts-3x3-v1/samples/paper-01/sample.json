@@ -1,0 +1,23 @@
+{
+  "task": "paper",
+  "exit_code": 2,
+  "archive": "/mnt/d/Muiti-Agent Programing/experiments/code-agent-smolagents/24371220/experiments/smolagents/stability-20261030-contracts-3x3-v1/samples/paper-01/evaluation",
+  "status": "infrastructure_failure",
+  "passed": false,
+  "requests": 23,
+  "prompt_tokens": 180963,
+  "completion_tokens": 11170,
+  "usage_complete": false,
+  "max_request_chars": 31760,
+  "agent_errors": {
+    "AgentExecutionError": 5,
+    "AgentParsingError": 1
+  },
+  "failure_reason": "AgentGenerationError: Error in generating model output:\nError code: 500 - {'error': {'message': 'Internal Server Error (request_id: 25316235-440e-454d-af7c-5514fafe552e)', 'type': 'internal_error', 'param': None, 'code': 'internal_error'}}",
+  "agent_status": "failed",
+  "score": null,
+  "max_score": null,
+  "checks": null,
+  "number": 1,
+  "native": "/home/ventsdenye/.local/state/code-agent/evaluations/stability-paper-01-zs2kqvfg"
+}

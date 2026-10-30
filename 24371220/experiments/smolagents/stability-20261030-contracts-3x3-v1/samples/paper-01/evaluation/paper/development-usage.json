@@ -1,0 +1,5 @@
+{
+  "complete": false,
+  "reason": "存在失败请求或缺失/矛盾的服务端 usage",
+  "total_tokens": null
+}

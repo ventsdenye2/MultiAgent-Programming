@@ -4,6 +4,7 @@ import ast
 import hashlib
 import json
 import copy
+import re
 
 from .audit import contains
 
@@ -21,6 +22,11 @@ PAPER_QUESTIONS = {
     'multi_agent': {'camel_prompting': str, 'generative_agents_evaluators': int},
     'outlook': {'agenda_topics': list, 'shared_foundations': list},
 }
+
+
+def normalized_quote(text):
+    """Course-permitted layout normalization, used only for source comparison."""
+    return re.sub(r'(?<=\w)-\s+(?=\w)', '-', ' '.join(text.split()))
 
 
 @dataclass
@@ -198,8 +204,9 @@ class EvidenceStore:
         item = self.items[evidence_id]
         if not item.valid or item.source != 'paper.pdf' or item.page != page or item.version != self.workspace.current_hash('paper.pdf'):
             raise ValueError('evidence source, page or version mismatch')
-        if type(quote) is not str or not 20 <= len(quote.strip()) <= 1500 or quote not in item.text:
-            raise ValueError('quote must be a continuous exact excerpt of the cited page')
+        if (type(quote) is not str or not 20 <= len(quote.strip()) <= 1500
+                or normalized_quote(quote) not in normalized_quote(item.text)):
+            raise ValueError('quote must be continuous text from the cited page; whitespace may be merged, words may not be rewritten')
     def save_answer(self, section, question_id, answer, evidence_id, page, quote):
         self.refresh()
         self._validate_answer(section, question_id, answer, evidence_id, page, quote)

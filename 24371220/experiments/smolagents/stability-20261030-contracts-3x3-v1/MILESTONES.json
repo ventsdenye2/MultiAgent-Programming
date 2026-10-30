@@ -1,0 +1,271 @@
+[
+  {
+    "sample": "paper-01",
+    "task": "paper",
+    "exit_code": 2,
+    "archive": "/mnt/d/Muiti-Agent Programing/experiments/code-agent-smolagents/24371220/experiments/smolagents/stability-20261030-contracts-3x3-v1/samples/paper-01/evaluation",
+    "status": "infrastructure_failure",
+    "passed": false,
+    "requests": 23,
+    "prompt_tokens": 180963,
+    "completion_tokens": 11170,
+    "usage_complete": false,
+    "max_request_chars": 31760,
+    "agent_errors": {
+      "AgentExecutionError": 5,
+      "AgentParsingError": 1
+    },
+    "failure_reason": "AgentGenerationError: Error in generating model output:\nError code: 500 - {'error': {'message': 'Internal Server Error (request_id: 25316235-440e-454d-af7c-5514fafe552e)', 'type': 'internal_error', 'param': None, 'code': 'internal_error'}}",
+    "agent_status": "failed",
+    "score": null,
+    "max_score": null,
+    "checks": null,
+    "number": 1,
+    "native": "/home/ventsdenye/.local/state/code-agent/evaluations/stability-paper-01-zs2kqvfg",
+    "milestones": {
+      "first_write": null,
+      "last_write": null,
+      "report_writes": [],
+      "writes": [],
+      "tests": [
+        {
+          "request": 1,
+          "seq": 14,
+          "rc": 1,
+          "timed_out": false
+        }
+      ],
+      "tests_after_last_write": [],
+      "finish": [],
+      "errors": [
+        {
+          "request": 4,
+          "seq": 112,
+          "event": "tool_error",
+          "type": "ValueError",
+          "classification": null,
+          "tool": "save_answer",
+          "error": "quote must be a continuous exact excerpt of the cited page"
+        },
+        {
+          "request": 4,
+          "seq": 114,
+          "event": "agent_error",
+          "type": "AgentExecutionError",
+          "classification": null,
+          "tool": null,
+          "error": "Code execution failed at line 'print(save_answer(\"overview\", \"categories\", {\"value\": [\"reasoning\", \"acting\", \"interacting\"]}, \"ev-26c94297c50e4ef408a2\", 4, q1))' due to: ValueError: quote must be a continuous exact excerpt of the cited page"
+        },
+        {
+          "request": 5,
+          "seq": 125,
+          "event": "agent_error",
+          "type": "AgentExecutionError",
+          "classification": null,
+          "tool": null,
+          "error": "Code execution failed at line 'pgs = json.loads(r[\"stdout\"])[\"pages\"]' due to: InterpreterError: The variable `json` is not defined."
+        },
+        {
+          "request": 6,
+          "seq": 133,
+          "event": "tool_error",
+          "type": "ValueError",
+          "classification": null,
+          "tool": "save_answer",
+          "error": "quote must be a continuous exact excerpt of the cited page"
+        },
+        {
+          "request": 6,
+          "seq": 135,
+          "event": "agent_error",
+          "type": "AgentExecutionError",
+          "classification": null,
+          "tool": null,
+          "error": "Code execution failed at line 'print(save_answer(\"overview\", \"categories\", {\"value\": [\"reasoning\", \"acting\", \"interacting\"]}, \"ev-26c94297c50e4ef408a2\", 4, q1))' due to: ValueError: quote must be a continuous exact excerpt of the cited page"
+        },
+        {
+          "request": 9,
+          "seq": 168,
+          "event": "tool_error",
+          "type": "ValueError",
+          "classification": null,
+          "tool": "recall",
+          "error": "Requested evidence is missing or stale"
+        },
+        {
+          "request": 9,
+          "seq": 170,
+          "event": "agent_error",
+          "type": "AgentExecutionError",
+          "classification": null,
+          "tool": null,
+          "error": "Code execution failed at line 'recall(['ev-0aaa960f62d9cf1689f1','ev-5ee42fcee0f3b22d5203','ev-4049593a30e2846f8394','ev-2c5302116a7f6c84effa','ev-b8db09947ef7c899cd9d','ev-ced75d6936911b2f0248','ev-9317b06df60c30a6c12f'])' due to: ValueError: Requested evidence is missing or stale"
+        },
+        {
+          "request": 13,
+          "seq": 212,
+          "event": "agent_error",
+          "type": "AgentExecutionError",
+          "classification": null,
+          "tool": null,
+          "error": "Code execution failed at line 'print(json.dumps(st, ensure_ascii=False)[:3000])' due to: InterpreterError: The variable `json` is not defined."
+        },
+        {
+          "request": 19,
+          "seq": 273,
+          "event": "agent_error",
+          "type": "AgentParsingError",
+          "classification": null,
+          "tool": null,
+          "error": "Error in code parsing:\nYour code snippet is invalid, because the regex pattern ```python(.*?)``` was not found in it.\n            Here is your code snippet:\n\n\n<｜｜DSML｜｜ calls>\n<｜｜DSML｜｜ invoke name=\"recall\">\n<｜｜DSML｜｜ parameter name=\"evidence_ids\" string=\"false\">[\"ev-a9b70da77a1c104405a2\", \"ev-345e6706309ac04ee927\", \"ev-98a30db9253fff6cc9da\", \"ev-2f8846ab5b1bc7072a1b\"]</｜｜DSML｜｜ parameter>\n</｜｜DSML｜｜ invoke>\n</｜｜DSML｜｜ calls>```\n            Make sure to include code with the correct pattern, for instance:\n            Thoughts: Your thoughts\n            ```python\n            # Your python code here\n            ```\nMake sure to provide correct code blobs."
+        },
+        {
+          "request": 23,
+          "seq": 311,
+          "event": "model_error",
+          "type": null,
+          "classification": "HTTP_500",
+          "tool": null,
+          "error": {
+            "message": "Internal Server Error (request_id: 25316235-440e-454d-af7c-5514fafe552e)",
+            "type": "internal_error",
+            "param": null,
+            "code": "internal_error"
+          }
+        }
+      ],
+      "saved_answer_events": [
+        {
+          "request": 7,
+          "seq": 143,
+          "section": "overview",
+          "question_id": "categories"
+        },
+        {
+          "request": 7,
+          "seq": 146,
+          "section": "overview",
+          "question_id": "search_methods"
+        }
+      ],
+      "version_checks": [
+        {
+          "request": 1,
+          "seq": 15,
+          "command": [
+            "python",
+            "-m",
+            "pytest",
+            "-q"
+          ],
+          "rc": 1,
+          "before_versions": {
+            "report.json": "ca3d163bab055381827226140568f3bef7eaac187cebd76878e0b63e9e442356"
+          },
+          "after_versions": {
+            "report.json": "ca3d163bab055381827226140568f3bef7eaac187cebd76878e0b63e9e442356"
+          },
+          "timed_out": false
+        }
+      ],
+      "completed_plan_events": [],
+      "quote_rejections": [
+        {
+          "request": 4,
+          "seq": 112,
+          "question_id": "categories",
+          "declared_page": 4,
+          "source_page": 4,
+          "quote_chars": 205,
+          "exact_match": false,
+          "whitespace_normalized_match": true
+        },
+        {
+          "request": 6,
+          "seq": 133,
+          "question_id": "categories",
+          "declared_page": 4,
+          "source_page": 4,
+          "quote_chars": 205,
+          "exact_match": false,
+          "whitespace_normalized_match": true
+        }
+      ],
+      "protocol_errors": 1,
+      "tool_errors": 3,
+      "infrastructure_errors": 1
+    },
+    "paper_page_count": 42,
+    "section_topics": [
+      "multi_agent",
+      "overview",
+      "reasoning"
+    ]
+  },
+  {
+    "sample": "source-01",
+    "task": "source",
+    "exit_code": 2,
+    "archive": "/mnt/d/Muiti-Agent Programing/experiments/code-agent-smolagents/24371220/experiments/smolagents/stability-20261030-contracts-3x3-v1/samples/source-01/evaluation",
+    "status": "infrastructure_failure",
+    "passed": false,
+    "requests": 2,
+    "prompt_tokens": 4264,
+    "completion_tokens": 240,
+    "usage_complete": false,
+    "max_request_chars": 21231,
+    "agent_errors": {
+      "AgentExecutionError": 1
+    },
+    "failure_reason": "AgentGenerationError: Error in generating model output:\nError code: 503 - {'error': {'message': 'Service is too busy. We advise users to temporarily switch to alternative LLM API service providers. (request_id: 79e6e737-6da3-44a0-add0-320d1468e3d7)', 'type': 'service_unavailable_error', 'param': None, 'code': 'service_unavailable_error'}}",
+    "agent_status": "failed",
+    "score": null,
+    "max_score": null,
+    "checks": null,
+    "number": 1,
+    "native": "/home/ventsdenye/.local/state/code-agent/evaluations/stability-source-01-jmk5asjg",
+    "milestones": {
+      "first_write": null,
+      "last_write": null,
+      "report_writes": [],
+      "writes": [],
+      "tests": [],
+      "tests_after_last_write": [],
+      "finish": [],
+      "errors": [
+        {
+          "request": 1,
+          "seq": 28,
+          "event": "agent_error",
+          "type": "AgentExecutionError",
+          "classification": null,
+          "tool": null,
+          "error": "Code execution failed at line 'log = read_file(\"deepinfer/logger.py\")' due to: InterpreterError: Cannot assign to name 'log': doing this would erase the existing tool!"
+        },
+        {
+          "request": 2,
+          "seq": 32,
+          "event": "model_error",
+          "type": null,
+          "classification": "HTTP_503",
+          "tool": null,
+          "error": {
+            "message": "Service is too busy. We advise users to temporarily switch to alternative LLM API service providers. (request_id: 79e6e737-6da3-44a0-add0-320d1468e3d7)",
+            "type": "service_unavailable_error",
+            "param": null,
+            "code": "service_unavailable_error"
+          }
+        }
+      ],
+      "saved_answer_events": [],
+      "version_checks": [],
+      "completed_plan_events": [],
+      "quote_rejections": [],
+      "protocol_errors": 0,
+      "tool_errors": 0,
+      "infrastructure_errors": 1
+    },
+    "paper_page_count": 0,
+    "section_topics": []
+  }
+]

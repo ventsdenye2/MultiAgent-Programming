@@ -1,0 +1,10 @@
+{
+  "status": "closed_for_revision",
+  "baseline_commit": "d718061d54a90e66a04f6aa18d20de7b8d5f3879",
+  "scheduled": {"source": 3, "paper": 3},
+  "finished": ["source-01", "paper-01"],
+  "not_started": ["source-02", "paper-02", "source-03", "paper-03"],
+  "reason": "The new quote validator rejected page text differing only in course-permitted whitespace. Fix in a separate implementation/version cohort; never replace these samples.",
+  "infrastructure_failures": {"source-01": "HTTP_503 at request 2", "paper-01": "HTTP_500 at request 23"},
+  "automatic_retries": false
+}

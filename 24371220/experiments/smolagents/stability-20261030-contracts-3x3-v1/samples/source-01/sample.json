@@ -1,0 +1,22 @@
+{
+  "task": "source",
+  "exit_code": 2,
+  "archive": "/mnt/d/Muiti-Agent Programing/experiments/code-agent-smolagents/24371220/experiments/smolagents/stability-20261030-contracts-3x3-v1/samples/source-01/evaluation",
+  "status": "infrastructure_failure",
+  "passed": false,
+  "requests": 2,
+  "prompt_tokens": 4264,
+  "completion_tokens": 240,
+  "usage_complete": false,
+  "max_request_chars": 21231,
+  "agent_errors": {
+    "AgentExecutionError": 1
+  },
+  "failure_reason": "AgentGenerationError: Error in generating model output:\nError code: 503 - {'error': {'message': 'Service is too busy. We advise users to temporarily switch to alternative LLM API service providers. (request_id: 79e6e737-6da3-44a0-add0-320d1468e3d7)', 'type': 'service_unavailable_error', 'param': None, 'code': 'service_unavailable_error'}}",
+  "agent_status": "failed",
+  "score": null,
+  "max_score": null,
+  "checks": null,
+  "number": 1,
+  "native": "/home/ventsdenye/.local/state/code-agent/evaluations/stability-source-01-jmk5asjg"
+}

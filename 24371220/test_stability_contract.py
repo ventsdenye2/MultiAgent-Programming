@@ -58,6 +58,22 @@ def test_paper_saved_answer_validation_and_serialization(tmp_path):
     with pytest.raises(ValueError): store.report('overview')
 
 
+def test_quote_matching_allows_course_whitespace_without_rewriting_model_text(tmp_path):
+    (tmp_path / 'paper.pdf').write_text('version', encoding='utf-8')
+    ws = WorkspaceTools(tmp_path, tmp_path, set(), lambda *a, **k: None)
+    contract = SimpleNamespace(profile='paper', topics=tuple(PAPER_QUESTIONS), paper_pages=(1,))
+    store = EvidenceStore(contract, ws, lambda *a, **k: None)
+    raw = 'First line of evidence about a word- \n boundary.\nSecond line remains continuous and exact.'
+    quote = 'First line of evidence about a word-boundary. Second line remains continuous and exact.'
+    eid = store._add('paper.pdf', ws.current_hash('paper.pdf'), 'page:1', raw, page=1)
+    store.exposed.add(eid)
+    store.save_answer('overview', 'categories', ['synthetic'], eid, 1, quote)
+    assert store.answers['overview']['categories']['quote'] == quote
+    with pytest.raises(ValueError, match='quote'):
+        store.save_answer('overview', 'categories', ['synthetic'], eid, 1,
+                          'First line of evidence. Second line remains continuous and exact.')
+
+
 @pytest.mark.parametrize('first_edit', ['good', 'bad'])
 def test_official_final_runs_verification_and_recovers(tmp_path, monkeypatch, first_edit):
     from test_smolagents import run_script

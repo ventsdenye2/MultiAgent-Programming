@@ -1,0 +1,103 @@
+{
+  "path": "/mnt/d/Muiti-Agent Programing/experiments/code-agent-smolagents/24371220/experiments/smolagents/stability-20261030-contracts-3x3-v1/samples/source-01/evaluation/source/development/run.log",
+  "requests": 2,
+  "responses": 1,
+  "model_errors": 1,
+  "usage_complete": false,
+  "known_prompt_tokens": 4264,
+  "known_completion_tokens": 240,
+  "known_total_tokens": 4504,
+  "cache_hit_tokens": 0,
+  "cache_miss_tokens": 4264,
+  "max_request_chars": 21231,
+  "response_classes": {
+    "ok": 1
+  },
+  "last_request_parameters": {
+    "model": "deepseek-flash",
+    "max_tokens": 16384,
+    "thinking": {
+      "type": "enabled"
+    },
+    "reasoning_effort": "high"
+  },
+  "counts": {
+    "snapshot": 3,
+    "run_start": 1,
+    "file_read": 3,
+    "context_selection": 2,
+    "request_budget": 2,
+    "model_request": 2,
+    "model_response": 1,
+    "usage": 1,
+    "context_exposure": 1,
+    "tool_call": 3,
+    "plan": 1,
+    "tool_result": 3,
+    "evidence": 6,
+    "agent_step": 2,
+    "agent_error": 1,
+    "model_error": 1,
+    "run_error": 1,
+    "run_result": 1
+  },
+  "commands": [],
+  "paper_pages_exposed": [],
+  "paper_page_count": 0,
+  "section_note_count": 0,
+  "section_topics": [],
+  "changed_files": [],
+  "agent_error_types": {
+    "AgentExecutionError": 1
+  },
+  "recent_actions": [
+    {
+      "event": "tool_call",
+      "tool": "update_plan",
+      "error_type": null,
+      "error": null
+    },
+    {
+      "event": "tool_call",
+      "tool": "read_file",
+      "error_type": null,
+      "error": null
+    },
+    {
+      "event": "tool_call",
+      "tool": "read_file",
+      "error_type": null,
+      "error": null
+    },
+    {
+      "event": "agent_error",
+      "tool": null,
+      "error_type": "AgentExecutionError",
+      "error": "Code execution failed at line 'log = read_file(\"deepinfer/logger.py\")' due to: InterpreterError: Cannot assign to name 'log': doing this would erase the existing tool!"
+    }
+  ],
+  "result": {
+    "status": "failed",
+    "engine": "smolagents",
+    "upstream_version": "1.26.0",
+    "context_mode": "evidence",
+    "reason": "AgentGenerationError: Error in generating model output:\nError code: 503 - {'error': {'message': 'Service is too busy. We advise users to temporarily switch to alternative LLM API service providers. (request_id: 79e6e737-6da3-44a0-add0-320d1468e3d7)', 'type': 'service_unavailable_error', 'param': None, 'code': 'service_unavailable_error'}}",
+    "usage": {
+      "requests": 2,
+      "complete": false,
+      "prompt_tokens": 4264,
+      "completion_tokens": 240
+    },
+    "remaining": [
+      "read_file: deepinfer/engine/stats_logger.py",
+      "read/reuse complete mechanisms or source note: deepinfer/engine/stats_logger.py",
+      "read/reuse complete mechanisms or source note: deepinfer/environ.py",
+      "read/reuse complete mechanisms or source note: deepinfer/logger.py",
+      "baseline: python -m pytest -q",
+      "remaining source changes: deepinfer/engine/stats_logger.py, deepinfer/environ.py, deepinfer/logger.py",
+      "verify current files: python -m pytest -q",
+      "finish all plan items after their work and checks"
+    ]
+  },
+  "invalid_lines": 0
+}
