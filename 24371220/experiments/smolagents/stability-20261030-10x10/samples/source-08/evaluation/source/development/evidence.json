@@ -1,0 +1,505 @@
+{
+  "evidence": [
+    {
+      "id": "ev-8554ade850ecb397d235",
+      "source": "deepinfer/environ.py",
+      "version": "fe2c531989c419f0b51b169a07f5ed826dcec7f95c0c5bc3a351805923c4f218",
+      "locator": "lines:31-94",
+      "text": "class EnvVar[T]:\n    \"\"\"Non-data descriptor, resolved on first access\"\"\"\n\n    __slots__ = (\"name\", \"init\", \"lock\")\n\n    def __init__(self, init: Callable[[str | None], T]) -> None:\n        self.init = init\n        self.lock = threading.Lock()\n\n    def __set_name__(self, owner: type[envs], name: str) -> None:\n        self.name = name\n        _descriptors[name] = self\n\n    def __get__(self, instance: envs | None, owner: type[envs]) -> T:\n        with self.lock:\n            cached = owner.__dict__.get(self.name, self)\n            if cached is not self:\n                return cached\n            try:\n                value = self.init(os.getenv(self.name))\n            except Exception as e:  # noqa: BLE001\n                try:\n                    raise type(e)(f\"{self.name}: {e}\") from e\n                except TypeError:\n                    raise e from None\n            setattr(owner, self.name, value)\n            return value\n\n    # -- Factory Methods --\n\n    @staticmethod\n    def int(*, default: int = 0) -> EnvVar[int]:\n        return EnvVar(lambda v: _int(v, default))\n\n    @staticmethod\n    def float(*, default: float = 0.0) -> EnvVar[float]:\n        return EnvVar(lambda v: _float(v, default))\n\n    @staticmethod\n    def bool(*, default: bool = False) -> EnvVar[bool]:\n        return EnvVar(lambda v: _bool(v, \"1\" if default else \"0\"))\n\n    @staticmethod\n    def str(*, default: str = \"\") -> EnvVar[str]:\n        return EnvVar(lambda v: _str(v, default))\n\n    @staticmethod\n    def str_or_none() -> EnvVar[str | None]:\n        return EnvVar(lambda v: v)\n\n    @staticmethod\n    def int_or_none() -> EnvVar[int | None]:\n        return EnvVar(lambda v: int(v) if v is not None else None)\n\n    @staticmethod\n    def choice(*, default: str | None = None, choices: tuple[str, ...]) -> EnvVar[str | None]:\n        def _init(v: str | None) -> str | None:\n            if v is None:\n                return default\n            if v not in choices:\n                raise ValueError(f\"{v!r}, must be one of {choices}\")\n            return v\n\n        return EnvVar(_init)",
+      "required": true,
+      "page": null,
+      "valid": false,
+      "atomic": true
+    },
+    {
+      "id": "ev-246c6e73a88cb2c9edc3",
+      "source": "deepinfer/environ.py",
+      "version": "fe2c531989c419f0b51b169a07f5ed826dcec7f95c0c5bc3a351805923c4f218",
+      "locator": "lines:213-215",
+      "text": "def rearm(name: str) -> None:\n    \"\"\"Rearm specific descriptor, will resolve again on next access.\"\"\"\n    setattr(envs, name, _descriptors[name])",
+      "required": true,
+      "page": null,
+      "valid": false,
+      "atomic": true
+    },
+    {
+      "id": "ev-ef45633e339c9e5fd82f",
+      "source": "deepinfer/environ.py",
+      "version": "fe2c531989c419f0b51b169a07f5ed826dcec7f95c0c5bc3a351805923c4f218",
+      "locator": "lines:218-221",
+      "text": "def rearm_all() -> None:\n    \"\"\"Rearm all descriptors.\"\"\"\n    for name, descriptor in _descriptors.items():\n        setattr(envs, name, descriptor)",
+      "required": true,
+      "page": null,
+      "valid": false,
+      "atomic": true
+    },
+    {
+      "id": "ev-30754515034e43628968",
+      "source": "deepinfer/logger.py",
+      "version": "5b8f8d9947de692353609c1fc2851097d24f9b6ba6004dce1dbfa394dc6d3ec8",
+      "locator": "lines:33-68",
+      "text": "class NewLineFormatter(logging.Formatter):\n    \"\"\"Adds logging prefix to newlines to align multi-line messages, optionally with microsecond precision.\n\n    若 use_color=True 且输出为 TTY，会给日志级别染色（不影响写入文件的纯净度）。\n    \"\"\"\n\n    def __init__(\n        self,\n        fmt: str,\n        datefmt: str | None = None,\n        high_precision: bool = False,\n        use_color: bool = False,\n    ) -> None:\n        super().__init__(fmt, datefmt)\n        self.high_precision = high_precision\n        self.use_color = use_color\n\n    def formatTime(self, record: logging.LogRecord, datefmt: str | None = None) -> str:\n        if not self.high_precision:\n            # 调用 logging.Formatter 默认实现，保持原来的格式\n            return super().formatTime(record, datefmt)\n        # ===== 高精度模式：在普通 datefmt 基础上附加微秒 =====\n        base = time.strftime(datefmt or _DATE_FORMAT, self.converter(record.created))\n        return f\"{base}.{record.msecs * 1000:06.0f}\"\n\n    def format(self, record: logging.LogRecord) -> str:\n        msg = super().format(record)\n        # 快速路径：单行日志（绝大多数情况）无需做对齐处理\n        if \"\\n\" in msg and record.message:\n            prefix = msg[: msg.find(record.message)]\n            msg = msg.replace(\"\\n\", \"\\n\" + prefix)\n        if self.use_color:\n            color = _LEVEL_COLORS.get(record.levelno)\n            if color:\n                msg = f\"{color}{msg}{_COLOR_RESET}\"\n        return msg",
+      "required": true,
+      "page": null,
+      "valid": false,
+      "atomic": true
+    },
+    {
+      "id": "ev-d69c220908cefeeae7f2",
+      "source": "deepinfer/logger.py",
+      "version": "5b8f8d9947de692353609c1fc2851097d24f9b6ba6004dce1dbfa394dc6d3ec8",
+      "locator": "lines:75-90",
+      "text": "def _setup_logger() -> None:\n    global _default_handler\n    _root_logger.setLevel(logging.DEBUG)\n    if _default_handler is None:\n        _default_handler = logging.StreamHandler(sys.stdout)\n        _default_handler.flush = sys.stdout.flush\n        _default_handler.setLevel(logging.INFO)\n        _root_logger.addHandler(_default_handler)\n\n    fmt = NewLineFormatter(\n        _FORMAT,\n        datefmt=_DATE_FORMAT,\n        use_color=sys.stdout.isatty(),\n    )\n    _default_handler.setFormatter(fmt)\n    _root_logger.propagate = False",
+      "required": true,
+      "page": null,
+      "valid": false,
+      "atomic": true
+    },
+    {
+      "id": "ev-51e2fa3b9fc1aebe86f3",
+      "source": "deepinfer/logger.py",
+      "version": "5b8f8d9947de692353609c1fc2851097d24f9b6ba6004dce1dbfa394dc6d3ec8",
+      "locator": "lines:96-107",
+      "text": "def init_logger(name: str) -> logging.Logger:\n    logger = logging.getLogger(name)\n    logger.setLevel(logging.DEBUG)\n    # name 在 \"deepinfer\" 层级下时，通过 propagate 冒泡复用 root logger 的 handler，\n    # 无需自己挂 handler。否则回退到直接挂 handler（避免重复添加）。\n    if name == \"deepinfer\" or name.startswith(\"deepinfer.\"):\n        logger.propagate = True\n    else:\n        logger.propagate = False\n        if _default_handler is not None and _default_handler not in logger.handlers:\n            logger.addHandler(_default_handler)\n    return logger",
+      "required": true,
+      "page": null,
+      "valid": false,
+      "atomic": true
+    },
+    {
+      "id": "ev-ddb5be78a5cf6218d616",
+      "source": "deepinfer/engine/stats_logger.py",
+      "version": "9ef93c3930d6dd8d889d4ba69558a85459c2210ae0714d5073c3b4328c8e7cb9",
+      "locator": "lines:116-126",
+      "text": "def _log_worker(q: queue.SimpleQueue[list[str] | None]) -> None:\n    need_sleep = True\n    for msgs in iter(q.get, None):\n        try:\n            if need_sleep:\n                time.sleep((dist.get_rank() % 8) * 0.005)\n            for m in msgs:\n                logger.info(m)\n            need_sleep = q.empty()  # we skip sleep when q has backlog\n        except Exception:\n            traceback.print_exc()",
+      "required": true,
+      "page": null,
+      "valid": false,
+      "atomic": true
+    },
+    {
+      "id": "ev-c8859274b7c70879ff16",
+      "source": "deepinfer/engine/stats_logger.py",
+      "version": "9ef93c3930d6dd8d889d4ba69558a85459c2210ae0714d5073c3b4328c8e7cb9",
+      "locator": "lines:342-344",
+      "text": "def _emit_logs(self, msgs: list[str]) -> None:\n        \"\"\"投递日志到固定 worker 线程，主线程不触碰 logger 的 handler 锁。\"\"\"\n        self._log_queue.put(msgs)",
+      "required": true,
+      "page": null,
+      "valid": false,
+      "atomic": true
+    },
+    {
+      "id": "ev-5a3c8c1ca1246b61b813",
+      "source": "deepinfer/engine/stats_logger.py",
+      "version": "9ef93c3930d6dd8d889d4ba69558a85459c2210ae0714d5073c3b4328c8e7cb9",
+      "locator": "lines:20-20",
+      "text": "from deepinfer.logger import init_logger",
+      "required": true,
+      "page": null,
+      "valid": false,
+      "atomic": true
+    },
+    {
+      "id": "ev-5abfdabfb975754c6683",
+      "source": "deepinfer/engine/stats_logger.py",
+      "version": "9ef93c3930d6dd8d889d4ba69558a85459c2210ae0714d5073c3b4328c8e7cb9",
+      "locator": "lines:29-29",
+      "text": "logger = init_logger(__name__)",
+      "required": true,
+      "page": null,
+      "valid": false,
+      "atomic": true
+    },
+    {
+      "id": "ev-ed2914917db6a069f2c0",
+      "source": "deepinfer/environ.py",
+      "version": "fe2c531989c419f0b51b169a07f5ed826dcec7f95c0c5bc3a351805923c4f218",
+      "locator": "lines:1-30",
+      "text": "from __future__ import annotations\n\nimport os\nimport threading\nfrom collections.abc import Callable\nfrom datetime import timedelta\nfrom typing import Any\n\nDEFAULT_PREFILL_MAX_SUM_SEQLEN_K = 2**30\n\n\ndef _bool(v: str | None, default: str = \"0\") -> bool:\n    return (v if v is not None else default) not in (\"0\", \"\", \"false\", \"False\")\n\n\ndef _int(v: str | None, default: int = 0) -> int:\n    return int(v if v is not None else str(default))\n\n\ndef _float(v: str | None, default: float = 0.0) -> float:\n    return float(v if v is not None else str(default))\n\n\ndef _str(v: str | None, default: str = \"\") -> str:\n    return v if v is not None else default\n\n\n_descriptors: dict[str, EnvVar[Any]] = {}\n\n\n",
+      "required": false,
+      "page": null,
+      "valid": false,
+      "atomic": true
+    },
+    {
+      "id": "ev-68c0aee2879a48f050cf",
+      "source": "deepinfer/environ.py",
+      "version": "fe2c531989c419f0b51b169a07f5ed826dcec7f95c0c5bc3a351805923c4f218",
+      "locator": "lines:95-221",
+      "text": "\n\nclass envs:\n    \"环境变量的集中定义模块\"\n\n    # -- Platform --\n    DEEPINFER_ACCELERATOR = EnvVar.str(default=\"nvidia\")\n\n    # -- Runtime --\n    DEEPINFER_COMPUTE_SUM_SMALLER_PROBS = EnvVar.bool()\n    DEEPINFER_JIT_CACHE_DIR = EnvVar.str_or_none()\n\n    # -- Distributed Communication --\n    DEEPINFER_NCCL_NUM_SMS = EnvVar.int(default=32)\n    DEEPINFER_USERBUFFER_COMM_SMS = EnvVar.int()\n    DEEPINFER_GLOO_TIMEOUT = EnvVar(lambda v: timedelta(seconds=_float(v, 14400)))\n    DEEPINFER_REARRANGE_P2P_GROUPS = EnvVar.int(default=1)\n\n    # -- MoE & Expert Parallelism --\n    DEEPINFER_OVERRIDE_NUM_EXTRA_EXPERTS = EnvVar.int()\n    DEEPINFER_EXPERT_COUNT_WINDOW_SIZE = EnvVar.int(default=100)\n    DEEPINFER_EXPERT_REARRANGEMENT_STEP_INTERVAL = EnvVar.int()\n    DEEPINFER_REARRANGE_AFTER_PREFILL_IN_NORMAL_ENGINE = EnvVar.bool()\n    DEEPINFER_MOE_LB_STAT_INTERVAL = EnvVar.int(default=128)\n    DEEPINFER_FORCE_IMBALANCE_RATIO = EnvVar.float()\n    DEEPINFER_FORCE_LOAD_BALANCE = EnvVar.bool()\n    DEEPINFER_SHOW_EPLB_DETAIL = EnvVar.bool()\n\n    # -- Attention --\n    DEEPINFER_PREFILL_MAX_SUM_SEQLEN_K = EnvVar.int_or_none()\n    \"未设置表示不限制 sum-K；传给 C++ Scheduler 时以 DEFAULT_PREFILL_MAX_SUM_SEQLEN_K 作为等效不限制的封顶值。\"\n    DEEPINFER_INDEX_ATTN_MEMORY_LIMIT = EnvVar.int(default=10 * 2**30)\n\n    # -- MTP --\n    DEEPINFER_USE_NEXTN_DECODE = EnvVar.int(default=5)\n    \"最大支持投机几个；默认 5，显式设为 0 可关闭投机解码\"\n    DEEPINFER_ENABLE_MTP_VARLEN = EnvVar.bool()\n    DEEPINFER_MAX_BACKTRACKING_TOKENS = EnvVar(lambda v: max(_int(v), envs.DEEPINFER_USE_NEXTN_DECODE + 1))\n\n    @EnvVar\n    def DEEPINFER_DFLASH_CONFIDENCE_HEAD_TEMPERATURE(v: str | None) -> float | tuple[float, ...]:\n        raw = v if v is not None else \"1.0\"\n        if \",\" in raw:\n            parts = [float(x.strip()) for x in raw.split(\",\")]\n            nextn = envs.DEEPINFER_USE_NEXTN_DECODE\n            if len(parts) != nextn:\n                raise ValueError(f\"has {len(parts)} elements ('{raw}') but DEEPINFER_USE_NEXTN_DECODE={nextn}\")\n            return tuple(parts)\n        return float(raw)\n\n    # -- Model Loading --\n    DEEPINFER_ENGRAM_PAD_TOKEN = EnvVar.int(default=2)\n    DEEPINFER_ENGRAM_FORCE_GPU_STORAGE = EnvVar(lambda v: _bool(v) or envs.DEEPINFER_ACCELERATOR == \"ascend\")\n\n    # -- Sampling --\n    DEEPINFER_SAMPLER_FORCE_TOPK = EnvVar.int()\n    DEEPINFER_DECODE_TOKEN_BLACKLIST = EnvVar.str()\n\n    # -- CUDA Graph --\n    DEEPINFER_ENFORCE_EAGER = EnvVar.bool()\n    DEEPINFER_CUDAGRAPH_BATCH_SIZE_INTERVAL = EnvVar.int(default=8)\n    DEEPINFER_DFLASH_ENFORCE_EAGER = EnvVar.bool()\n    DEEPINFER_DFLASH_CUDAGRAPH_BATCH_SIZE_INTERVAL = EnvVar.int(default=8)\n    DEEPINFER_DECODE_PERF_CACHE_DIR = EnvVar.str_or_none()\n    DEEPINFER_DECODE_PERF_CACHE_TTL_SEC = EnvVar.int(default=60 * 60)\n\n    # -- KV Cache Store --\n    DEEPINFER_NUM_STATE_SLOTS_RATIO = EnvVar.float(default=1.2)\n    DEEPINFER_PREFILL_STORE_EXTRA_STATE = EnvVar.bool()\n    DEEPINFER_PREFILL_STORE_EXTRA_SIZE = EnvVar.int(default=128)\n\n    # -- Structured Output --\n    DEEPINFER_XGRAMMAR_DEBUG = EnvVar.bool()\n    DEEPINFER_XGRAMMAR_TIMEOUT = EnvVar.int(default=20)\n    DEEPINFER_XGRAMMAR_DISABLE_CACHE = EnvVar.bool(default=False)\n    DEEPINFER_XGRAMMAR_CACHE_LIMIT_BYTES = EnvVar.int(default=10 * 1024 * 1024 * 1024)\n    DEEPINFER_SO_BUILDER_CPUS = EnvVar.int(default=4)\n\n    # -- Scheduling --\n    DEEPINFER_PREFILL_ATTEMPT_INTERVAL = EnvVar.int(default=70)\n    \"\"\"NORMAL 引擎 prefill 尝试间隔（ALL 点：全员有活才做，逻辑见 scheduler.hpp _schedule）。\n    各 rank 在集体 prefill 前累积待处理的 prompt。\"\"\"\n    DEEPINFER_PREFILL_ANY_ATTEMPT_INTERVAL = EnvVar.int(default=100)\n    \"ANY 保底间隔：任一 rank 有活就集体 prefill，孤立 rank 最多等这么多个 decode step\"\n    DEEPINFER_ZERO_OVERHEAD_SCHEDULING = EnvVar.bool()\n\n    # -- Logging --\n    DEEPINFER_LOGGING_INTERVAL_STEP = EnvVar.int(default=100)\n    DEEPINFER_NCCL_MEMORY_SAMPLE_INTERVAL_STEPS = EnvVar.int(default=1000)\n    DEEPINFER_RINGBUFFER_WARNING_INTERVAL = EnvVar.int(default=60)\n    DEEPINFER_GC_INTERVAL_STEP = EnvVar.int(default=1000)\n\n    # -- YoCo --\n    DEEPINFER_YOCO_PREFILL_TRUNCATION_MODE = EnvVar.choice(default=\"off\", choices=(\"off\", \"mask\", \"compact\"))\n    \"\"\"YoCo consumer prefill 截断模式：off 表示关闭；mask 保留全部 query，仅收窄 SWA\n    可见域；compact 真正移除截断区 query，以减少 consumer 层计算。\"\"\"\n    DEEPINFER_YOCO_PREFILL_KEEP_TOKENS = EnvVar.int()\n    \"\"\"YoCo consumer prefill 截断开启时保留的末尾 query token 数。mask 与 compact 的\n    SWA 可见域均为原始滑窗和末尾 KEEP_TOKENS 矩形的交集。必须满足 KEEP_TOKENS >=\n    window_size + DEEPINFER_MAX_BACKTRACKING_TOKENS；默认 0，启用截断时必须显式设置。\"\"\"\n\n    # -- Profiling & Debug --\n    DEEPINFER_BATCH_INVARIANT = EnvVar.bool()\n    DEEPINFER_DISABLE_SYNC_GUARD = EnvVar.bool()\n    \"debug 用：关闭 forbid_cuda_sync 守卫（model forward/sampling launch 期的 CPU-GPU 同步检查）\"\n    DEEPINFER_PROFILE_TORCH_CUDA_MEMORY = EnvVar.str_or_none()\n    DEEPINFER_ENABLE_MEMORY_TRACING = EnvVar.bool()\n    DEEPINFER_PROFILE_HTTP_ENABLE = EnvVar.bool()\n    DEEPINFER_PROFILE_HTTP_PORT_BASE = EnvVar.int(default=6070)\n    DEEPINFER_TORCH_PROFILER_DIR = EnvVar.str(default=\"/tmp\")\n\n    # -- Multi-Modal --\n    DEEPINFER_USE_MULTIMODAL_POOL = EnvVar.bool()\n    DEEPINFER_MULTIMODAL_POOL_SIZE_GB = EnvVar.int(default=8)\n    DEEPINFER_MULTI_MODAL_BUFFER_SIZE = EnvVar.int(default=512)\n    DEEPINFER_MULTI_MODAL_WORKER_TIMEOUT = EnvVar.float(default=1800.0)\n\n\ndef rearm(name: str) -> None:\n    \"\"\"Rearm specific descriptor, will resolve again on next access.\"\"\"\n    setattr(envs, name, _descriptors[name])\n\n\ndef rearm_all() -> None:\n    \"\"\"Rearm all descriptors.\"\"\"\n    for name, descriptor in _descriptors.items():\n        setattr(envs, name, descriptor)\n",
+      "required": false,
+      "page": null,
+      "valid": false,
+      "atomic": true
+    },
+    {
+      "id": "ev-bae57eeee18761001e03",
+      "source": "deepinfer/logger.py",
+      "version": "5b8f8d9947de692353609c1fc2851097d24f9b6ba6004dce1dbfa394dc6d3ec8",
+      "locator": "lines:1-32",
+      "text": "# SPDX-License-Identifier: Apache-2.0\n# Derived from vLLM; modified by DeepSeek.\n\n# Adapted from\n# https://github.com/skypilot-org/skypilot/blob/86dc0f6283a335e4aa37b3c10716f90999f48ab6/sky/sky_logging.py\n\"\"\"Logging configuration for DeepInfer.\"\"\"\n\nimport datetime\nimport logging\nimport multiprocessing\nimport os\nimport sys\nimport threading\nimport time\nfrom multiprocessing.context import ForkProcess, SpawnProcess\nfrom multiprocessing.process import BaseProcess\nfrom types import TracebackType\n\n_FORMAT = \"[%(levelname)s %(asctime)s %(filename)s:%(lineno)d] %(message)s\"\n_DATE_FORMAT = \"%m-%d %H:%M:%S\"\n\n# ANSI 颜色（仅在 TTY 输出时使用），按日志级别区分\n_LEVEL_COLORS = {\n    logging.DEBUG: \"\\033[36m\",  # cyan\n    logging.INFO: \"\\033[32m\",  # green\n    logging.WARNING: \"\\033[33m\",  # yellow\n    logging.ERROR: \"\\033[31m\",  # red\n    logging.CRITICAL: \"\\033[1;31m\",  # bold red\n}\n_COLOR_RESET = \"\\033[0m\"\n\n\n",
+      "required": false,
+      "page": null,
+      "valid": false,
+      "atomic": true
+    },
+    {
+      "id": "ev-57f7a2fe3be4d4618fe5",
+      "source": "deepinfer/logger.py",
+      "version": "5b8f8d9947de692353609c1fc2851097d24f9b6ba6004dce1dbfa394dc6d3ec8",
+      "locator": "lines:69-130",
+      "text": "\n\n_root_logger = logging.getLogger(\"deepinfer\")\n_default_handler = None\n\n\ndef _setup_logger() -> None:\n    global _default_handler\n    _root_logger.setLevel(logging.DEBUG)\n    if _default_handler is None:\n        _default_handler = logging.StreamHandler(sys.stdout)\n        _default_handler.flush = sys.stdout.flush\n        _default_handler.setLevel(logging.INFO)\n        _root_logger.addHandler(_default_handler)\n\n    fmt = NewLineFormatter(\n        _FORMAT,\n        datefmt=_DATE_FORMAT,\n        use_color=sys.stdout.isatty(),\n    )\n    _default_handler.setFormatter(fmt)\n    _root_logger.propagate = False\n\n\n_setup_logger()\n\n\ndef init_logger(name: str) -> logging.Logger:\n    logger = logging.getLogger(name)\n    logger.setLevel(logging.DEBUG)\n    # name 在 \"deepinfer\" 层级下时，通过 propagate 冒泡复用 root logger 的 handler，\n    # 无需自己挂 handler。否则回退到直接挂 handler（避免重复添加）。\n    if name == \"deepinfer\" or name.startswith(\"deepinfer.\"):\n        logger.propagate = True\n    else:\n        logger.propagate = False\n        if _default_handler is not None and _default_handler not in logger.handlers:\n            logger.addHandler(_default_handler)\n    return logger\n\n\ndef _print_error_line(message: str) -> None:\n    now = datetime.datetime.now().strftime(f\"{_DATE_FORMAT}.%f\")\n    print(f\"[ERROR {now}] {message}\", file=sys.stderr, flush=True)\n\n\ndef print_crash_header() -> None:\n    process_name = multiprocessing.current_process().name\n    thread_name = threading.current_thread().name\n    _print_error_line(f\"Uncaught exception in process {process_name} thread {thread_name} (pid {os.getpid()}):\")\n\n\ndef install_excepthook(exit_on_thread_exception: bool = False) -> None:\n    \"\"\"Print error timestamp, traceback, and process/thread info when an uncaught exception occurs.\n\n    Args:\n        exit_on_thread_exception (bool): If True, the process will exit when an uncaught exception occurs in a thread.\n    \"\"\"\n\n    def _excepthook(\n        exc_type: type[BaseException],\n        exc_value: BaseException,\n",
+      "required": false,
+      "page": null,
+      "valid": false,
+      "atomic": true
+    },
+    {
+      "id": "ev-c182db1a2a105009c479",
+      "source": "deepinfer/engine/stats_logger.py",
+      "version": "9ef93c3930d6dd8d889d4ba69558a85459c2210ae0714d5073c3b4328c8e7cb9",
+      "locator": "lines:100-130",
+      "text": "    def __len__(self) -> int:\n        return len(self.entries)\n\n    def __bool__(self) -> bool:\n        return bool(self.entries)\n\n    def append(self, now: float, payload: object, step: int) -> None:\n        self.entries.append((now, payload, step))\n\n    def trim(self, step: int, max_age: int) -> None:\n        self.entries = [e for e in self.entries if step - e[2] <= max_age]\n\n    def sum(self, key: Callable[[object], float]) -> float:\n        return sum(key(p) for _, p, _ in self.entries)\n\n\ndef _log_worker(q: queue.SimpleQueue[list[str] | None]) -> None:\n    need_sleep = True\n    for msgs in iter(q.get, None):\n        try:\n            if need_sleep:\n                time.sleep((dist.get_rank() % 8) * 0.005)\n            for m in msgs:\n                logger.info(m)\n            need_sleep = q.empty()  # we skip sleep when q has backlog\n        except Exception:\n            traceback.print_exc()\n\n\nclass StatsLogger:\n    \"\"\"Owns all sliding-window data, timing accumulators and logging state.\n",
+      "required": false,
+      "page": null,
+      "valid": false,
+      "atomic": true
+    },
+    {
+      "id": "ev-b9ca8fffd8da76cf4927",
+      "source": "deepinfer/engine/stats_logger.py",
+      "version": "9ef93c3930d6dd8d889d4ba69558a85459c2210ae0714d5073c3b4328c8e7cb9",
+      "locator": "lines:320-360",
+      "text": "            items.append(f\"state_cache_usage {a.gpu_state_usage * 100:.2f}%\")\n        if self._engine_type == EngineType.NORMAL:\n            prefill_t = cpu_timer.times.get(\"engine_step:prefill\", 0.0)\n            decode_t = cpu_timer.times.get(\"engine_step:decode\", 0.0)\n            total_t = prefill_t + decode_t\n            items.append(f\"prefill/decode {100 * safe_divide(prefill_t, total_t):.2f}%/{100 * safe_divide(decode_t, total_t):.2f}%\")\n        items += [\n            f\"prefill_caching_rate (GPU {gpu_pct * 100:.2f}%)\",\n            f\"TTFT (max {a.max_TTFT:.1f} ms, mean {a.mean_TTFT:.1f} ms)\",\n            f\"avg_length (input {a.avg_prompt_len:.1f}, output {a.avg_completion_len:.1f})\",\n            f\"finished {self._engine.num_finished_completion}\",\n            f\"preempted {a.num_preempted}\",\n            f\"aborted {a.num_aborted}\",\n            f\"sum_seqlen_qxk {s.sum_seqlen_qxk}\",\n            f\"max_seqlen_k {s.max_seqlen_k}\",\n            f\"min_seqlen_k {s.min_seqlen_k}\",\n            f\"attn_TFLOPs {s.attn_tflops:.1f}\",\n            f\"MFU {a.mfu:.3f}\",\n        ]\n        msg = f\"RANK {rank}, GPU {gpu_id}, step {self._engine.generate_step}, [stats] ({' | '.join(items)})\"\n        return [msg, *lines]\n\n    def _emit_logs(self, msgs: list[str]) -> None:\n        \"\"\"投递日志到固定 worker 线程，主线程不触碰 logger 的 handler 锁。\"\"\"\n        self._log_queue.put(msgs)\n\n    def close(self) -> None:\n        \"\"\"写完队列中已投递的日志后停掉 worker 线程；重复调用安全。\"\"\"\n        self._log_queue.put(None)\n        self._log_worker_thread.join()\n\n    # ------------------------------------------------------------------\n    # record / aggregate steps\n    # ------------------------------------------------------------------\n\n    def _record(self, s: StepStats, now: float, gen_tokens: list[int]) -> float:\n        \"\"\"Append per-step records and return batch utilization.\"\"\"\n        step = self._engine.generate_step\n\n        if s.prompt_run:\n            self._prompt_tokens.append(now, s.num_batched_tokens, step)\n",
+      "required": false,
+      "page": null,
+      "valid": false,
+      "atomic": true
+    },
+    {
+      "id": "ev-f77bf536cb37fea4ee95",
+      "source": "deepinfer/engine/stats_logger.py",
+      "version": "9ef93c3930d6dd8d889d4ba69558a85459c2210ae0714d5073c3b4328c8e7cb9",
+      "locator": "lines:110-130",
+      "text": "        self.entries = [e for e in self.entries if step - e[2] <= max_age]\n\n    def sum(self, key: Callable[[object], float]) -> float:\n        return sum(key(p) for _, p, _ in self.entries)\n\n\ndef _log_worker(q: queue.SimpleQueue[list[str] | None]) -> None:\n    need_sleep = True\n    for msgs in iter(q.get, None):\n        try:\n            if need_sleep:\n                time.sleep((dist.get_rank() % 8) * 0.005)\n            for m in msgs:\n                logger.info(m)\n            need_sleep = q.empty()  # we skip sleep when q has backlog\n        except Exception:\n            traceback.print_exc()\n\n\nclass StatsLogger:\n    \"\"\"Owns all sliding-window data, timing accumulators and logging state.\n",
+      "required": false,
+      "page": null,
+      "valid": false,
+      "atomic": true
+    },
+    {
+      "id": "ev-8d9367024e9cf0226e42",
+      "source": "deepinfer/environ.py",
+      "version": "fe2c531989c419f0b51b169a07f5ed826dcec7f95c0c5bc3a351805923c4f218",
+      "locator": "lines:213-221",
+      "text": "def rearm(name: str) -> None:\n    \"\"\"Rearm specific descriptor, will resolve again on next access.\"\"\"\n    setattr(envs, name, _descriptors[name])\n\n\ndef rearm_all() -> None:\n    \"\"\"Rearm all descriptors.\"\"\"\n    for name, descriptor in _descriptors.items():\n        setattr(envs, name, descriptor)\n",
+      "required": false,
+      "page": null,
+      "valid": false,
+      "atomic": true
+    },
+    {
+      "id": "ev-5e9fb573e4b591084792",
+      "source": "deepinfer/environ.py",
+      "version": "fe2c531989c419f0b51b169a07f5ed826dcec7f95c0c5bc3a351805923c4f218",
+      "locator": "lines:95-215",
+      "text": "\n\nclass envs:\n    \"环境变量的集中定义模块\"\n\n    # -- Platform --\n    DEEPINFER_ACCELERATOR = EnvVar.str(default=\"nvidia\")\n\n    # -- Runtime --\n    DEEPINFER_COMPUTE_SUM_SMALLER_PROBS = EnvVar.bool()\n    DEEPINFER_JIT_CACHE_DIR = EnvVar.str_or_none()\n\n    # -- Distributed Communication --\n    DEEPINFER_NCCL_NUM_SMS = EnvVar.int(default=32)\n    DEEPINFER_USERBUFFER_COMM_SMS = EnvVar.int()\n    DEEPINFER_GLOO_TIMEOUT = EnvVar(lambda v: timedelta(seconds=_float(v, 14400)))\n    DEEPINFER_REARRANGE_P2P_GROUPS = EnvVar.int(default=1)\n\n    # -- MoE & Expert Parallelism --\n    DEEPINFER_OVERRIDE_NUM_EXTRA_EXPERTS = EnvVar.int()\n    DEEPINFER_EXPERT_COUNT_WINDOW_SIZE = EnvVar.int(default=100)\n    DEEPINFER_EXPERT_REARRANGEMENT_STEP_INTERVAL = EnvVar.int()\n    DEEPINFER_REARRANGE_AFTER_PREFILL_IN_NORMAL_ENGINE = EnvVar.bool()\n    DEEPINFER_MOE_LB_STAT_INTERVAL = EnvVar.int(default=128)\n    DEEPINFER_FORCE_IMBALANCE_RATIO = EnvVar.float()\n    DEEPINFER_FORCE_LOAD_BALANCE = EnvVar.bool()\n    DEEPINFER_SHOW_EPLB_DETAIL = EnvVar.bool()\n\n    # -- Attention --\n    DEEPINFER_PREFILL_MAX_SUM_SEQLEN_K = EnvVar.int_or_none()\n    \"未设置表示不限制 sum-K；传给 C++ Scheduler 时以 DEFAULT_PREFILL_MAX_SUM_SEQLEN_K 作为等效不限制的封顶值。\"\n    DEEPINFER_INDEX_ATTN_MEMORY_LIMIT = EnvVar.int(default=10 * 2**30)\n\n    # -- MTP --\n    DEEPINFER_USE_NEXTN_DECODE = EnvVar.int(default=5)\n    \"最大支持投机几个；默认 5，显式设为 0 可关闭投机解码\"\n    DEEPINFER_ENABLE_MTP_VARLEN = EnvVar.bool()\n    DEEPINFER_MAX_BACKTRACKING_TOKENS = EnvVar(lambda v: max(_int(v), envs.DEEPINFER_USE_NEXTN_DECODE + 1))\n\n    @EnvVar\n    def DEEPINFER_DFLASH_CONFIDENCE_HEAD_TEMPERATURE(v: str | None) -> float | tuple[float, ...]:\n        raw = v if v is not None else \"1.0\"\n        if \",\" in raw:\n            parts = [float(x.strip()) for x in raw.split(\",\")]\n            nextn = envs.DEEPINFER_USE_NEXTN_DECODE\n            if len(parts) != nextn:\n                raise ValueError(f\"has {len(parts)} elements ('{raw}') but DEEPINFER_USE_NEXTN_DECODE={nextn}\")\n            return tuple(parts)\n        return float(raw)\n\n    # -- Model Loading --\n    DEEPINFER_ENGRAM_PAD_TOKEN = EnvVar.int(default=2)\n    DEEPINFER_ENGRAM_FORCE_GPU_STORAGE = EnvVar(lambda v: _bool(v) or envs.DEEPINFER_ACCELERATOR == \"ascend\")\n\n    # -- Sampling --\n    DEEPINFER_SAMPLER_FORCE_TOPK = EnvVar.int()\n    DEEPINFER_DECODE_TOKEN_BLACKLIST = EnvVar.str()\n\n    # -- CUDA Graph --\n    DEEPINFER_ENFORCE_EAGER = EnvVar.bool()\n    DEEPINFER_CUDAGRAPH_BATCH_SIZE_INTERVAL = EnvVar.int(default=8)\n    DEEPINFER_DFLASH_ENFORCE_EAGER = EnvVar.bool()\n    DEEPINFER_DFLASH_CUDAGRAPH_BATCH_SIZE_INTERVAL = EnvVar.int(default=8)\n    DEEPINFER_DECODE_PERF_CACHE_DIR = EnvVar.str_or_none()\n    DEEPINFER_DECODE_PERF_CACHE_TTL_SEC = EnvVar.int(default=60 * 60)\n\n    # -- KV Cache Store --\n    DEEPINFER_NUM_STATE_SLOTS_RATIO = EnvVar.float(default=1.2)\n    DEEPINFER_PREFILL_STORE_EXTRA_STATE = EnvVar.bool()\n    DEEPINFER_PREFILL_STORE_EXTRA_SIZE = EnvVar.int(default=128)\n\n    # -- Structured Output --\n    DEEPINFER_XGRAMMAR_DEBUG = EnvVar.bool()\n    DEEPINFER_XGRAMMAR_TIMEOUT = EnvVar.int(default=20)\n    DEEPINFER_XGRAMMAR_DISABLE_CACHE = EnvVar.bool(default=False)\n    DEEPINFER_XGRAMMAR_CACHE_LIMIT_BYTES = EnvVar.int(default=10 * 1024 * 1024 * 1024)\n    DEEPINFER_SO_BUILDER_CPUS = EnvVar.int(default=4)\n\n    # -- Scheduling --\n    DEEPINFER_PREFILL_ATTEMPT_INTERVAL = EnvVar.int(default=70)\n    \"\"\"NORMAL 引擎 prefill 尝试间隔（ALL 点：全员有活才做，逻辑见 scheduler.hpp _schedule）。\n    各 rank 在集体 prefill 前累积待处理的 prompt。\"\"\"\n    DEEPINFER_PREFILL_ANY_ATTEMPT_INTERVAL = EnvVar.int(default=100)\n    \"ANY 保底间隔：任一 rank 有活就集体 prefill，孤立 rank 最多等这么多个 decode step\"\n    DEEPINFER_ZERO_OVERHEAD_SCHEDULING = EnvVar.bool()\n\n    # -- Logging --\n    DEEPINFER_LOGGING_INTERVAL_STEP = EnvVar.int(default=100)\n    DEEPINFER_NCCL_MEMORY_SAMPLE_INTERVAL_STEPS = EnvVar.int(default=1000)\n    DEEPINFER_RINGBUFFER_WARNING_INTERVAL = EnvVar.int(default=60)\n    DEEPINFER_GC_INTERVAL_STEP = EnvVar.int(default=1000)\n\n    # -- YoCo --\n    DEEPINFER_YOCO_PREFILL_TRUNCATION_MODE = EnvVar.choice(default=\"off\", choices=(\"off\", \"mask\", \"compact\"))\n    \"\"\"YoCo consumer prefill 截断模式：off 表示关闭；mask 保留全部 query，仅收窄 SWA\n    可见域；compact 真正移除截断区 query，以减少 consumer 层计算。\"\"\"\n    DEEPINFER_YOCO_PREFILL_KEEP_TOKENS = EnvVar.int()\n    \"\"\"YoCo consumer prefill 截断开启时保留的末尾 query token 数。mask 与 compact 的\n    SWA 可见域均为原始滑窗和末尾 KEEP_TOKENS 矩形的交集。必须满足 KEEP_TOKENS >=\n    window_size + DEEPINFER_MAX_BACKTRACKING_TOKENS；默认 0，启用截断时必须显式设置。\"\"\"\n\n    # -- Profiling & Debug --\n    DEEPINFER_BATCH_INVARIANT = EnvVar.bool()\n    DEEPINFER_DISABLE_SYNC_GUARD = EnvVar.bool()\n    \"debug 用：关闭 forbid_cuda_sync 守卫（model forward/sampling launch 期的 CPU-GPU 同步检查）\"\n    DEEPINFER_PROFILE_TORCH_CUDA_MEMORY = EnvVar.str_or_none()\n    DEEPINFER_ENABLE_MEMORY_TRACING = EnvVar.bool()\n    DEEPINFER_PROFILE_HTTP_ENABLE = EnvVar.bool()\n    DEEPINFER_PROFILE_HTTP_PORT_BASE = EnvVar.int(default=6070)\n    DEEPINFER_TORCH_PROFILER_DIR = EnvVar.str(default=\"/tmp\")\n\n    # -- Multi-Modal --\n    DEEPINFER_USE_MULTIMODAL_POOL = EnvVar.bool()\n    DEEPINFER_MULTIMODAL_POOL_SIZE_GB = EnvVar.int(default=8)\n    DEEPINFER_MULTI_MODAL_BUFFER_SIZE = EnvVar.int(default=512)\n    DEEPINFER_MULTI_MODAL_WORKER_TIMEOUT = EnvVar.float(default=1800.0)\n\n\ndef rearm(name: str) -> None:\n    \"\"\"Rearm specific descriptor, will resolve again on next access.\"\"\"\n    setattr(envs, name, _descriptors[name])\n",
+      "required": false,
+      "page": null,
+      "valid": false,
+      "atomic": true
+    },
+    {
+      "id": "ev-1b63b46cf9a74b26f495",
+      "source": "deepinfer/environ.py",
+      "version": "fe2c531989c419f0b51b169a07f5ed826dcec7f95c0c5bc3a351805923c4f218",
+      "locator": "lines:220-221",
+      "text": "    for name, descriptor in _descriptors.items():\n        setattr(envs, name, descriptor)\n",
+      "required": false,
+      "page": null,
+      "valid": false,
+      "atomic": true
+    },
+    {
+      "id": "ev-035afa1a80556899e701",
+      "source": "deepinfer/environ.py",
+      "version": "fda80ed0fd4c705a3f9fcce83ea9b429d70342420506d0dde774fbb747d11878",
+      "locator": "lines:1-140",
+      "text": "from __future__ import annotations\n\nimport os\nimport threading\nfrom collections.abc import Callable\nfrom datetime import timedelta\nfrom typing import Any\n\nDEFAULT_PREFILL_MAX_SUM_SEQLEN_K = 2**30\n\n\ndef _bool(v: str | None, default: str = \"0\") -> bool:\n    return (v if v is not None else default) not in (\"0\", \"\", \"false\", \"False\")\n\n\ndef _int(v: str | None, default: int = 0) -> int:\n    return int(v if v is not None else str(default))\n\n\ndef _float(v: str | None, default: float = 0.0) -> float:\n    return float(v if v is not None else str(default))\n\n\ndef _str(v: str | None, default: str = \"\") -> str:\n    return v if v is not None else default\n\n\n_descriptors: dict[str, EnvVar[Any]] = {}\n\n\nclass EnvVar[T]:\n    \"\"\"Non-data descriptor, resolved on first access\"\"\"\n\n    __slots__ = (\"name\", \"init\", \"lock\")\n\n    def __init__(self, init: Callable[[str | None], T]) -> None:\n        self.init = init\n        self.lock = threading.Lock()\n\n    def __set_name__(self, owner: type[envs], name: str) -> None:\n        self.name = name\n        _descriptors[name] = self\n\n    def __get__(self, instance: envs | None, owner: type[envs]) -> T:\n        with self.lock:\n            cached = owner.__dict__.get(self.name, self)\n            if cached is not self:\n                return cached\n            try:\n                value = self.init(os.getenv(self.name))\n            except Exception as e:  # noqa: BLE001\n                try:\n                    raise type(e)(f\"{self.name}: {e}\") from e\n                except TypeError:\n                    raise e from None\n            setattr(owner, self.name, value)\n            return value\n\n    # -- Factory Methods --\n\n    @staticmethod\n    def int(*, default: int = 0) -> EnvVar[int]:\n        return EnvVar(lambda v: _int(v, default))\n\n    @staticmethod\n    def float(*, default: float = 0.0) -> EnvVar[float]:\n        return EnvVar(lambda v: _float(v, default))\n\n    @staticmethod\n    def bool(*, default: bool = False) -> EnvVar[bool]:\n        return EnvVar(lambda v: _bool(v, \"1\" if default else \"0\"))\n\n    @staticmethod\n    def str(*, default: str = \"\") -> EnvVar[str]:\n        return EnvVar(lambda v: _str(v, default))\n\n    @staticmethod\n    def str_or_none() -> EnvVar[str | None]:\n        return EnvVar(lambda v: v)\n\n    @staticmethod\n    def int_or_none() -> EnvVar[int | None]:\n        return EnvVar(lambda v: int(v) if v is not None else None)\n\n    @staticmethod\n    def int_or_none_min(*, minimum: int) -> EnvVar[int | None]:\n        def _init(v: str | None) -> int | None:\n            if v is None:\n                return None\n            value = int(v)\n            if value < minimum:\n                raise ValueError(f\"{value!r} must be >= {minimum}\")\n            return value\n\n        return EnvVar(_init)\n\n    @staticmethod\n    def choice(*, default: str | None = None, choices: tuple[str, ...]) -> EnvVar[str | None]:\n        def _init(v: str | None) -> str | None:\n            if v is None:\n                return default\n            if v not in choices:\n                raise ValueError(f\"{v!r}, must be one of {choices}\")\n            return v\n\n        return EnvVar(_init)\n\n\nclass envs:\n    \"环境变量的集中定义模块\"\n\n    # -- Platform --\n    DEEPINFER_ACCELERATOR = EnvVar.str(default=\"nvidia\")\n\n    # -- Runtime --\n    DEEPINFER_COMPUTE_SUM_SMALLER_PROBS = EnvVar.bool()\n    DEEPINFER_JIT_CACHE_DIR = EnvVar.str_or_none()\n\n    # -- Distributed Communication --\n    DEEPINFER_NCCL_NUM_SMS = EnvVar.int(default=32)\n    DEEPINFER_USERBUFFER_COMM_SMS = EnvVar.int()\n    DEEPINFER_GLOO_TIMEOUT = EnvVar(lambda v: timedelta(seconds=_float(v, 14400)))\n    DEEPINFER_REARRANGE_P2P_GROUPS = EnvVar.int(default=1)\n\n    # -- MoE & Expert Parallelism --\n    DEEPINFER_OVERRIDE_NUM_EXTRA_EXPERTS = EnvVar.int()\n    DEEPINFER_EXPERT_COUNT_WINDOW_SIZE = EnvVar.int(default=100)\n    DEEPINFER_EXPERT_REARRANGEMENT_STEP_INTERVAL = EnvVar.int()\n    DEEPINFER_REARRANGE_AFTER_PREFILL_IN_NORMAL_ENGINE = EnvVar.bool()\n    DEEPINFER_MOE_LB_STAT_INTERVAL = EnvVar.int(default=128)\n    DEEPINFER_FORCE_IMBALANCE_RATIO = EnvVar.float()\n    DEEPINFER_FORCE_LOAD_BALANCE = EnvVar.bool()\n    DEEPINFER_SHOW_EPLB_DETAIL = EnvVar.bool()\n\n    # -- Attention --\n    DEEPINFER_PREFILL_MAX_SUM_SEQLEN_K = EnvVar.int_or_none()\n    \"未设置表示不限制 sum-K；传给 C++ Scheduler 时以 DEFAULT_PREFILL_MAX_SUM_SEQLEN_K 作为等效不限制的封顶值。\"\n    DEEPINFER_INDEX_ATTN_MEMORY_LIMIT = EnvVar.int(default=10 * 2**30)\n\n    # -- MTP --\n",
+      "required": false,
+      "page": null,
+      "valid": false,
+      "atomic": true
+    },
+    {
+      "id": "ev-ac42a673914f9911cf89",
+      "source": "deepinfer/environ.py",
+      "version": "fda80ed0fd4c705a3f9fcce83ea9b429d70342420506d0dde774fbb747d11878",
+      "locator": "lines:31-106",
+      "text": "class EnvVar[T]:\n    \"\"\"Non-data descriptor, resolved on first access\"\"\"\n\n    __slots__ = (\"name\", \"init\", \"lock\")\n\n    def __init__(self, init: Callable[[str | None], T]) -> None:\n        self.init = init\n        self.lock = threading.Lock()\n\n    def __set_name__(self, owner: type[envs], name: str) -> None:\n        self.name = name\n        _descriptors[name] = self\n\n    def __get__(self, instance: envs | None, owner: type[envs]) -> T:\n        with self.lock:\n            cached = owner.__dict__.get(self.name, self)\n            if cached is not self:\n                return cached\n            try:\n                value = self.init(os.getenv(self.name))\n            except Exception as e:  # noqa: BLE001\n                try:\n                    raise type(e)(f\"{self.name}: {e}\") from e\n                except TypeError:\n                    raise e from None\n            setattr(owner, self.name, value)\n            return value\n\n    # -- Factory Methods --\n\n    @staticmethod\n    def int(*, default: int = 0) -> EnvVar[int]:\n        return EnvVar(lambda v: _int(v, default))\n\n    @staticmethod\n    def float(*, default: float = 0.0) -> EnvVar[float]:\n        return EnvVar(lambda v: _float(v, default))\n\n    @staticmethod\n    def bool(*, default: bool = False) -> EnvVar[bool]:\n        return EnvVar(lambda v: _bool(v, \"1\" if default else \"0\"))\n\n    @staticmethod\n    def str(*, default: str = \"\") -> EnvVar[str]:\n        return EnvVar(lambda v: _str(v, default))\n\n    @staticmethod\n    def str_or_none() -> EnvVar[str | None]:\n        return EnvVar(lambda v: v)\n\n    @staticmethod\n    def int_or_none() -> EnvVar[int | None]:\n        return EnvVar(lambda v: int(v) if v is not None else None)\n\n    @staticmethod\n    def int_or_none_min(*, minimum: int) -> EnvVar[int | None]:\n        def _init(v: str | None) -> int | None:\n            if v is None:\n                return None\n            value = int(v)\n            if value < minimum:\n                raise ValueError(f\"{value!r} must be >= {minimum}\")\n            return value\n\n        return EnvVar(_init)\n\n    @staticmethod\n    def choice(*, default: str | None = None, choices: tuple[str, ...]) -> EnvVar[str | None]:\n        def _init(v: str | None) -> str | None:\n            if v is None:\n                return default\n            if v not in choices:\n                raise ValueError(f\"{v!r}, must be one of {choices}\")\n            return v\n\n        return EnvVar(_init)",
+      "required": true,
+      "page": null,
+      "valid": false,
+      "atomic": true
+    },
+    {
+      "id": "ev-4b24c4846992a4f0ccea",
+      "source": "deepinfer/environ.py",
+      "version": "fda80ed0fd4c705a3f9fcce83ea9b429d70342420506d0dde774fbb747d11878",
+      "locator": "lines:227-229",
+      "text": "def rearm(name: str) -> None:\n    \"\"\"Rearm specific descriptor, will resolve again on next access.\"\"\"\n    setattr(envs, name, _descriptors[name])",
+      "required": true,
+      "page": null,
+      "valid": false,
+      "atomic": true
+    },
+    {
+      "id": "ev-c7ff4b5b970258dda761",
+      "source": "deepinfer/environ.py",
+      "version": "fda80ed0fd4c705a3f9fcce83ea9b429d70342420506d0dde774fbb747d11878",
+      "locator": "lines:232-235",
+      "text": "def rearm_all() -> None:\n    \"\"\"Rearm all descriptors.\"\"\"\n    for name, descriptor in _descriptors.items():\n        setattr(envs, name, descriptor)",
+      "required": true,
+      "page": null,
+      "valid": false,
+      "atomic": true
+    },
+    {
+      "id": "ev-307c2a63e207cb147021",
+      "source": "deepinfer/environ.py",
+      "version": "a3a3ea32b36c2f1c7ea45357cff9e9be1a8b6bedb5d27a27788bc5eb1c0d25bc",
+      "locator": "lines:31-106",
+      "text": "class EnvVar[T]:\n    \"\"\"Non-data descriptor, resolved on first access\"\"\"\n\n    __slots__ = (\"name\", \"init\", \"lock\")\n\n    def __init__(self, init: Callable[[str | None], T]) -> None:\n        self.init = init\n        self.lock = threading.Lock()\n\n    def __set_name__(self, owner: type[envs], name: str) -> None:\n        self.name = name\n        _descriptors[name] = self\n\n    def __get__(self, instance: envs | None, owner: type[envs]) -> T:\n        with self.lock:\n            cached = owner.__dict__.get(self.name, self)\n            if cached is not self:\n                return cached\n            try:\n                value = self.init(os.getenv(self.name))\n            except Exception as e:  # noqa: BLE001\n                try:\n                    raise type(e)(f\"{self.name}: {e}\") from e\n                except TypeError:\n                    raise e from None\n            setattr(owner, self.name, value)\n            return value\n\n    # -- Factory Methods --\n\n    @staticmethod\n    def int(*, default: int = 0) -> EnvVar[int]:\n        return EnvVar(lambda v: _int(v, default))\n\n    @staticmethod\n    def float(*, default: float = 0.0) -> EnvVar[float]:\n        return EnvVar(lambda v: _float(v, default))\n\n    @staticmethod\n    def bool(*, default: bool = False) -> EnvVar[bool]:\n        return EnvVar(lambda v: _bool(v, \"1\" if default else \"0\"))\n\n    @staticmethod\n    def str(*, default: str = \"\") -> EnvVar[str]:\n        return EnvVar(lambda v: _str(v, default))\n\n    @staticmethod\n    def str_or_none() -> EnvVar[str | None]:\n        return EnvVar(lambda v: v)\n\n    @staticmethod\n    def int_or_none() -> EnvVar[int | None]:\n        return EnvVar(lambda v: int(v) if v is not None else None)\n\n    @staticmethod\n    def int_or_none_min(*, minimum: int) -> EnvVar[int | None]:\n        def _init(v: str | None) -> int | None:\n            if v is None:\n                return None\n            value = int(v)\n            if value < minimum:\n                raise ValueError(f\"{value!r} must be >= {minimum}\")\n            return value\n\n        return EnvVar(_init)\n\n    @staticmethod\n    def choice(*, default: str | None = None, choices: tuple[str, ...]) -> EnvVar[str | None]:\n        def _init(v: str | None) -> str | None:\n            if v is None:\n                return default\n            if v not in choices:\n                raise ValueError(f\"{v!r}, must be one of {choices}\")\n            return v\n\n        return EnvVar(_init)",
+      "required": true,
+      "page": null,
+      "valid": true,
+      "atomic": true
+    },
+    {
+      "id": "ev-f247541668863735f1b7",
+      "source": "deepinfer/environ.py",
+      "version": "a3a3ea32b36c2f1c7ea45357cff9e9be1a8b6bedb5d27a27788bc5eb1c0d25bc",
+      "locator": "lines:231-233",
+      "text": "def rearm(name: str) -> None:\n    \"\"\"Rearm specific descriptor, will resolve again on next access.\"\"\"\n    setattr(envs, name, _descriptors[name])",
+      "required": true,
+      "page": null,
+      "valid": true,
+      "atomic": true
+    },
+    {
+      "id": "ev-14a5df2f64c9a607da49",
+      "source": "deepinfer/environ.py",
+      "version": "a3a3ea32b36c2f1c7ea45357cff9e9be1a8b6bedb5d27a27788bc5eb1c0d25bc",
+      "locator": "lines:236-239",
+      "text": "def rearm_all() -> None:\n    \"\"\"Rearm all descriptors.\"\"\"\n    for name, descriptor in _descriptors.items():\n        setattr(envs, name, descriptor)",
+      "required": true,
+      "page": null,
+      "valid": true,
+      "atomic": true
+    },
+    {
+      "id": "ev-2d373a31d658fc958e65",
+      "source": "deepinfer/logger.py",
+      "version": "32285fab98a1dd95fb21c21fabbc59095295e0939423405a586af317f37c9af2",
+      "locator": "lines:35-70",
+      "text": "class NewLineFormatter(logging.Formatter):\n    \"\"\"Adds logging prefix to newlines to align multi-line messages, optionally with microsecond precision.\n\n    若 use_color=True 且输出为 TTY，会给日志级别染色（不影响写入文件的纯净度）。\n    \"\"\"\n\n    def __init__(\n        self,\n        fmt: str,\n        datefmt: str | None = None,\n        high_precision: bool = False,\n        use_color: bool = False,\n    ) -> None:\n        super().__init__(fmt, datefmt)\n        self.high_precision = high_precision\n        self.use_color = use_color\n\n    def formatTime(self, record: logging.LogRecord, datefmt: str | None = None) -> str:\n        if not self.high_precision:\n            # 调用 logging.Formatter 默认实现，保持原来的格式\n            return super().formatTime(record, datefmt)\n        # ===== 高精度模式：在普通 datefmt 基础上附加微秒 =====\n        base = time.strftime(datefmt or _DATE_FORMAT, self.converter(record.created))\n        return f\"{base}.{record.msecs * 1000:06.0f}\"\n\n    def format(self, record: logging.LogRecord) -> str:\n        msg = super().format(record)\n        # 快速路径：单行日志（绝大多数情况）无需做对齐处理\n        if \"\\n\" in msg and record.message:\n            prefix = msg[: msg.find(record.message)]\n            msg = msg.replace(\"\\n\", \"\\n\" + prefix)\n        if self.use_color:\n            color = _LEVEL_COLORS.get(record.levelno)\n            if color:\n                msg = f\"{color}{msg}{_COLOR_RESET}\"\n        return msg",
+      "required": true,
+      "page": null,
+      "valid": true,
+      "atomic": true
+    },
+    {
+      "id": "ev-744c4e83ef7d8bd7fde4",
+      "source": "deepinfer/logger.py",
+      "version": "32285fab98a1dd95fb21c21fabbc59095295e0939423405a586af317f37c9af2",
+      "locator": "lines:77-92",
+      "text": "def _setup_logger() -> None:\n    global _default_handler\n    _root_logger.setLevel(logging.DEBUG)\n    if _default_handler is None:\n        _default_handler = logging.StreamHandler(sys.stdout)\n        _default_handler.flush = sys.stdout.flush\n        _default_handler.setLevel(logging.INFO)\n        _root_logger.addHandler(_default_handler)\n\n    fmt = NewLineFormatter(\n        _FORMAT,\n        datefmt=_DATE_FORMAT,\n        use_color=sys.stdout.isatty(),\n    )\n    _default_handler.setFormatter(fmt)\n    _root_logger.propagate = False",
+      "required": true,
+      "page": null,
+      "valid": true,
+      "atomic": true
+    },
+    {
+      "id": "ev-cc6ef52a9cfaeb6f41f1",
+      "source": "deepinfer/logger.py",
+      "version": "32285fab98a1dd95fb21c21fabbc59095295e0939423405a586af317f37c9af2",
+      "locator": "lines:98-109",
+      "text": "def init_logger(name: str) -> logging.Logger:\n    logger = logging.getLogger(name)\n    logger.setLevel(logging.DEBUG)\n    # name 在 \"deepinfer\" 层级下时，通过 propagate 冒泡复用 root logger 的 handler，\n    # 无需自己挂 handler。否则回退到直接挂 handler（避免重复添加）。\n    if name == \"deepinfer\" or name.startswith(\"deepinfer.\"):\n        logger.propagate = True\n    else:\n        logger.propagate = False\n        if _default_handler is not None and _default_handler not in logger.handlers:\n            logger.addHandler(_default_handler)\n    return logger",
+      "required": true,
+      "page": null,
+      "valid": true,
+      "atomic": true
+    },
+    {
+      "id": "ev-6b1ad6b988a7b8376ebe",
+      "source": "deepinfer/logger.py",
+      "version": "32285fab98a1dd95fb21c21fabbc59095295e0939423405a586af317f37c9af2",
+      "locator": "lines:30-115",
+      "text": "    logging.CRITICAL: \"\\033[1;31m\",  # bold red\n}\n_COLOR_RESET = \"\\033[0m\"\n\n\nclass NewLineFormatter(logging.Formatter):\n    \"\"\"Adds logging prefix to newlines to align multi-line messages, optionally with microsecond precision.\n\n    若 use_color=True 且输出为 TTY，会给日志级别染色（不影响写入文件的纯净度）。\n    \"\"\"\n\n    def __init__(\n        self,\n        fmt: str,\n        datefmt: str | None = None,\n        high_precision: bool = False,\n        use_color: bool = False,\n    ) -> None:\n        super().__init__(fmt, datefmt)\n        self.high_precision = high_precision\n        self.use_color = use_color\n\n    def formatTime(self, record: logging.LogRecord, datefmt: str | None = None) -> str:\n        if not self.high_precision:\n            # 调用 logging.Formatter 默认实现，保持原来的格式\n            return super().formatTime(record, datefmt)\n        # ===== 高精度模式：在普通 datefmt 基础上附加微秒 =====\n        base = time.strftime(datefmt or _DATE_FORMAT, self.converter(record.created))\n        return f\"{base}.{record.msecs * 1000:06.0f}\"\n\n    def format(self, record: logging.LogRecord) -> str:\n        msg = super().format(record)\n        # 快速路径：单行日志（绝大多数情况）无需做对齐处理\n        if \"\\n\" in msg and record.message:\n            prefix = msg[: msg.find(record.message)]\n            msg = msg.replace(\"\\n\", \"\\n\" + prefix)\n        if self.use_color:\n            color = _LEVEL_COLORS.get(record.levelno)\n            if color:\n                msg = f\"{color}{msg}{_COLOR_RESET}\"\n        return msg\n\n\n_root_logger = logging.getLogger(\"deepinfer\")\n_default_handler = None\n\n\ndef _setup_logger() -> None:\n    global _default_handler\n    _root_logger.setLevel(logging.DEBUG)\n    if _default_handler is None:\n        _default_handler = logging.StreamHandler(sys.stdout)\n        _default_handler.flush = sys.stdout.flush\n        _default_handler.setLevel(logging.INFO)\n        _root_logger.addHandler(_default_handler)\n\n    fmt = NewLineFormatter(\n        _FORMAT,\n        datefmt=_DATE_FORMAT,\n        use_color=sys.stdout.isatty(),\n    )\n    _default_handler.setFormatter(fmt)\n    _root_logger.propagate = False\n\n\n_setup_logger()\n\n\ndef init_logger(name: str) -> logging.Logger:\n    logger = logging.getLogger(name)\n    logger.setLevel(logging.DEBUG)\n    # name 在 \"deepinfer\" 层级下时，通过 propagate 冒泡复用 root logger 的 handler，\n    # 无需自己挂 handler。否则回退到直接挂 handler（避免重复添加）。\n    if name == \"deepinfer\" or name.startswith(\"deepinfer.\"):\n        logger.propagate = True\n    else:\n        logger.propagate = False\n        if _default_handler is not None and _default_handler not in logger.handlers:\n            logger.addHandler(_default_handler)\n    return logger\n\n\ndef _print_error_line(message: str) -> None:\n    now = datetime.datetime.now().strftime(f\"{_DATE_FORMAT}.%f\")\n    print(f\"[ERROR {now}] {message}\", file=sys.stderr, flush=True)\n\n",
+      "required": false,
+      "page": null,
+      "valid": true,
+      "atomic": true
+    },
+    {
+      "id": "ev-421161c911f2edf2238b",
+      "source": "deepinfer/environ.py",
+      "version": "a3a3ea32b36c2f1c7ea45357cff9e9be1a8b6bedb5d27a27788bc5eb1c0d25bc",
+      "locator": "lines:220-239",
+      "text": "    DEEPINFER_PROFILE_HTTP_ENABLE = EnvVar.bool()\n    DEEPINFER_PROFILE_HTTP_PORT_BASE = EnvVar.int(default=6070)\n    DEEPINFER_TORCH_PROFILER_DIR = EnvVar.str(default=\"/tmp\")\n\n    # -- Multi-Modal --\n    DEEPINFER_USE_MULTIMODAL_POOL = EnvVar.bool()\n    DEEPINFER_MULTIMODAL_POOL_SIZE_GB = EnvVar.int(default=8)\n    DEEPINFER_MULTI_MODAL_BUFFER_SIZE = EnvVar.int(default=512)\n    DEEPINFER_MULTI_MODAL_WORKER_TIMEOUT = EnvVar.float(default=1800.0)\n\n\ndef rearm(name: str) -> None:\n    \"\"\"Rearm specific descriptor, will resolve again on next access.\"\"\"\n    setattr(envs, name, _descriptors[name])\n\n\ndef rearm_all() -> None:\n    \"\"\"Rearm all descriptors.\"\"\"\n    for name, descriptor in _descriptors.items():\n        setattr(envs, name, descriptor)\n",
+      "required": false,
+      "page": null,
+      "valid": true,
+      "atomic": true
+    },
+    {
+      "id": "ev-aa31811a8ad5ebea31bb",
+      "source": "deepinfer/engine/stats_logger.py",
+      "version": "9ef93c3930d6dd8d889d4ba69558a85459c2210ae0714d5073c3b4328c8e7cb9",
+      "locator": "lines:1-40",
+      "text": "\"\"\"Engine statistics collection, aggregation and logging.\"\"\"\n\nfrom __future__ import annotations\n\nimport queue\nimport statistics\nimport threading\nimport time\nimport traceback\nfrom collections import deque\nfrom collections.abc import Callable\nfrom dataclasses import dataclass, field\nfrom typing import TYPE_CHECKING\n\nimport numpy as np\nimport torch.distributed as dist\n\nfrom deepinfer import envs\nfrom deepinfer.engine.engine_type import EngineType\nfrom deepinfer.logger import init_logger\nfrom deepinfer.model_executor.parallel_utils.nccl_memory import NCCLMemoryStatsLogger\nfrom deepinfer.timer import cpu_timer, get_timers\nfrom deepinfer.utils import safe_divide\n\nif TYPE_CHECKING:\n    from deepinfer.config import CacheConfig, ModelConfig, ParallelConfig\n    from deepinfer.engine.llm_engine import LLMEngine\n\nlogger = init_logger(__name__)\n\n\n@dataclass\nclass StepStats:\n    \"\"\"Per-step statistics fed into :py:meth:`StatsLogger.log_step`.\"\"\"\n\n    prompt_run: bool\n    num_seqs: int\n    num_batched_tokens: int\n    sum_seqlen_qxk: int\n    max_seqlen_k: int\n",
+      "required": false,
+      "page": null,
+      "valid": false,
+      "atomic": true
+    },
+    {
+      "id": "ev-d78261b72d04eceddf3f",
+      "source": "deepinfer/environ.py",
+      "version": "a3a3ea32b36c2f1c7ea45357cff9e9be1a8b6bedb5d27a27788bc5eb1c0d25bc",
+      "locator": "lines:108-128",
+      "text": "\nclass envs:\n    \"环境变量的集中定义模块\"\n\n    # -- Platform --\n    DEEPINFER_ACCELERATOR = EnvVar.str(default=\"nvidia\")\n\n    # -- Runtime --\n    DEEPINFER_COMPUTE_SUM_SMALLER_PROBS = EnvVar.bool()\n    DEEPINFER_JIT_CACHE_DIR = EnvVar.str_or_none()\n\n    # -- Logging --\n    DEEPINFER_LOG_MAX_MESSAGE_CHARS = EnvVar.int_or_none_min(minimum=32)\n    \"未设置表示不限制普通诊断日志消息长度；设置时须为 >= 32 的整数。\"\n\n    # -- Distributed Communication --\n    DEEPINFER_NCCL_NUM_SMS = EnvVar.int(default=32)\n    DEEPINFER_USERBUFFER_COMM_SMS = EnvVar.int()\n    DEEPINFER_GLOO_TIMEOUT = EnvVar(lambda v: timedelta(seconds=_float(v, 14400)))\n    DEEPINFER_REARRANGE_P2P_GROUPS = EnvVar.int(default=1)\n\n",
+      "required": false,
+      "page": null,
+      "valid": true,
+      "atomic": true
+    },
+    {
+      "id": "ev-d68abb2ff0233e87d3f2",
+      "source": "deepinfer/environ.py",
+      "version": "a3a3ea32b36c2f1c7ea45357cff9e9be1a8b6bedb5d27a27788bc5eb1c0d25bc",
+      "locator": "lines:188-205",
+      "text": "\n    # -- Scheduling --\n    DEEPINFER_PREFILL_ATTEMPT_INTERVAL = EnvVar.int(default=70)\n    \"\"\"NORMAL 引擎 prefill 尝试间隔（ALL 点：全员有活才做，逻辑见 scheduler.hpp _schedule）。\n    各 rank 在集体 prefill 前累积待处理的 prompt。\"\"\"\n    DEEPINFER_PREFILL_ANY_ATTEMPT_INTERVAL = EnvVar.int(default=100)\n    \"ANY 保底间隔：任一 rank 有活就集体 prefill，孤立 rank 最多等这么多个 decode step\"\n    DEEPINFER_ZERO_OVERHEAD_SCHEDULING = EnvVar.bool()\n\n    # -- Logging --\n    DEEPINFER_LOG_MAX_MESSAGE_CHARS = EnvVar.int_or_none_min(minimum=32)\n    \"\"\"普通诊断日志消息正文的最大字符数；未设置表示不限长，设置时必须 >= 32。\"\"\"\n    DEEPINFER_LOGGING_INTERVAL_STEP = EnvVar.int(default=100)\n    DEEPINFER_NCCL_MEMORY_SAMPLE_INTERVAL_STEPS = EnvVar.int(default=1000)\n    DEEPINFER_RINGBUFFER_WARNING_INTERVAL = EnvVar.int(default=60)\n    DEEPINFER_GC_INTERVAL_STEP = EnvVar.int(default=1000)\n\n    # -- YoCo --\n",
+      "required": false,
+      "page": null,
+      "valid": true,
+      "atomic": true
+    },
+    {
+      "id": "ev-af4b68f21bd11715229e",
+      "source": "deepinfer/logger.py",
+      "version": "32285fab98a1dd95fb21c21fabbc59095295e0939423405a586af317f37c9af2",
+      "locator": "lines:30-176",
+      "text": "    logging.CRITICAL: \"\\033[1;31m\",  # bold red\n}\n_COLOR_RESET = \"\\033[0m\"\n\n\nclass NewLineFormatter(logging.Formatter):\n    \"\"\"Adds logging prefix to newlines to align multi-line messages, optionally with microsecond precision.\n\n    若 use_color=True 且输出为 TTY，会给日志级别染色（不影响写入文件的纯净度）。\n    \"\"\"\n\n    def __init__(\n        self,\n        fmt: str,\n        datefmt: str | None = None,\n        high_precision: bool = False,\n        use_color: bool = False,\n    ) -> None:\n        super().__init__(fmt, datefmt)\n        self.high_precision = high_precision\n        self.use_color = use_color\n\n    def formatTime(self, record: logging.LogRecord, datefmt: str | None = None) -> str:\n        if not self.high_precision:\n            # 调用 logging.Formatter 默认实现，保持原来的格式\n            return super().formatTime(record, datefmt)\n        # ===== 高精度模式：在普通 datefmt 基础上附加微秒 =====\n        base = time.strftime(datefmt or _DATE_FORMAT, self.converter(record.created))\n        return f\"{base}.{record.msecs * 1000:06.0f}\"\n\n    def format(self, record: logging.LogRecord) -> str:\n        msg = super().format(record)\n        # 快速路径：单行日志（绝大多数情况）无需做对齐处理\n        if \"\\n\" in msg and record.message:\n            prefix = msg[: msg.find(record.message)]\n            msg = msg.replace(\"\\n\", \"\\n\" + prefix)\n        if self.use_color:\n            color = _LEVEL_COLORS.get(record.levelno)\n            if color:\n                msg = f\"{color}{msg}{_COLOR_RESET}\"\n        return msg\n\n\n_root_logger = logging.getLogger(\"deepinfer\")\n_default_handler = None\n\n\ndef _setup_logger() -> None:\n    global _default_handler\n    _root_logger.setLevel(logging.DEBUG)\n    if _default_handler is None:\n        _default_handler = logging.StreamHandler(sys.stdout)\n        _default_handler.flush = sys.stdout.flush\n        _default_handler.setLevel(logging.INFO)\n        _root_logger.addHandler(_default_handler)\n\n    fmt = NewLineFormatter(\n        _FORMAT,\n        datefmt=_DATE_FORMAT,\n        use_color=sys.stdout.isatty(),\n    )\n    _default_handler.setFormatter(fmt)\n    _root_logger.propagate = False\n\n\n_setup_logger()\n\n\ndef init_logger(name: str) -> logging.Logger:\n    logger = logging.getLogger(name)\n    logger.setLevel(logging.DEBUG)\n    # name 在 \"deepinfer\" 层级下时，通过 propagate 冒泡复用 root logger 的 handler，\n    # 无需自己挂 handler。否则回退到直接挂 handler（避免重复添加）。\n    if name == \"deepinfer\" or name.startswith(\"deepinfer.\"):\n        logger.propagate = True\n    else:\n        logger.propagate = False\n        if _default_handler is not None and _default_handler not in logger.handlers:\n            logger.addHandler(_default_handler)\n    return logger\n\n\ndef _print_error_line(message: str) -> None:\n    now = datetime.datetime.now().strftime(f\"{_DATE_FORMAT}.%f\")\n    print(f\"[ERROR {now}] {message}\", file=sys.stderr, flush=True)\n\n\ndef print_crash_header() -> None:\n    process_name = multiprocessing.current_process().name\n    thread_name = threading.current_thread().name\n    _print_error_line(f\"Uncaught exception in process {process_name} thread {thread_name} (pid {os.getpid()}):\")\n\n\ndef install_excepthook(exit_on_thread_exception: bool = False) -> None:\n    \"\"\"Print error timestamp, traceback, and process/thread info when an uncaught exception occurs.\n\n    Args:\n        exit_on_thread_exception (bool): If True, the process will exit when an uncaught exception occurs in a thread.\n    \"\"\"\n\n    def _excepthook(\n        exc_type: type[BaseException],\n        exc_value: BaseException,\n        exc_tb: TracebackType | None,\n    ) -> None:\n        print_crash_header()\n        sys.__excepthook__(exc_type, exc_value, exc_tb)\n\n    def _thread_excepthook(args: threading.ExceptHookArgs) -> None:\n        print_crash_header()\n        threading.__excepthook__(args)\n        if exit_on_thread_exception:\n            _print_error_line(f\"Aborting process due to uncaught exception in thread {args.thread.name}: {args.exc_value}\")\n            sys.stdout.flush()\n            sys.stderr.flush()\n            os._exit(1)\n\n    sys.excepthook = _excepthook\n    threading.excepthook = _thread_excepthook\n\n\nclass _CrashHeaderProcessMixin(BaseProcess):\n    \"\"\"给子进程崩溃打印头信息，每条路径恰好一次：\n\n    - 主线程崩溃：BaseProcess._bootstrap 用裸 except 拦截 run() 抛出的异常后直接退出，\n      sys.excepthook 不会触发，头信息仅由下面的 except 分支打印；\n    - 子线程崩溃：异常不会传播到 run()，头信息仅由 install_excepthook\n      安装的 threading.excepthook 打印。\n    \"\"\"\n\n    def run(self) -> None:\n        install_excepthook()\n        try:\n            super().run()\n        except SystemExit:\n            raise\n        except BaseException:\n            print_crash_header()\n            raise\n\n\nclass SpawnProcessWithCrashHeader(_CrashHeaderProcessMixin, SpawnProcess):\n    pass\n\n\nclass ForkProcessWithCrashHeader(_CrashHeaderProcessMixin, ForkProcess):\n    pass\n",
+      "required": false,
+      "page": null,
+      "valid": true,
+      "atomic": true
+    },
+    {
+      "id": "ev-b010e91aa6bb8cd06456",
+      "source": "deepinfer/environ.py",
+      "version": "a3a3ea32b36c2f1c7ea45357cff9e9be1a8b6bedb5d27a27788bc5eb1c0d25bc",
+      "locator": "lines:1-30",
+      "text": "from __future__ import annotations\n\nimport os\nimport threading\nfrom collections.abc import Callable\nfrom datetime import timedelta\nfrom typing import Any\n\nDEFAULT_PREFILL_MAX_SUM_SEQLEN_K = 2**30\n\n\ndef _bool(v: str | None, default: str = \"0\") -> bool:\n    return (v if v is not None else default) not in (\"0\", \"\", \"false\", \"False\")\n\n\ndef _int(v: str | None, default: int = 0) -> int:\n    return int(v if v is not None else str(default))\n\n\ndef _float(v: str | None, default: float = 0.0) -> float:\n    return float(v if v is not None else str(default))\n\n\ndef _str(v: str | None, default: str = \"\") -> str:\n    return v if v is not None else default\n\n\n_descriptors: dict[str, EnvVar[Any]] = {}\n\n\n",
+      "required": false,
+      "page": null,
+      "valid": true,
+      "atomic": true
+    },
+    {
+      "id": "ev-7f60d860ccfda8565a98",
+      "source": "deepinfer/logger.py",
+      "version": "32285fab98a1dd95fb21c21fabbc59095295e0939423405a586af317f37c9af2",
+      "locator": "lines:1-30",
+      "text": "# SPDX-License-Identifier: Apache-2.0\n# Derived from vLLM; modified by DeepSeek.\n\n# Adapted from\n# https://github.com/skypilot-org/skypilot/blob/86dc0f6283a335e4aa37b3c10716f90999f48ab6/sky/sky_logging.py\n\"\"\"Logging configuration for DeepInfer.\"\"\"\n\nimport datetime\nimport logging\nimport multiprocessing\nimport os\nimport sys\nimport threading\nimport time\nfrom multiprocessing.context import ForkProcess, SpawnProcess\nfrom multiprocessing.process import BaseProcess\nfrom types import TracebackType\n\nfrom deepinfer.environ import envs\n\n_FORMAT = \"[%(levelname)s %(asctime)s %(filename)s:%(lineno)d] %(message)s\"\n_DATE_FORMAT = \"%m-%d %H:%M:%S\"\n\n# ANSI 颜色（仅在 TTY 输出时使用），按日志级别区分\n_LEVEL_COLORS = {\n    logging.DEBUG: \"\\033[36m\",  # cyan\n    logging.INFO: \"\\033[32m\",  # green\n    logging.WARNING: \"\\033[33m\",  # yellow\n    logging.ERROR: \"\\033[31m\",  # red\n    logging.CRITICAL: \"\\033[1;31m\",  # bold red\n",
+      "required": false,
+      "page": null,
+      "valid": true,
+      "atomic": true
+    }
+  ],
+  "notes": {},
+  "exposed": [
+    "ev-14a5df2f64c9a607da49",
+    "ev-2d373a31d658fc958e65",
+    "ev-307c2a63e207cb147021",
+    "ev-421161c911f2edf2238b",
+    "ev-6b1ad6b988a7b8376ebe",
+    "ev-744c4e83ef7d8bd7fde4",
+    "ev-af4b68f21bd11715229e",
+    "ev-cc6ef52a9cfaeb6f41f1",
+    "ev-d68abb2ff0233e87d3f2",
+    "ev-d78261b72d04eceddf3f",
+    "ev-f247541668863735f1b7"
+  ],
+  "received_ranges": {
+    "ev-14a5df2f64c9a607da49": [
+      [
+        0,
+        147
+      ]
+    ],
+    "ev-307c2a63e207cb147021": [
+      [
+        0,
+        2439
+      ]
+    ],
+    "ev-f247541668863735f1b7": [
+      [
+        0,
+        145
+      ]
+    ],
+    "ev-2d373a31d658fc958e65": [
+      [
+        0,
+        1369
+      ]
+    ],
+    "ev-744c4e83ef7d8bd7fde4": [
+      [
+        0,
+        534
+      ]
+    ],
+    "ev-cc6ef52a9cfaeb6f41f1": [
+      [
+        0,
+        521
+      ]
+    ],
+    "ev-6b1ad6b988a7b8376ebe": [
+      [
+        0,
+        2778
+      ]
+    ],
+    "ev-421161c911f2edf2238b": [
+      [
+        0,
+        747
+      ]
+    ],
+    "ev-d78261b72d04eceddf3f": [
+      [
+        0,
+        657
+      ]
+    ],
+    "ev-d68abb2ff0233e87d3f2": [
+      [
+        0,
+        815
+      ]
+    ],
+    "ev-af4b68f21bd11715229e": [
+      [
+        0,
+        4720
+      ]
+    ]
+  },
+  "full_read_ids": {}
+}

@@ -1,0 +1,32 @@
+--- a/deepinfer/environ.py
++++ b/deepinfer/environ.py
+@@ -83,6 +83,20 @@
+         return EnvVar(lambda v: int(v) if v is not None else None)
+ 
+     @staticmethod
++    def positive_int_or_none(*, minimum: int) -> EnvVar[int | None]:
++        """未设置时为 None；设置时必须解析为 >= minimum 的整数。"""
++
++        def _init(v: str | None) -> int | None:
++            if v is None:
++                return None
++            value = int(v)
++            if value < minimum:
++                raise ValueError(f"{v!r} must be >= {minimum}")
++            return value
++
++        return EnvVar(_init)
++
++    @staticmethod
+     def choice(*, default: str | None = None, choices: tuple[str, ...]) -> EnvVar[str | None]:
+         def _init(v: str | None) -> str | None:
+             if v is None:
+@@ -183,6 +197,8 @@
+     DEEPINFER_NCCL_MEMORY_SAMPLE_INTERVAL_STEPS = EnvVar.int(default=1000)
+     DEEPINFER_RINGBUFFER_WARNING_INTERVAL = EnvVar.int(default=60)
+     DEEPINFER_GC_INTERVAL_STEP = EnvVar.int(default=1000)
++    DEEPINFER_LOG_MAX_MESSAGE_CHARS = EnvVar.positive_int_or_none(minimum=32)
++    """默认处理器输出的普通诊断消息最大保留字符数；未设置表示不限长。"""
+ 
+     # -- YoCo --
+     DEEPINFER_YOCO_PREFILL_TRUNCATION_MODE = EnvVar.choice(default="off", choices=("off", "mask", "compact"))

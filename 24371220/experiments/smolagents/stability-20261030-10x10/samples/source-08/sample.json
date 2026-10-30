@@ -1,0 +1,32 @@
+{
+  "task": "source",
+  "exit_code": 1,
+  "archive": "/mnt/d/Muiti-Agent Programing/experiments/code-agent-smolagents/24371220/experiments/smolagents/stability-20261030-10x10/samples/source-08/evaluation",
+  "status": "failed",
+  "passed": false,
+  "requests": 20,
+  "prompt_tokens": 172394,
+  "completion_tokens": 19647,
+  "usage_complete": true,
+  "max_request_chars": 31635,
+  "agent_errors": {
+    "AgentExecutionError": 5
+  },
+  "failure_reason": "MAX_STEPS_NO_EXTRA_REQUEST",
+  "agent_status": "failed",
+  "score": 0,
+  "max_score": 1,
+  "checks": {
+    "真实开发过程与修改范围": "agent 退出码 1，查看 agent-console.log；最后修改后须执行完整 pytest 并通过",
+    "补丁可还原实际修改": true,
+    "相关源码真实读取并入模": true,
+    "首次修改复用相关源码或模型笔记": true,
+    "独立兼容与新增功能测试": false,
+    "真实日志处理链路": false,
+    "运行后修改范围仍合规": true,
+    "学生代码与本轮开始一致": true,
+    "服务端真实用量完整": true
+  },
+  "number": 8,
+  "native": "/home/ventsdenye/.local/state/code-agent/evaluations/stability-source-08-xpm5z9cw"
+}

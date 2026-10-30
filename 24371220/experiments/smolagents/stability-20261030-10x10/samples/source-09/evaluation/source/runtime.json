@@ -1,0 +1,14 @@
+{
+  "passed": true,
+  "checks": {
+    "central_configuration": true,
+    "ordinary_message_bounded": true,
+    "statistics_message_complete": true,
+    "shared_original_record_preserved": true
+  },
+  "ordinary_original_characters": 72010,
+  "ordinary_budget": 96,
+  "statistics_characters": 8413,
+  "output_lines": 2,
+  "limited_preview": "[ERROR 10-30 13:03:19 check_logger.py:33] BEGIN 中间诊断资料🧪 中间诊断资料🧪 中间诊断资料🧪 中间诊断资料🧪 中间诊...<omitted>...资料🧪 中间诊断资料🧪 中间诊断资料🧪 中间诊断资料🧪 中间诊断资料🧪  END"
+}

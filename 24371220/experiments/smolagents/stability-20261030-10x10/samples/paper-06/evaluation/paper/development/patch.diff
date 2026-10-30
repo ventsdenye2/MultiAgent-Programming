@@ -1,0 +1,140 @@
+--- a/report.json
++++ b/report.json
+@@ -1 +1,135 @@
+-{}
++{
++  "overview": "本文综述 agentic LLM，即能够推理、行动并与环境或他人交互的大语言模型。作者按 reason、act、interact 三类组织文献：推理部分讨论 CoT、自洽性、思维树/思维图与推理专用模型；行动部分讨论工具使用、具身与机器人行动、代码生成；交互部分讨论多智能体协作与人机社会模拟。三类能力层层递进并构成良性循环：推理支撑行动，行动与交互支撑社会模拟，模拟结果又能回流为训练数据微调模型。文章最后给出训练数据、幻觉、agent 行为、自反思与安全等研究议程。",
++  "sections": [
++    {
++      "id": "overview",
++      "summary": "作者把 agentic 能力分为 reason（推理）、act（行动）与 interact（交互）三类，并指出它们分别对应符号 AI、机器人/自主系统与多智能体建模三个研究传统。三者不是并列堆叠而是相互支撑：推理能力让模型能规划并调用工具去行动，行动与交互支撑社会模拟，模拟产生的数据又可微调模型，形成论文图 1 的良性循环。文献先在 Google Scholar 检索 Agentic LLM，再用滚雪球方式补充被引却未纳入的工作，只保留基于 LLM 的方法，且以 2024 年工作为主。",
++      "application": "我的 agent 已实现按批调用 read_pdf.py 读页、保留证据与主题笔记并写出报告，但还没有滚雪球式二次检索。可借鉴良性循环：把每轮笔记作为下一轮选页与提问的依据。",
++      "answers": {
++        "categories": [
++          "reason",
++          "act",
++          "interact"
++        ],
++        "search_methods": [
++          "google_scholar",
++          "snowballing"
++        ]
++      },
++      "evidence": [
++        {
++          "question": "categories",
++          "page": 1,
++          "quote": "We organize the literature of agentic LLMs in three categories: reasoning, acting, and interacting."
++        },
++        {
++          "question": "search_methods",
++          "page": 5,
++          "quote": "The papers were initially selected with a Google Scholar search on Agentic LLM. From there, we used a snowballing approach to discover work that was cited but not yet included in our initial set."
++        }
++      ]
++    },
++    {
++      "id": "reasoning",
++      "summary": "CoT 用逐步推理把难题分解为中间步骤，是后续方法的基础。Self Consistency 采样多条推理路径，再以多数投票选出最一致的答案，属于集成式方法，明显提升 CoT 表现，也是 o1/o3 等推理模型的思想来源。Tree of Thoughts 引入外部搜索控制器，配合生成与评估提示进行回溯，论文描述了广度优先与深度优先两种控制器；Graph of Thoughts 进一步把思维组织成图结构。局限在于路径评估常依赖模型自身，可能放大幻觉。",
++      "application": "我的 agent 目前是单路径直出报告，没有多路径采样投票，也没有搜索式规划。可对同一批页面采样多次并投票，或对答案候选做广度优先扩展与评估剪枝。",
++      "answers": {
++        "self_consistency_selection": "majority voting",
++        "tot_search": [
++          "breadth_first",
++          "depth_first"
++        ]
++      },
++      "evidence": [
++        {
++          "question": "self_consistency_selection",
++          "page": 10,
++          "quote": "Self Consistency is an ensemble approach that samples diverse reasoning paths, evaluates them, and selects the most consistent answer using majority voting."
++        },
++        {
++          "question": "tot_search",
++          "page": 13,
++          "quote": "The paper describes both a breadth-first and a depth-first controller."
++        }
++      ]
++    },
++    {
++      "id": "tool_use",
++      "summary": "行动主题把工具使用视为 agent 落地的核心。Toolformer 让模型自学何时调用哪个 API、如何填写参数、如何利用返回结果，测试了计算器、问答系统、搜索引擎、翻译系统与日历五类工具。工具检索与规划形成 planner–caller–summarizer 的多模型框架，ToolBench 提供 16,464 个 RapidAPI 接口，作为大规模工具学习与评测的基础。具身方向涵盖 SayCan、Inner Monologue 与视觉-语言-行动模型。局限是 API 频繁变动，调用错误会沿链条传播。",
++      "application": "我的 agent 只实现了 read_pdf、文件读写与 pytest 等少量工具，尚无工具检索、参数校验与失败重试。可借鉴 Toolformer 的调用决策与 planner–caller–summarizer 分工，加入工具描述检索与结果校验。",
++      "answers": {
++        "toolformer_tools": [
++          "calculator",
++          "question_answering",
++          "search_engine",
++          "translation",
++          "calendar"
++        ],
++        "toolbench_api_count": 16464
++      },
++      "evidence": [
++        {
++          "question": "toolformer_tools",
++          "page": 23,
++          "quote": "A range of tools is tested: a calculator, a question-answering system, a search engine, a translation system, and a calendar."
++        },
++        {
++          "question": "toolbench_api_count",
++          "page": 23,
++          "quote": "ToolBench [Qin et al., 2023] contains 16,464 APIs from RapidAPI"
++        }
++      ]
++    },
++    {
++      "id": "multi_agent",
++      "summary": "多智能体主题区分协作与竞争。CAMEL 用 inception prompting 与角色描述让两个模型保持身份，无需持续人工提示即可合作，并通过对话把复杂问题拆成可管理步骤；此外还有创建者-批评者、宪法 AI、多智能体辩论与带裁判的 MAD 等模式。社会模拟方面，Generative Agents 用 100 名人类评估者判断行为是否可信，完整架构表现最好，但仍出现幻觉与反复行为；Sotopia、GovSim 等提供评测环境。局限是成本高、易角色漂移与错误放大。",
++      "application": "我的 agent 是单智能体流水线，未实现角色分工、辩论或批评者复核，多智能体协作仍属未来设想。可在写报告阶段加入批评者 agent 核对引文与页码。",
++      "answers": {
++        "camel_prompting": "inception_prompting",
++        "generative_agents_evaluators": 100
++      },
++      "evidence": [
++        {
++          "question": "camel_prompting",
++          "page": 37,
++          "quote": "cooperatively drive a conversation without continuous human prompting. By using inception prompting and role descriptions, the agents stay in character and collaborate toward the goal by breaking down complex problems in manageable steps through dialogue."
++        },
++        {
++          "question": "generative_agents_evaluators",
++          "page": 47,
++          "quote": "Whether the Generative Agents system generates believable behavior is evaluated with the help of 100 human evaluators."
++        }
++      ]
++    },
++    {
++      "id": "outlook",
++      "summary": "结论把未来工作整理为 Table 4 的五个议题：Training Data、Hallucination、Agent Behavior、Self Reflection 与 Safety，分别关注用推理数据与稳定 RL 训练模型、自我验证与机制可解释性、可扩展的角色扮演与行为建模、模型内自反思与元认知、以及责任、隐私与公平等安全治理。作者强调各类能力共享基础：机器人与工具使用依赖有据的检索增强，社会交互依赖自我反思，而所有类别都受益于推理与自我验证。",
++      "application": "我的 agent 已做 pytest 结构校验，但缺少答案级自验证与不确定性检测。可在写报告后增加一轮自检，核对引文是否为对应页连续原文，对应 Self Reflection 与 Hallucination 议题。",
++      "answers": {
++        "agenda_topics": [
++          "training_data",
++          "hallucination",
++          "agent_behavior",
++          "self_reflection",
++          "safety"
++        ],
++        "shared_foundations": [
++          "reasoning",
++          "self_verification"
++        ]
++      },
++      "evidence": [
++        {
++          "question": "agenda_topics",
++          "page": 51,
++          "quote": "Training Data Hallucination Agent Behavior Self Reflection Safety"
++        },
++        {
++          "question": "shared_foundations",
++          "page": 52,
++          "quote": "Robotic interaction and tool-use build on grounded retrieval augmentation, social interaction (such as theory of mind) builds on self reflection, and all categories benefit from reasoning and self-verification."
++        }
++      ]
++    }
++  ]
++}
+\ No newline at end of file

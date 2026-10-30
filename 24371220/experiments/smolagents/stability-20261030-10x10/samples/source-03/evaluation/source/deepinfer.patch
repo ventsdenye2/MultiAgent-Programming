@@ -1,0 +1,22 @@
+--- a/deepinfer/environ.py
++++ b/deepinfer/environ.py
+@@ -23,6 +23,19 @@
+ 
+ def _str(v: str | None, default: str = "") -> str:
+     return v if v is not None else default
++
++
++def _max_message_chars(v: str | None) -> int | None:
++    """未设置表示不限长；设置时须为可解析为 >= 32 的整数。"""
++    if v is None:
++        return None
++    try:
++        value = int(v)
++    except (TypeError, ValueError):
++        raise ValueError(f"invalid int value {v!r}, must be an integer >= 32") from None
++    if value < 32:
++        raise ValueError(f"{value!r} must be >= 32")
++    return value
+ 
+ 
+ _descriptors: dict[str, EnvVar[Any]] = {}

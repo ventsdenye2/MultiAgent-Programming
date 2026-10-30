@@ -1,0 +1,17 @@
+{
+  "status": "failed",
+  "engine": "smolagents",
+  "upstream_version": "1.26.0",
+  "context_mode": "evidence",
+  "reason": "MAX_STEPS_NO_EXTRA_REQUEST",
+  "usage": {
+    "requests": 20,
+    "complete": true,
+    "prompt_tokens": 172394,
+    "completion_tokens": 19647
+  },
+  "remaining": [
+    "verify current files: python -m pytest -q",
+    "finish all plan items after their work and checks"
+  ]
+}

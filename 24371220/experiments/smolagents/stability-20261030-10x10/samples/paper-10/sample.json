@@ -1,0 +1,25 @@
+{
+  "task": "paper",
+  "exit_code": 1,
+  "archive": "/mnt/d/Muiti-Agent Programing/experiments/code-agent-smolagents/24371220/experiments/smolagents/stability-20261030-10x10/samples/paper-10/evaluation",
+  "status": "failed",
+  "passed": false,
+  "requests": 40,
+  "prompt_tokens": 340759,
+  "completion_tokens": 34078,
+  "usage_complete": true,
+  "max_request_chars": 31792,
+  "agent_errors": {
+    "AgentExecutionError": 7
+  },
+  "failure_reason": "MAX_STEPS_NO_EXTRA_REQUEST",
+  "agent_status": "failed",
+  "score": 0.0,
+  "max_score": 5,
+  "checks": {
+    "学生程序与报告生成": "agent 退出码 1，查看 agent-console.log；未产生 file_write，尚未完成指定文件；先检查 agent-console.log 中的退出原因；report.json 与初始内容相同或为空，尚未生成阅读报告",
+    "其他文件保持原样": true
+  },
+  "number": 10,
+  "native": "/home/ventsdenye/.local/state/code-agent/evaluations/stability-paper-10-gkvnan7w"
+}

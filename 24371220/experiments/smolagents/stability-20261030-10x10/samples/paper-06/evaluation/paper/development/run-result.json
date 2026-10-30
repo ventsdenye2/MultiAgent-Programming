@@ -1,0 +1,15 @@
+{
+  "status": "completed",
+  "engine": "smolagents",
+  "upstream_version": "1.26.0",
+  "context_mode": "evidence",
+  "reason": null,
+  "usage": {
+    "requests": 40,
+    "complete": true,
+    "prompt_tokens": 333411,
+    "completion_tokens": 41237
+  },
+  "answer": "report.json contains the five-section report (overview, reasoning, tool_use, multi_agent, outlook) built from the five topic notes; pytest passes with rc=0.",
+  "remaining": []
+}

@@ -1,0 +1,51 @@
+{
+  "task": "题目1自测",
+  "passed": false,
+  "checks": {
+    "真实运行、PDF提取、分块笔记和补丁": true,
+    "报告结构": true,
+    "overview.categories：答案与原文引用": "categories 引文未覆盖支撑这个答案的关键内容",
+    "overview.search_methods：答案与原文引用": true,
+    "reasoning.self_consistency_selection：答案与原文引用": true,
+    "reasoning.tot_search：答案与原文引用": true,
+    "tool_use.toolformer_tools：答案与原文引用": true,
+    "tool_use.toolbench_api_count：答案与原文引用": true,
+    "multi_agent.camel_prompting：答案与原文引用": "camel_prompting 的 quote 不是该页原文；可合并空白，不能改写原句",
+    "multi_agent.generative_agents_evaluators：答案与原文引用": true,
+    "outlook.agenda_topics：答案与原文引用": true,
+    "outlook.shared_foundations：答案与原文引用": true
+  },
+  "score": 4.0,
+  "section_scores": {
+    "overview": 0.5,
+    "reasoning": 1.0,
+    "tool_use": 1.0,
+    "multi_agent": 0.5,
+    "outlook": 1.0
+  },
+  "question_scores": {
+    "overview": {
+      "categories": 0.0,
+      "search_methods": 0.5
+    },
+    "reasoning": {
+      "self_consistency_selection": 0.5,
+      "tot_search": 0.5
+    },
+    "tool_use": {
+      "toolformer_tools": 0.5,
+      "toolbench_api_count": 0.5
+    },
+    "multi_agent": {
+      "camel_prompting": 0.0,
+      "generative_agents_evaluators": 0.5
+    },
+    "outlook": {
+      "agenda_topics": 0.5,
+      "shared_foundations": 0.5
+    }
+  },
+  "scoring_enabled": true,
+  "max_score": 5,
+  "report_status": "checked"
+}

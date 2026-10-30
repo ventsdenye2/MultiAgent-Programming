@@ -1,0 +1,138 @@
+{
+  "path": "/mnt/d/Muiti-Agent Programing/experiments/code-agent-smolagents/24371220/experiments/smolagents/stability-20261030-10x10/samples/source-09/evaluation/source/development/run.log",
+  "requests": 20,
+  "responses": 20,
+  "model_errors": 0,
+  "usage_complete": true,
+  "known_prompt_tokens": 182240,
+  "known_completion_tokens": 21506,
+  "known_total_tokens": 203746,
+  "cache_hit_tokens": 81664,
+  "cache_miss_tokens": 100576,
+  "max_request_chars": 31747,
+  "response_classes": {
+    "ok": 20
+  },
+  "last_request_parameters": {
+    "model": "deepseek-flash",
+    "max_tokens": 16384,
+    "thinking": {
+      "type": "enabled"
+    },
+    "reasoning_effort": "high"
+  },
+  "counts": {
+    "snapshot": 3,
+    "run_start": 1,
+    "file_read": 25,
+    "context_selection": 20,
+    "request_budget": 20,
+    "model_request": 20,
+    "model_response": 20,
+    "usage": 20,
+    "context_exposure": 20,
+    "tool_call": 38,
+    "plan": 2,
+    "tool_result": 37,
+    "evidence": 22,
+    "agent_step": 20,
+    "context_clip": 11,
+    "command_result": 2,
+    "agent_error": 3,
+    "file_write": 7,
+    "evidence_invalidated": 4,
+    "tool_error": 1,
+    "run_error": 1,
+    "run_result": 1
+  },
+  "commands": [
+    {
+      "argv": [
+        "/mnt/d/Muiti-Agent Programing/experiments/code-agent-smolagents/24371220/.venv/bin/python",
+        "-m",
+        "pytest",
+        "-q"
+      ],
+      "rc": 1,
+      "timed_out": false
+    },
+    {
+      "argv": [
+        "/mnt/d/Muiti-Agent Programing/experiments/code-agent-smolagents/24371220/.venv/bin/python",
+        "-m",
+        "pytest",
+        "-q"
+      ],
+      "rc": 0,
+      "timed_out": false
+    }
+  ],
+  "paper_pages_exposed": [],
+  "paper_page_count": 0,
+  "section_note_count": 0,
+  "section_topics": [],
+  "changed_files": [
+    "deepinfer/engine/stats_logger.py",
+    "deepinfer/environ.py",
+    "deepinfer/logger.py"
+  ],
+  "agent_error_types": {
+    "AgentParsingError": 1,
+    "AgentExecutionError": 2
+  },
+  "recent_actions": [
+    {
+      "event": "tool_call",
+      "tool": "replace_text",
+      "error_type": null,
+      "error": null
+    },
+    {
+      "event": "tool_call",
+      "tool": "replace_text",
+      "error_type": null,
+      "error": null
+    },
+    {
+      "event": "tool_call",
+      "tool": "read_file",
+      "error_type": null,
+      "error": null
+    },
+    {
+      "event": "tool_call",
+      "tool": "replace_text",
+      "error_type": null,
+      "error": null
+    },
+    {
+      "event": "tool_call",
+      "tool": "run_command",
+      "error_type": null,
+      "error": null
+    },
+    {
+      "event": "agent_error",
+      "tool": null,
+      "error_type": "AgentExecutionError",
+      "error": "Code execution failed at line 'import os' due to: InterpreterError: Import of os is not allowed. Authorized imports are: ['re', 'statistics', 'json', 'random', 'collections', 'math', 'datetime', 'stat', 'unicodedata', 'itertools', 'time', 'queue']"
+    }
+  ],
+  "result": {
+    "status": "failed",
+    "engine": "smolagents",
+    "upstream_version": "1.26.0",
+    "context_mode": "evidence",
+    "reason": "MAX_STEPS_NO_EXTRA_REQUEST",
+    "usage": {
+      "requests": 20,
+      "complete": true,
+      "prompt_tokens": 182240,
+      "completion_tokens": 21506
+    },
+    "remaining": [
+      "finish all plan items after their work and checks"
+    ]
+  },
+  "invalid_lines": 0
+}

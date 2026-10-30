@@ -1,0 +1,38 @@
+--- a/deepinfer/environ.py
++++ b/deepinfer/environ.py
+@@ -23,6 +23,15 @@
+ 
+ def _str(v: str | None, default: str = "") -> str:
+     return v if v is not None else default
++
++
++def _max_message_chars(v: str | None) -> int | None:
++    if v is None:
++        return None
++    value = int(v)
++    if value < 32:
++        raise ValueError(f"must be >= 32, got {value}")
++    return value
+ 
+ 
+ _descriptors: dict[str, EnvVar[Any]] = {}
+@@ -179,6 +188,8 @@
+     DEEPINFER_ZERO_OVERHEAD_SCHEDULING = EnvVar.bool()
+ 
+     # -- Logging --
++    DEEPINFER_LOG_MAX_MESSAGE_CHARS = EnvVar(_max_message_chars)
++    "普通诊断日志消息正文的最大字符数；未设置表示不限长，设置时须为不小于 32 的整数。"
+     DEEPINFER_LOGGING_INTERVAL_STEP = EnvVar.int(default=100)
+     DEEPINFER_NCCL_MEMORY_SAMPLE_INTERVAL_STEPS = EnvVar.int(default=1000)
+     DEEPINFER_RINGBUFFER_WARNING_INTERVAL = EnvVar.int(default=60)
+--- a/deepinfer/logger.py
++++ b/deepinfer/logger.py
+@@ -15,6 +15,8 @@
+ from multiprocessing.context import ForkProcess, SpawnProcess
+ from multiprocessing.process import BaseProcess
+ from types import TracebackType
++
++from deepinfer.environ import envs
+ 
+ _FORMAT = "[%(levelname)s %(asctime)s %(filename)s:%(lineno)d] %(message)s"
+ _DATE_FORMAT = "%m-%d %H:%M:%S"

@@ -1,0 +1,44 @@
+命令：["/mnt/d/Muiti-Agent Programing/experiments/code-agent-smolagents/24371220/.venv/bin/python", "/home/ventsdenye/.local/state/code-agent/evaluations/stability-paper-10-gkvnan7w/results/paper/submission/agent.py", "--task", "/home/ventsdenye/.local/state/code-agent/evaluations/stability-paper-10-gkvnan7w/course/公开任务/题目1/task.md", "--repo", "/home/ventsdenye/.local/state/code-agent/evaluations/stability-paper-10-gkvnan7w/results/paper/repo", "--model", "deepseek-flash", "--auto"]
+Code execution failed at line 'print(write_note(title='reasoning', 
+content='reasoning 笔记（初版，依据 p.10-13）：\n1) Self Consistency 
+的选择规则：对同一问题采样多条推理路径，再按多数投票（majority 
+voting）统计各路径最终答案，取出现最多的那个答案，而不是只跟随单条路径（p.10-11,
+§2.1）。此项的逐字原文尚待从 p.10 提取结果复核后再补。\n2) Tree of Thoughts 
+的两种搜索控制器（p.13 原文）："The paper describes both a breadth-first and a 
+depth-first controller." 即 breadth-first 与 depth-first。ToT 由 generation 
+prompt、evaluation prompt 加外部搜索算法三者配合，遍历可回溯的推理步骤树（p.13, 
+Fig.6）。\n局限：外部搜索需外部记忆记录已走过的分支（p.15）。', 
+evidence_ids=['ev-4049593a30e2846f8394'], section='reasoning'))' due to: 
+ValueError: Note text must occur contiguously in the actual model response. Pass
+content as ONE string literal, not adjacent strings, concatenation or a 
+variable; do not change the note text after generation.
+Code execution failed at line 'print([k for k in globals().keys() if not 
+k.startswith('__')])' due to: InterpreterError: Forbidden function evaluation: 
+'globals' is not among the explicitly allowed tools or defined/imported in the 
+preceding code
+Code execution failed at line 'print(recall(['ev-page4', 'ev-page5', 
+'ev-page10', 'ev-page11', 'ev-page13']))' due to: ValueError: Requested evidence
+is missing or stale
+Code execution failed at line 
+'print(recall(['ev-4c0f0a9c1e6a1b8e','ev-2b7a3c6d9e0f1a2b']))' due to: 
+ValueError: Requested evidence is missing or stale
+Code execution failed at line 'for n in (1,4,5):
+    t = flat(n)
+    for kw in ('categor','Scholar','snowball','three'):
+        i = t.lower().find(kw.lower())
+        if i>=0:
+            print(f'--- p{n} [{kw}]', t[max(0,i-450):i+700])
+            break' due to: TypeError: 'int' object is not callable
+Code execution failed at line 'for sid in order:
+    ev = []
+    for field, val in ans[sid].items():
+        pg_no, quote = q[field]
+        ev.append({'question': field, 'page': pg_no, 'quote': re.sub(r'\s+',' ',
+quote).strip()})
+    sections.append({'id': sid, 'summary': summ[sid], 'application': appl[sid], 
+'answers': ans[sid], 'evidence': ev})' due to: TypeError: expected string or 
+bytes-like object, got 'NoneType'
+Code execution failed at line 'print(repr(t51[max(0,i-300):i+2600]))' due to: 
+InterpreterError: Forbidden function evaluation: 'repr' is not among the 
+explicitly allowed tools or defined/imported in the preceding code
+{"status": "failed", "engine": "smolagents", "upstream_version": "1.26.0", "context_mode": "evidence", "reason": "MAX_STEPS_NO_EXTRA_REQUEST", "usage": {"requests": 40, "complete": true, "prompt_tokens": 340759, "completion_tokens": 34078}, "remaining": ["make the requested change", "verify current files: python -m pytest -q", "finish all plan items after their work and checks"]}

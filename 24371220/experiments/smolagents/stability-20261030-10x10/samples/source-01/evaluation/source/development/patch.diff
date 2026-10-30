@@ -1,0 +1,38 @@
+--- a/deepinfer/environ.py
++++ b/deepinfer/environ.py
+@@ -23,6 +23,16 @@
+ 
+ def _str(v: str | None, default: str = "") -> str:
+     return v if v is not None else default
++
++
++def _int_or_none_min(v: str | None, minimum: int = 32) -> int | None:
++    """Parse an optional int; unset means no limit, otherwise must be >= minimum."""
++    if v is None:
++        return None
++    value = int(v)
++    if value < minimum:
++        raise ValueError(f"{v!r} must be >= {minimum}")
++    return value
+ 
+ 
+ _descriptors: dict[str, EnvVar[Any]] = {}
+@@ -179,6 +189,8 @@
+     DEEPINFER_ZERO_OVERHEAD_SCHEDULING = EnvVar.bool()
+ 
+     # -- Logging --
++    DEEPINFER_LOG_MAX_MESSAGE_CHARS = EnvVar(lambda v: _int_or_none_min(v, 32))
++    """限制默认处理器输出的普通诊断日志消息正文的最大字符数；未设置（None）表示不限长，设置时必须 >= 32。"""
+     DEEPINFER_LOGGING_INTERVAL_STEP = EnvVar.int(default=100)
+     DEEPINFER_NCCL_MEMORY_SAMPLE_INTERVAL_STEPS = EnvVar.int(default=1000)
+     DEEPINFER_RINGBUFFER_WARNING_INTERVAL = EnvVar.int(default=60)
+--- a/deepinfer/logger.py
++++ b/deepinfer/logger.py
+@@ -5,6 +5,7 @@
+ # https://github.com/skypilot-org/skypilot/blob/86dc0f6283a335e4aa37b3c10716f90999f48ab6/sky/sky_logging.py
+ """Logging configuration for DeepInfer."""
+ 
++import copy
+ import datetime
+ import logging
+ import multiprocessing

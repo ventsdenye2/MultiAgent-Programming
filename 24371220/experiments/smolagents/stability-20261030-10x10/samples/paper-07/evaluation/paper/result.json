@@ -1,0 +1,41 @@
+{
+  "task": "题目1自测",
+  "passed": false,
+  "checks": {
+    "真实运行、PDF提取、分块笔记和补丁": "agent 退出码 1，查看 agent-console.log；最后修改后须执行完整 pytest 并通过",
+    "报告结构": "报告结构未通过；查看 report-format.log"
+  },
+  "score": 0.0,
+  "section_scores": {
+    "overview": 0.0,
+    "reasoning": 0.0,
+    "tool_use": 0.0,
+    "multi_agent": 0.0,
+    "outlook": 0.0
+  },
+  "question_scores": {
+    "overview": {
+      "categories": 0.0,
+      "search_methods": 0.0
+    },
+    "reasoning": {
+      "self_consistency_selection": 0.0,
+      "tot_search": 0.0
+    },
+    "tool_use": {
+      "toolformer_tools": 0.0,
+      "toolbench_api_count": 0.0
+    },
+    "multi_agent": {
+      "camel_prompting": 0.0,
+      "generative_agents_evaluators": 0.0
+    },
+    "outlook": {
+      "agenda_topics": 0.0,
+      "shared_foundations": 0.0
+    }
+  },
+  "scoring_enabled": false,
+  "max_score": 5,
+  "report_status": "invalid"
+}

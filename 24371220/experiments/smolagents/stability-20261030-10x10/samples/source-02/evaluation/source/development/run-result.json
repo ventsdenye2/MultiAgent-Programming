@@ -1,0 +1,16 @@
+{
+  "status": "failed",
+  "engine": "smolagents",
+  "upstream_version": "1.26.0",
+  "context_mode": "evidence",
+  "reason": "MAX_STEPS_NO_EXTRA_REQUEST",
+  "usage": {
+    "requests": 20,
+    "complete": true,
+    "prompt_tokens": 166028,
+    "completion_tokens": 12105
+  },
+  "remaining": [
+    "finish all plan items after their work and checks"
+  ]
+}

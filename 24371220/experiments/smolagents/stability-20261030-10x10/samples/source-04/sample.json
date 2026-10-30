@@ -1,0 +1,33 @@
+{
+  "task": "source",
+  "exit_code": 1,
+  "archive": "/mnt/d/Muiti-Agent Programing/experiments/code-agent-smolagents/24371220/experiments/smolagents/stability-20261030-10x10/samples/source-04/evaluation",
+  "status": "failed",
+  "passed": false,
+  "requests": 20,
+  "prompt_tokens": 171766,
+  "completion_tokens": 15241,
+  "usage_complete": true,
+  "max_request_chars": 31692,
+  "agent_errors": {
+    "AgentParsingError": 2,
+    "AgentExecutionError": 2
+  },
+  "failure_reason": "MAX_STEPS_NO_EXTRA_REQUEST",
+  "agent_status": "failed",
+  "score": 0,
+  "max_score": 1,
+  "checks": {
+    "真实开发过程与修改范围": "agent 退出码 1，查看 agent-console.log；目标源码尚未修改：deepinfer/engine/stats_logger.py；deepinfer/engine/stats_logger.py 须有与最终文件一致的 file_write；最后修改后须执行完整 pytest 并通过",
+    "补丁可还原实际修改": false,
+    "相关源码真实读取并入模": true,
+    "首次修改复用相关源码或模型笔记": true,
+    "独立兼容与新增功能测试": "源码或检查文件不完整，未执行",
+    "真实日志处理链路": "前置条件未满足，未执行",
+    "运行后修改范围仍合规": "目标源码尚未修改：deepinfer/engine/stats_logger.py",
+    "学生代码与本轮开始一致": true,
+    "服务端真实用量完整": true
+  },
+  "number": 4,
+  "native": "/home/ventsdenye/.local/state/code-agent/evaluations/stability-source-04-l5msyhzv"
+}

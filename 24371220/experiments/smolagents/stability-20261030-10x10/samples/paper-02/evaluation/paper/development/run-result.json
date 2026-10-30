@@ -1,0 +1,15 @@
+{
+  "status": "completed",
+  "engine": "smolagents",
+  "upstream_version": "1.26.0",
+  "context_mode": "evidence",
+  "reason": null,
+  "usage": {
+    "requests": 40,
+    "complete": true,
+    "prompt_tokens": 338771,
+    "completion_tokens": 31516
+  },
+  "answer": "report.json 已生成：包含五个主题（overview/reasoning/tool_use/multi_agent/outlook）的总结、启发、10 个答案与对应 PDF 页码引文；python -m pytest -q 通过（1 passed）。",
+  "remaining": []
+}

@@ -1,0 +1,35 @@
+{
+  "task": "paper",
+  "exit_code": 0,
+  "archive": "/mnt/d/Muiti-Agent Programing/experiments/code-agent-smolagents/24371220/experiments/smolagents/stability-20261030-10x10/samples/paper-09/evaluation",
+  "status": "passed",
+  "passed": true,
+  "requests": 36,
+  "prompt_tokens": 288667,
+  "completion_tokens": 29693,
+  "usage_complete": true,
+  "max_request_chars": 31468,
+  "agent_errors": {
+    "AgentExecutionError": 4
+  },
+  "failure_reason": null,
+  "agent_status": "completed",
+  "score": 5.0,
+  "max_score": 5,
+  "checks": {
+    "真实运行、PDF提取、分块笔记和补丁": true,
+    "报告结构": true,
+    "overview.categories：答案与原文引用": true,
+    "overview.search_methods：答案与原文引用": true,
+    "reasoning.self_consistency_selection：答案与原文引用": true,
+    "reasoning.tot_search：答案与原文引用": true,
+    "tool_use.toolformer_tools：答案与原文引用": true,
+    "tool_use.toolbench_api_count：答案与原文引用": true,
+    "multi_agent.camel_prompting：答案与原文引用": true,
+    "multi_agent.generative_agents_evaluators：答案与原文引用": true,
+    "outlook.agenda_topics：答案与原文引用": true,
+    "outlook.shared_foundations：答案与原文引用": true
+  },
+  "number": 9,
+  "native": "/home/ventsdenye/.local/state/code-agent/evaluations/stability-paper-09-bntrokw9"
+}

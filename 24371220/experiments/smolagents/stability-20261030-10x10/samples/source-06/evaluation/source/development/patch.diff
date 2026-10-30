@@ -1,0 +1,23 @@
+--- a/deepinfer/environ.py
++++ b/deepinfer/environ.py
+@@ -83,6 +83,20 @@
+         return EnvVar(lambda v: int(v) if v is not None else None)
+ 
+     @staticmethod
++    def int_or_none_min(*, min_value: int) -> EnvVar[int | None]:
++        """未设置时为 None；设置时必须能解析为 int 且不小于 min_value。"""
++
++        def _init(v: str | None) -> int | None:
++            if v is None:
++                return None
++            value = int(v)
++            if value < min_value:
++                raise ValueError(f"{value!r}, must be >= {min_value}")
++            return value
++
++        return EnvVar(_init)
++
++    @staticmethod
+     def choice(*, default: str | None = None, choices: tuple[str, ...]) -> EnvVar[str | None]:
+         def _init(v: str | None) -> str | None:
+             if v is None:

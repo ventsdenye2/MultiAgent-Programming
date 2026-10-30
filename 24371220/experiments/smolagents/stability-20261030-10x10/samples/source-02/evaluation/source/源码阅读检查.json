@@ -1,0 +1,111 @@
+{
+  "source_characters": 33763,
+  "first_write_event": 112,
+  "decision_request": 7,
+  "groups": {
+    "deepinfer/logger.py": {
+      "source_sent_before_write": true,
+      "direct_reuse": true,
+      "model_note_reuse": false,
+      "notes": [],
+      "locations": [
+        {
+          "location": "NewLineFormatter",
+          "start_line": 33,
+          "end_line": 68,
+          "source_sent": true
+        },
+        {
+          "location": "_setup_logger",
+          "start_line": 75,
+          "end_line": 90,
+          "source_sent": true
+        },
+        {
+          "location": "init_logger",
+          "start_line": 96,
+          "end_line": 107,
+          "source_sent": true
+        }
+      ],
+      "source_requests": [
+        5,
+        6,
+        7
+      ]
+    },
+    "deepinfer/environ.py": {
+      "source_sent_before_write": true,
+      "direct_reuse": true,
+      "model_note_reuse": false,
+      "notes": [],
+      "locations": [
+        {
+          "location": "EnvVar",
+          "start_line": 31,
+          "end_line": 94,
+          "source_sent": true
+        },
+        {
+          "location": "rearm",
+          "start_line": 213,
+          "end_line": 215,
+          "source_sent": true
+        },
+        {
+          "location": "rearm_all",
+          "start_line": 218,
+          "end_line": 221,
+          "source_sent": true
+        }
+      ],
+      "source_requests": [
+        3,
+        4,
+        5,
+        6,
+        7
+      ]
+    },
+    "deepinfer/engine/stats_logger.py": {
+      "source_sent_before_write": true,
+      "direct_reuse": true,
+      "model_note_reuse": false,
+      "notes": [],
+      "locations": [
+        {
+          "location": "_log_worker",
+          "start_line": 116,
+          "end_line": 126,
+          "source_sent": true
+        },
+        {
+          "location": "_emit_logs",
+          "start_line": 342,
+          "end_line": 344,
+          "source_sent": true
+        },
+        {
+          "location": "第20行调用或初始化",
+          "start_line": 20,
+          "end_line": 20,
+          "source_sent": true
+        },
+        {
+          "location": "第29行调用或初始化",
+          "start_line": 29,
+          "end_line": 29,
+          "source_sent": true
+        }
+      ],
+      "source_requests": [
+        6,
+        7
+      ]
+    }
+  },
+  "checks": {
+    "相关源码真实读取并入模": true,
+    "首次修改复用相关源码或模型笔记": true
+  }
+}

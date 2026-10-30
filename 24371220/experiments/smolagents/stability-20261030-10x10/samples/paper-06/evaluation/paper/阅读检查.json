@@ -1,0 +1,116 @@
+{
+  "process_errors": [],
+  "pages": [
+    1,
+    2,
+    3,
+    4,
+    5,
+    6,
+    7,
+    8,
+    9,
+    10,
+    11,
+    12,
+    13,
+    14,
+    15,
+    16,
+    17,
+    18,
+    19,
+    20,
+    21,
+    22,
+    23,
+    24,
+    25,
+    26,
+    27,
+    28,
+    29,
+    30,
+    31,
+    32,
+    33,
+    34,
+    35,
+    36,
+    37,
+    38,
+    39,
+    40,
+    41,
+    42,
+    43,
+    44,
+    45,
+    46,
+    47,
+    48,
+    49,
+    50,
+    51,
+    52
+  ],
+  "report_status": "checked",
+  "skipped_checks": [],
+  "questions": {
+    "overview": {
+      "categories": [
+        "categories 的 quote 不是该页原文；可合并空白，不能改写原句"
+      ],
+      "search_methods": []
+    },
+    "reasoning": {
+      "self_consistency_selection": [],
+      "tot_search": []
+    },
+    "tool_use": {
+      "toolformer_tools": [],
+      "toolbench_api_count": []
+    },
+    "multi_agent": {
+      "camel_prompting": [],
+      "generative_agents_evaluators": []
+    },
+    "outlook": {
+      "agenda_topics": [
+        "agenda_topics 的 quote 不是该页原文；可合并空白，不能改写原句"
+      ],
+      "shared_foundations": []
+    }
+  },
+  "score": 4.0,
+  "section_scores": {
+    "overview": 0.5,
+    "reasoning": 1.0,
+    "tool_use": 1.0,
+    "multi_agent": 1.0,
+    "outlook": 0.5
+  },
+  "question_scores": {
+    "overview": {
+      "categories": 0.0,
+      "search_methods": 0.5
+    },
+    "reasoning": {
+      "self_consistency_selection": 0.5,
+      "tot_search": 0.5
+    },
+    "tool_use": {
+      "toolformer_tools": 0.5,
+      "toolbench_api_count": 0.5
+    },
+    "multi_agent": {
+      "camel_prompting": 0.5,
+      "generative_agents_evaluators": 0.5
+    },
+    "outlook": {
+      "agenda_topics": 0.0,
+      "shared_foundations": 0.5
+    }
+  },
+  "scoring_enabled": true
+}

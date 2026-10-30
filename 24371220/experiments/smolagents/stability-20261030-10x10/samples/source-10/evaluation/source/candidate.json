@@ -1,0 +1,10 @@
+{
+  "profile": "d03108378642da240a373be897a5b8deb1326447e85e51a4852b10ce92aa2807",
+  "student_sha256": "c1388c934f2cc06ba2c68fdb8c212550eb386b513029ae04d8596b0463fd2405",
+  "source_sha256": {
+    "deepinfer/logger.py": "85e00afacd8ddbb766e5106f7365e3628ba65b59c25058dff3bc97a72fd0b68b",
+    "deepinfer/environ.py": "cdc03fd94c8d0f43a0186f8a41087640589f3c90863a03536b81c21a70ca75b5",
+    "deepinfer/engine/stats_logger.py": "554e54ac42df2277016bff89f7ab3deb6cc62af0dc6a89945312751606af5481"
+  },
+  "repo": "/home/ventsdenye/.local/state/code-agent/evaluations/stability-source-10-4_7tgwpb/results/workspace/DeepInfer"
+}

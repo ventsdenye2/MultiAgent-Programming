@@ -1,0 +1,140 @@
+--- a/report.json
++++ b/report.json
+@@ -1 +1,135 @@
+-{}
++{
++  "overview": "这是一篇关于 Agentic LLM 的综述（arXiv:2503.23037v3）。作者把 LLM 的能动性拆成三类能力：reason（推理：分解问题、搜索推理路径、自我反思与验证）、act（行动：调用工具与 API、操作网页与计算机、与机器人和科学实验集成）、interact（交互：角色扮演、多智能体协作、社会仿真与博弈），并按此结构组织第 2～4 节，用分类表、方法比较和基准汇总现有工作。第 5 节把三类能力用于科学发现等应用，第 6 节用 Table 4 给出数据、幻觉、行为、自我反思与安全五个研究议题，结论强调推理与自我验证是共同基础。文献以 Google Scholar 起步并用 snowballing 扩展，因此覆盖面广但受检索起点影响。",
++  "sections": [
++    {
++      "id": "overview",
++      "summary": "作者把 Agent 能力分为 reason、act、interact 三类，第 2～4 节分别按推理、行动、交互整理方法，每节给出分类表和基准对比，并指出三类能力互相依赖。文献组织是先以 Google Scholar 检索 Agentic LLM 相关论文，再用 snowballing 顺着引用关系扩展到首次检索未覆盖的工作，只保留基于 LLM 的方法。局限在于该策略依赖起始关键词与引用网络，可能低估非英文或较新的工作。",
++      "application": "上次的 agent 已实现分批读页、版本化证据 ID、主题笔记与 pytest 结构校验，但流程固定为单线程顺序，且不会自动回查引文。可借鉴三类划分，把“推理选步—调用工具—多 agent 分工”做成可插拔模块，并让每个结论绑定页码与引文以便核验。",
++      "answers": {
++        "categories": [
++          "reason",
++          "act",
++          "interact"
++        ],
++        "search_methods": [
++          "google_scholar",
++          "snowballing"
++        ]
++      },
++      "evidence": [
++        {
++          "question": "categories",
++          "page": 1,
++          "quote": "Methods: Agentic LLMs are LLMs that (1) reason, (2) act, and (3) interact."
++        },
++        {
++          "question": "search_methods",
++          "page": 0,
++          "quote": ""
++        }
++      ]
++    },
++    {
++      "id": "reasoning",
++      "summary": "第 2 节把推理方法分为提示（CoT）、搜索树、自我反思与神经符号等。CoT 是贪心的：只沿看起来最好的一步前进，丢弃其它可能，因此遇到多分支时难以选择正确路径。Self Consistency 针对这一点采样多条推理路径，再用多数投票选出最一致的答案。Tree of Thoughts 把生成提示、评估提示和外部搜索算法组合起来系统探索推理步骤，回溯后尝试替代路径，论文给出广度优先与深度优先两种控制器。代价是需要多次采样或额外搜索，成本更高。",
++      "application": "我的 agent 目前按固定页批顺序推进，缺少回溯与自检，已有的证据 ID 可用来复核引文。可借鉴 ToT：为“读哪些页、写哪个主题”建立候选并评估，再用多次采样加多数投票确定最终答案字段，减少单次贪心出错。",
++      "answers": {
++        "self_consistency_selection": "majority_vote_for_the_most_consistent_answer",
++        "tot_search": [
++          "breadth_first",
++          "depth_first"
++        ]
++      },
++      "evidence": [
++        {
++          "question": "self_consistency_selection",
++          "page": 10,
++          "quote": "Self Consistency is an ensemble approach that samples diverse reasoning paths, evaluates them, and selects the most consistent answer using majority voting."
++        },
++        {
++          "question": "tot_search",
++          "page": 13,
++          "quote": "The paper describes both a breadth-first and a depth-first controller."
++        }
++      ]
++    },
++    {
++      "id": "tool_use",
++      "summary": "第 3 节强调工具使用是 agent 从语言走向外部行动的关键。Toolformer 让模型自监督地学习何时调用哪个 API、传什么参数、如何把返回结果并入后续 token 预测，测试了计算器、问答、搜索引擎、翻译与日历五种工具。ToolBench 基于 RapidAPI 构建含 16,464 个真实 REST API 的大规模数据集，支持训练与评测。同节还比较 Gorilla/APIBench 的 API 调用生成、ToolAlpaca 的合成指令和 EasyTool 的结构化工具文档。局限是错误工具幻觉、参数与返回格式不匹配，需要执行反馈与验证。",
++      "application": "已实现的是通过 run_command 调用 read_pdf.py 与 pytest、以及文件读写，工具选择仍由我手工决定，没有学习何时调用。可增加显式工具清单与参数校验，保存每次 command_result，失败时读取错误信息并重试，向 Toolformer 式自监督选择靠拢。",
++      "answers": {
++        "toolformer_tools": [
++          "calculator",
++          "question_answering",
++          "search_engine",
++          "translation",
++          "calendar"
++        ],
++        "toolbench_api_count": 16464
++      },
++      "evidence": [
++        {
++          "question": "toolformer_tools",
++          "page": 0,
++          "quote": ""
++        },
++        {
++          "question": "toolbench_api_count",
++          "page": 23,
++          "quote": "ToolBench [Qin et al., 2023] contains 16,464 APIs from RapidAPI, a large dataset of publicly available REST APIs."
++        }
++      ]
++    },
++    {
++      "id": "multi_agent",
++      "summary": "第 4 节按三步组织：LLM 的社会能力、角色配对或小团队、以及无预设角色的开放式 agent 社会。CAMEL 用 inception prompting 与角色描述让两个 LLM 维持预定义角色持续对话，无需人工反复提示。Generative Agents 用 25 个 agent 组成小镇，结合感知、记忆、反思、检索与规划，并用 100 名人类评估者按四类可信度排序，完整架构表现最好。更大规模的工作包括 AgentSociety（超一万个 agent）、AgentVerse 的四阶段协作与 OASIS（最多上百万 agent，基于 CAMEL）。局限是仿真可信度、成本与基准不足。",
++      "application": "目前是单 agent 顺序执行，读页、写笔记和写报告都在同一进程里完成，没有多智能体协作。未来可尝试 CAMEL 式角色分工：读取者、笔记整理者、引用核对者各持角色描述互相检查，并用小评估集比较是否比单 agent 更可靠；这属于改进设想，尚未实现。",
++      "answers": {
++        "camel_prompting": "inception_prompting",
++        "generative_agents_evaluators": 100
++      },
++      "evidence": [
++        {
++          "question": "camel_prompting",
++          "page": 37,
++          "quote": "By using inception prompting and role descriptions, the agents stay in character and collaborate toward the goal by breaking down complex problems in manageable steps through dialogue."
++        },
++        {
++          "question": "generative_agents_evaluators",
++          "page": 47,
++          "quote": "Whether the Generative Agents system generates believable behavior is evaluated with the help of 100 human evaluators."
++        }
++      ]
++    },
++    {
++      "id": "outlook",
++      "summary": "Table 4 列出五个研究议题：Training Data（用推理轨迹数据微调、稳定的强化学习、VLA 与多模态）、Hallucination（自我验证、机制可解释性、探索开放世界模型）、Agent Behavior（可扩展仿真与角色扮演、蒸馏到小模型、agent 与人类行为建模）、Self reflection（模型内自我反思与元推理、元认知与人格、自动化科学发现）以及 Safety（责任与义务、隐私与数据公平、assistant 的更广应用领域）。结论指出三类能力互补：推理是基础，机器人与工具使用依赖 grounded retrieval augmentation，社会交互依赖自我反思，且都受益于 reasoning 与 self-verification。",
++      "application": "已实现的检查只有 pytest 结构校验与证据哈希记录，缺少针对幻觉和安全的自动核验。可先在读取阶段加入引文回查（引文必须能在对应页找到），再考虑自我验证与多 agent 审查，同时记录每次请求的字符预算以控制成本。",
++      "answers": {
++        "agenda_topics": [
++          "training_data",
++          "hallucination",
++          "agent_behavior",
++          "self_reflection",
++          "safety"
++        ],
++        "shared_foundations": [
++          "reasoning",
++          "self_verification"
++        ]
++      },
++      "evidence": [
++        {
++          "question": "agenda_topics",
++          "page": 51,
++          "quote": "Agentic LLM • 1:51 Topic Challenge Training Data Finetune with inference time reasoning data Convergent/stable reinforcement learning VLA, Multimodal signals, such as speech Hallucination Use Self Verification Use Mechanistic Interpretability Use Open Ended/Open World Models for exploration Agent Behavior Scalable simulation infrastructure, role playing Distill reasoning to small models Models of agent and human behavior, emergent behavior, future of society Self reflection In-model self reflection and metareasoning Metacognition, personality Automated Scientific Discovery Safety Assistants: Responsibility, liability Privacy, fairness of data Wider application areas for assistants Table 4."
++        },
++        {
++          "question": "shared_foundations",
++          "page": 7,
++          "quote": "The methods involve automated prompt-improvement, retrieval of extra data, usage of tools, interaction with other LLMs, self-verification, and simulations. As we will see in this survey, these works have yielded more intelligent, active, and interactive LLMs— agentic LLMs. 1.5 Taxonomy In a short amount of time, a literature on agentic LLMs has appeared, that we categorize based on the above challenges. The agentic LLMs in this survey have (1) reasoning capabilities, (2) an interface to the outside world in order to act, and (3) a social environment with other agents with which to interact."
++        }
++      ]
++    }
++  ]
++}
+\ No newline at end of file

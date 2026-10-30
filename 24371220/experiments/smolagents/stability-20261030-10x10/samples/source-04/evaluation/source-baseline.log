@@ -1,0 +1,765 @@
+.........FFFFFFFFFFFFFFFFFFFFFFFFFF.FFFFFFFFFFFFFFFFFFFFFFFF             [100%]
+=================================== FAILURES ===================================
+_________________ test_message_budget_and_alignment[ascii-32] __________________
+
+message = 'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa...aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa'
+budget = 32
+
+    @pytest.mark.parametrize("budget", [32, 33, 64, 127])
+    @pytest.mark.parametrize("message", ["a" * 400, "汉字🧪e\u0301" * 90, "head\n" + "row\n" * 100 + "tail"],
+                             ids=["ascii", "unicode", "multiline"])
+    def test_message_budget_and_alignment(message, budget):
+>       formatter = Formatter("[%(levelname)s] %(message)s", max_message_chars=budget)
+                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       TypeError: NewLineFormatter.__init__() got an unexpected keyword argument 'max_message_chars'
+
+.course/test_logger.py:52: TypeError
+_________________ test_message_budget_and_alignment[ascii-33] __________________
+
+message = 'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa...aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa'
+budget = 33
+
+    @pytest.mark.parametrize("budget", [32, 33, 64, 127])
+    @pytest.mark.parametrize("message", ["a" * 400, "汉字🧪e\u0301" * 90, "head\n" + "row\n" * 100 + "tail"],
+                             ids=["ascii", "unicode", "multiline"])
+    def test_message_budget_and_alignment(message, budget):
+>       formatter = Formatter("[%(levelname)s] %(message)s", max_message_chars=budget)
+                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       TypeError: NewLineFormatter.__init__() got an unexpected keyword argument 'max_message_chars'
+
+.course/test_logger.py:52: TypeError
+_________________ test_message_budget_and_alignment[ascii-64] __________________
+
+message = 'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa...aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa'
+budget = 64
+
+    @pytest.mark.parametrize("budget", [32, 33, 64, 127])
+    @pytest.mark.parametrize("message", ["a" * 400, "汉字🧪e\u0301" * 90, "head\n" + "row\n" * 100 + "tail"],
+                             ids=["ascii", "unicode", "multiline"])
+    def test_message_budget_and_alignment(message, budget):
+>       formatter = Formatter("[%(levelname)s] %(message)s", max_message_chars=budget)
+                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       TypeError: NewLineFormatter.__init__() got an unexpected keyword argument 'max_message_chars'
+
+.course/test_logger.py:52: TypeError
+_________________ test_message_budget_and_alignment[ascii-127] _________________
+
+message = 'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa...aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa'
+budget = 127
+
+    @pytest.mark.parametrize("budget", [32, 33, 64, 127])
+    @pytest.mark.parametrize("message", ["a" * 400, "汉字🧪e\u0301" * 90, "head\n" + "row\n" * 100 + "tail"],
+                             ids=["ascii", "unicode", "multiline"])
+    def test_message_budget_and_alignment(message, budget):
+>       formatter = Formatter("[%(levelname)s] %(message)s", max_message_chars=budget)
+                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       TypeError: NewLineFormatter.__init__() got an unexpected keyword argument 'max_message_chars'
+
+.course/test_logger.py:52: TypeError
+________________ test_message_budget_and_alignment[unicode-32] _________________
+
+message = '汉字🧪é汉字🧪é汉字🧪é汉字🧪é汉字🧪é汉字🧪é汉字🧪é汉字🧪é汉字🧪é汉字🧪é汉字🧪é汉字🧪é汉字🧪é汉字🧪é汉字🧪é汉字🧪é汉字🧪é汉字🧪é汉字🧪é汉字🧪é汉字🧪é汉字🧪é汉字🧪é汉字...🧪é汉字🧪é汉字🧪é汉字🧪é汉字🧪é汉字🧪é汉字🧪é汉字🧪é汉字🧪é汉字🧪é汉字🧪é汉字🧪é汉字🧪é汉字🧪é汉字🧪é汉字🧪é汉字🧪é汉字🧪é汉字🧪é汉字🧪é汉字🧪é汉字🧪é汉字🧪é汉字🧪é'
+budget = 32
+
+    @pytest.mark.parametrize("budget", [32, 33, 64, 127])
+    @pytest.mark.parametrize("message", ["a" * 400, "汉字🧪e\u0301" * 90, "head\n" + "row\n" * 100 + "tail"],
+                             ids=["ascii", "unicode", "multiline"])
+    def test_message_budget_and_alignment(message, budget):
+>       formatter = Formatter("[%(levelname)s] %(message)s", max_message_chars=budget)
+                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       TypeError: NewLineFormatter.__init__() got an unexpected keyword argument 'max_message_chars'
+
+.course/test_logger.py:52: TypeError
+________________ test_message_budget_and_alignment[unicode-33] _________________
+
+message = '汉字🧪é汉字🧪é汉字🧪é汉字🧪é汉字🧪é汉字🧪é汉字🧪é汉字🧪é汉字🧪é汉字🧪é汉字🧪é汉字🧪é汉字🧪é汉字🧪é汉字🧪é汉字🧪é汉字🧪é汉字🧪é汉字🧪é汉字🧪é汉字🧪é汉字🧪é汉字🧪é汉字...🧪é汉字🧪é汉字🧪é汉字🧪é汉字🧪é汉字🧪é汉字🧪é汉字🧪é汉字🧪é汉字🧪é汉字🧪é汉字🧪é汉字🧪é汉字🧪é汉字🧪é汉字🧪é汉字🧪é汉字🧪é汉字🧪é汉字🧪é汉字🧪é汉字🧪é汉字🧪é汉字🧪é'
+budget = 33
+
+    @pytest.mark.parametrize("budget", [32, 33, 64, 127])
+    @pytest.mark.parametrize("message", ["a" * 400, "汉字🧪e\u0301" * 90, "head\n" + "row\n" * 100 + "tail"],
+                             ids=["ascii", "unicode", "multiline"])
+    def test_message_budget_and_alignment(message, budget):
+>       formatter = Formatter("[%(levelname)s] %(message)s", max_message_chars=budget)
+                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       TypeError: NewLineFormatter.__init__() got an unexpected keyword argument 'max_message_chars'
+
+.course/test_logger.py:52: TypeError
+________________ test_message_budget_and_alignment[unicode-64] _________________
+
+message = '汉字🧪é汉字🧪é汉字🧪é汉字🧪é汉字🧪é汉字🧪é汉字🧪é汉字🧪é汉字🧪é汉字🧪é汉字🧪é汉字🧪é汉字🧪é汉字🧪é汉字🧪é汉字🧪é汉字🧪é汉字🧪é汉字🧪é汉字🧪é汉字🧪é汉字🧪é汉字🧪é汉字...🧪é汉字🧪é汉字🧪é汉字🧪é汉字🧪é汉字🧪é汉字🧪é汉字🧪é汉字🧪é汉字🧪é汉字🧪é汉字🧪é汉字🧪é汉字🧪é汉字🧪é汉字🧪é汉字🧪é汉字🧪é汉字🧪é汉字🧪é汉字🧪é汉字🧪é汉字🧪é汉字🧪é'
+budget = 64
+
+    @pytest.mark.parametrize("budget", [32, 33, 64, 127])
+    @pytest.mark.parametrize("message", ["a" * 400, "汉字🧪e\u0301" * 90, "head\n" + "row\n" * 100 + "tail"],
+                             ids=["ascii", "unicode", "multiline"])
+    def test_message_budget_and_alignment(message, budget):
+>       formatter = Formatter("[%(levelname)s] %(message)s", max_message_chars=budget)
+                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       TypeError: NewLineFormatter.__init__() got an unexpected keyword argument 'max_message_chars'
+
+.course/test_logger.py:52: TypeError
+________________ test_message_budget_and_alignment[unicode-127] ________________
+
+message = '汉字🧪é汉字🧪é汉字🧪é汉字🧪é汉字🧪é汉字🧪é汉字🧪é汉字🧪é汉字🧪é汉字🧪é汉字🧪é汉字🧪é汉字🧪é汉字🧪é汉字🧪é汉字🧪é汉字🧪é汉字🧪é汉字🧪é汉字🧪é汉字🧪é汉字🧪é汉字🧪é汉字...🧪é汉字🧪é汉字🧪é汉字🧪é汉字🧪é汉字🧪é汉字🧪é汉字🧪é汉字🧪é汉字🧪é汉字🧪é汉字🧪é汉字🧪é汉字🧪é汉字🧪é汉字🧪é汉字🧪é汉字🧪é汉字🧪é汉字🧪é汉字🧪é汉字🧪é汉字🧪é汉字🧪é'
+budget = 127
+
+    @pytest.mark.parametrize("budget", [32, 33, 64, 127])
+    @pytest.mark.parametrize("message", ["a" * 400, "汉字🧪e\u0301" * 90, "head\n" + "row\n" * 100 + "tail"],
+                             ids=["ascii", "unicode", "multiline"])
+    def test_message_budget_and_alignment(message, budget):
+>       formatter = Formatter("[%(levelname)s] %(message)s", max_message_chars=budget)
+                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       TypeError: NewLineFormatter.__init__() got an unexpected keyword argument 'max_message_chars'
+
+.course/test_logger.py:52: TypeError
+_______________ test_message_budget_and_alignment[multiline-32] ________________
+
+message = 'head\nrow\nrow\nrow\nrow\nrow\nrow\nrow\nrow\nrow\nrow\nrow\nrow\nrow\nrow\nrow\nrow\nrow\nrow\nrow\nrow\nrow\nrow\nr...ow\nrow\nrow\nrow\nrow\nrow\nrow\nrow\nrow\nrow\nrow\nrow\nrow\nrow\nrow\nrow\nrow\nrow\nrow\nrow\nrow\nrow\nrow\ntail'
+budget = 32
+
+    @pytest.mark.parametrize("budget", [32, 33, 64, 127])
+    @pytest.mark.parametrize("message", ["a" * 400, "汉字🧪e\u0301" * 90, "head\n" + "row\n" * 100 + "tail"],
+                             ids=["ascii", "unicode", "multiline"])
+    def test_message_budget_and_alignment(message, budget):
+>       formatter = Formatter("[%(levelname)s] %(message)s", max_message_chars=budget)
+                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       TypeError: NewLineFormatter.__init__() got an unexpected keyword argument 'max_message_chars'
+
+.course/test_logger.py:52: TypeError
+_______________ test_message_budget_and_alignment[multiline-33] ________________
+
+message = 'head\nrow\nrow\nrow\nrow\nrow\nrow\nrow\nrow\nrow\nrow\nrow\nrow\nrow\nrow\nrow\nrow\nrow\nrow\nrow\nrow\nrow\nrow\nr...ow\nrow\nrow\nrow\nrow\nrow\nrow\nrow\nrow\nrow\nrow\nrow\nrow\nrow\nrow\nrow\nrow\nrow\nrow\nrow\nrow\nrow\nrow\ntail'
+budget = 33
+
+    @pytest.mark.parametrize("budget", [32, 33, 64, 127])
+    @pytest.mark.parametrize("message", ["a" * 400, "汉字🧪e\u0301" * 90, "head\n" + "row\n" * 100 + "tail"],
+                             ids=["ascii", "unicode", "multiline"])
+    def test_message_budget_and_alignment(message, budget):
+>       formatter = Formatter("[%(levelname)s] %(message)s", max_message_chars=budget)
+                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       TypeError: NewLineFormatter.__init__() got an unexpected keyword argument 'max_message_chars'
+
+.course/test_logger.py:52: TypeError
+_______________ test_message_budget_and_alignment[multiline-64] ________________
+
+message = 'head\nrow\nrow\nrow\nrow\nrow\nrow\nrow\nrow\nrow\nrow\nrow\nrow\nrow\nrow\nrow\nrow\nrow\nrow\nrow\nrow\nrow\nrow\nr...ow\nrow\nrow\nrow\nrow\nrow\nrow\nrow\nrow\nrow\nrow\nrow\nrow\nrow\nrow\nrow\nrow\nrow\nrow\nrow\nrow\nrow\nrow\ntail'
+budget = 64
+
+    @pytest.mark.parametrize("budget", [32, 33, 64, 127])
+    @pytest.mark.parametrize("message", ["a" * 400, "汉字🧪e\u0301" * 90, "head\n" + "row\n" * 100 + "tail"],
+                             ids=["ascii", "unicode", "multiline"])
+    def test_message_budget_and_alignment(message, budget):
+>       formatter = Formatter("[%(levelname)s] %(message)s", max_message_chars=budget)
+                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       TypeError: NewLineFormatter.__init__() got an unexpected keyword argument 'max_message_chars'
+
+.course/test_logger.py:52: TypeError
+_______________ test_message_budget_and_alignment[multiline-127] _______________
+
+message = 'head\nrow\nrow\nrow\nrow\nrow\nrow\nrow\nrow\nrow\nrow\nrow\nrow\nrow\nrow\nrow\nrow\nrow\nrow\nrow\nrow\nrow\nrow\nr...ow\nrow\nrow\nrow\nrow\nrow\nrow\nrow\nrow\nrow\nrow\nrow\nrow\nrow\nrow\nrow\nrow\nrow\nrow\nrow\nrow\nrow\nrow\ntail'
+budget = 127
+
+    @pytest.mark.parametrize("budget", [32, 33, 64, 127])
+    @pytest.mark.parametrize("message", ["a" * 400, "汉字🧪e\u0301" * 90, "head\n" + "row\n" * 100 + "tail"],
+                             ids=["ascii", "unicode", "multiline"])
+    def test_message_budget_and_alignment(message, budget):
+>       formatter = Formatter("[%(levelname)s] %(message)s", max_message_chars=budget)
+                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       TypeError: NewLineFormatter.__init__() got an unexpected keyword argument 'max_message_chars'
+
+.course/test_logger.py:52: TypeError
+___________________ test_short_or_exact_message_unchanged[0] ___________________
+
+length = 0
+
+    @pytest.mark.parametrize("length", [0, 31, 32])
+    def test_short_or_exact_message_unchanged(length):
+        text = "x" * length
+>       assert Formatter("%(message)s", max_message_chars=32).format(record(text)) == text
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       TypeError: NewLineFormatter.__init__() got an unexpected keyword argument 'max_message_chars'
+
+.course/test_logger.py:61: TypeError
+__________________ test_short_or_exact_message_unchanged[31] ___________________
+
+length = 31
+
+    @pytest.mark.parametrize("length", [0, 31, 32])
+    def test_short_or_exact_message_unchanged(length):
+        text = "x" * length
+>       assert Formatter("%(message)s", max_message_chars=32).format(record(text)) == text
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       TypeError: NewLineFormatter.__init__() got an unexpected keyword argument 'max_message_chars'
+
+.course/test_logger.py:61: TypeError
+__________________ test_short_or_exact_message_unchanged[32] ___________________
+
+length = 32
+
+    @pytest.mark.parametrize("length", [0, 31, 32])
+    def test_short_or_exact_message_unchanged(length):
+        text = "x" * length
+>       assert Formatter("%(message)s", max_message_chars=32).format(record(text)) == text
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       TypeError: NewLineFormatter.__init__() got an unexpected keyword argument 'max_message_chars'
+
+.course/test_logger.py:61: TypeError
+____________ test_format_arguments_before_counting_and_keep_record _____________
+
+    def test_format_arguments_before_counting_and_keep_record():
+        entry = record("value=%s", ("x" * 100,))
+        original = (entry.msg, entry.args, entry.exc_info, entry.stack_info)
+>       result = Formatter("%(message)s", max_message_chars=32).format(entry)
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       TypeError: NewLineFormatter.__init__() got an unexpected keyword argument 'max_message_chars'
+
+.course/test_logger.py:67: TypeError
+__________________________ test_invalid_budget[True] ___________________________
+
+value = True
+
+    @pytest.mark.parametrize("value", [True, False, 0, 31, -1, 32.0, "64", [], {}])
+    def test_invalid_budget(value):
+        with pytest.raises(ValueError):
+>           Formatter("%(message)s", max_message_chars=value)
+E           TypeError: NewLineFormatter.__init__() got an unexpected keyword argument 'max_message_chars'
+
+.course/test_logger.py:76: TypeError
+__________________________ test_invalid_budget[False] __________________________
+
+value = False
+
+    @pytest.mark.parametrize("value", [True, False, 0, 31, -1, 32.0, "64", [], {}])
+    def test_invalid_budget(value):
+        with pytest.raises(ValueError):
+>           Formatter("%(message)s", max_message_chars=value)
+E           TypeError: NewLineFormatter.__init__() got an unexpected keyword argument 'max_message_chars'
+
+.course/test_logger.py:76: TypeError
+____________________________ test_invalid_budget[0] ____________________________
+
+value = 0
+
+    @pytest.mark.parametrize("value", [True, False, 0, 31, -1, 32.0, "64", [], {}])
+    def test_invalid_budget(value):
+        with pytest.raises(ValueError):
+>           Formatter("%(message)s", max_message_chars=value)
+E           TypeError: NewLineFormatter.__init__() got an unexpected keyword argument 'max_message_chars'
+
+.course/test_logger.py:76: TypeError
+___________________________ test_invalid_budget[31] ____________________________
+
+value = 31
+
+    @pytest.mark.parametrize("value", [True, False, 0, 31, -1, 32.0, "64", [], {}])
+    def test_invalid_budget(value):
+        with pytest.raises(ValueError):
+>           Formatter("%(message)s", max_message_chars=value)
+E           TypeError: NewLineFormatter.__init__() got an unexpected keyword argument 'max_message_chars'
+
+.course/test_logger.py:76: TypeError
+___________________________ test_invalid_budget[-1] ____________________________
+
+value = -1
+
+    @pytest.mark.parametrize("value", [True, False, 0, 31, -1, 32.0, "64", [], {}])
+    def test_invalid_budget(value):
+        with pytest.raises(ValueError):
+>           Formatter("%(message)s", max_message_chars=value)
+E           TypeError: NewLineFormatter.__init__() got an unexpected keyword argument 'max_message_chars'
+
+.course/test_logger.py:76: TypeError
+__________________________ test_invalid_budget[32.0] ___________________________
+
+value = 32.0
+
+    @pytest.mark.parametrize("value", [True, False, 0, 31, -1, 32.0, "64", [], {}])
+    def test_invalid_budget(value):
+        with pytest.raises(ValueError):
+>           Formatter("%(message)s", max_message_chars=value)
+E           TypeError: NewLineFormatter.__init__() got an unexpected keyword argument 'max_message_chars'
+
+.course/test_logger.py:76: TypeError
+___________________________ test_invalid_budget[64] ____________________________
+
+value = '64'
+
+    @pytest.mark.parametrize("value", [True, False, 0, 31, -1, 32.0, "64", [], {}])
+    def test_invalid_budget(value):
+        with pytest.raises(ValueError):
+>           Formatter("%(message)s", max_message_chars=value)
+E           TypeError: NewLineFormatter.__init__() got an unexpected keyword argument 'max_message_chars'
+
+.course/test_logger.py:76: TypeError
+_________________________ test_invalid_budget[value7] __________________________
+
+value = []
+
+    @pytest.mark.parametrize("value", [True, False, 0, 31, -1, 32.0, "64", [], {}])
+    def test_invalid_budget(value):
+        with pytest.raises(ValueError):
+>           Formatter("%(message)s", max_message_chars=value)
+E           TypeError: NewLineFormatter.__init__() got an unexpected keyword argument 'max_message_chars'
+
+.course/test_logger.py:76: TypeError
+_________________________ test_invalid_budget[value8] __________________________
+
+value = {}
+
+    @pytest.mark.parametrize("value", [True, False, 0, 31, -1, 32.0, "64", [], {}])
+    def test_invalid_budget(value):
+        with pytest.raises(ValueError):
+>           Formatter("%(message)s", max_message_chars=value)
+E           TypeError: NewLineFormatter.__init__() got an unexpected keyword argument 'max_message_chars'
+
+.course/test_logger.py:76: TypeError
+___________________ test_none_explicitly_keeps_full_message ____________________
+
+    def test_none_explicitly_keeps_full_message():
+        text = "a" * 1000
+>       assert Formatter("%(message)s", max_message_chars=None).format(record(text)) == text
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       TypeError: NewLineFormatter.__init__() got an unexpected keyword argument 'max_message_chars'
+
+.course/test_logger.py:81: TypeError
+_______________ test_exception_and_stack_are_not_message_budget ________________
+
+    def test_exception_and_stack_are_not_message_budget():
+        entry = record("x" * 120)
+        try:
+            raise RuntimeError("retained exception details")
+        except RuntimeError:
+            entry.exc_info = sys.exc_info()
+        entry.stack_info = "retained stack details"
+>       formatter = Formatter("%(message)s", max_message_chars=32)
+                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       TypeError: NewLineFormatter.__init__() got an unexpected keyword argument 'max_message_chars'
+
+.course/test_logger.py:96: TypeError
+___________________ test_two_real_handlers_share_one_record ____________________
+
+    def test_two_real_handlers_share_one_record():
+        full, bounded = io.StringIO(), io.StringIO()
+        logger = logging.Logger("course.integration")
+        for stream, options in [(bounded, {"max_message_chars": 64}), (full, {})]:
+            handler = logging.StreamHandler(stream)
+>           handler.setFormatter(Formatter("%(message)s", **options))
+                                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E           TypeError: NewLineFormatter.__init__() got an unexpected keyword argument 'max_message_chars'
+
+.course/test_logger.py:108: TypeError
+____________________ test_unset_configuration_is_unlimited _____________________
+
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x7f0ae3a4e1e0>
+
+    def test_unset_configuration_is_unlimited(monkeypatch):
+>       formatter = configure(monkeypatch, None)
+                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+.course/test_logging_config.py:41: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x7f0ae3a4e1e0>
+value = None
+
+    def configure(monkeypatch, value):
+>       assert NAME in environ._descriptors, "新增配置须接入原有 EnvVar 描述符机制"
+E       AssertionError: 新增配置须接入原有 EnvVar 描述符机制
+E       assert 'DEEPINFER_LOG_MAX_MESSAGE_CHARS' in {'DEEPINFER_ACCELERATOR': <deepinfer.environ.EnvVar object at 0x7f0ae3c9cf40>, 'DEEPINFER_BATCH_INVARIANT': <deepinfer...t 0x7f0ae3c618c0>, 'DEEPINFER_CUDAGRAPH_BATCH_SIZE_INTERVAL': <deepinfer.environ.EnvVar object at 0x7f0ae3c9fac0>, ...}
+E        +  where {'DEEPINFER_ACCELERATOR': <deepinfer.environ.EnvVar object at 0x7f0ae3c9cf40>, 'DEEPINFER_BATCH_INVARIANT': <deepinfer...t 0x7f0ae3c618c0>, 'DEEPINFER_CUDAGRAPH_BATCH_SIZE_INTERVAL': <deepinfer.environ.EnvVar object at 0x7f0ae3c9fac0>, ...} = environ._descriptors
+
+.course/test_logging_config.py:30: AssertionError
+_______________ test_configuration_reaches_default_formatter[32] _______________
+
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x7f0ae3a4ec90>
+value = '32'
+
+    @pytest.mark.parametrize("value", ["32", "33", "96", "1000"])
+    def test_configuration_reaches_default_formatter(monkeypatch, value):
+>       formatter = configure(monkeypatch, value)
+                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+.course/test_logging_config.py:49: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x7f0ae3a4ec90>
+value = '32'
+
+    def configure(monkeypatch, value):
+>       assert NAME in environ._descriptors, "新增配置须接入原有 EnvVar 描述符机制"
+E       AssertionError: 新增配置须接入原有 EnvVar 描述符机制
+E       assert 'DEEPINFER_LOG_MAX_MESSAGE_CHARS' in {'DEEPINFER_ACCELERATOR': <deepinfer.environ.EnvVar object at 0x7f0ae3c9cf40>, 'DEEPINFER_BATCH_INVARIANT': <deepinfer...t 0x7f0ae3c618c0>, 'DEEPINFER_CUDAGRAPH_BATCH_SIZE_INTERVAL': <deepinfer.environ.EnvVar object at 0x7f0ae3c9fac0>, ...}
+E        +  where {'DEEPINFER_ACCELERATOR': <deepinfer.environ.EnvVar object at 0x7f0ae3c9cf40>, 'DEEPINFER_BATCH_INVARIANT': <deepinfer...t 0x7f0ae3c618c0>, 'DEEPINFER_CUDAGRAPH_BATCH_SIZE_INTERVAL': <deepinfer.environ.EnvVar object at 0x7f0ae3c9fac0>, ...} = environ._descriptors
+
+.course/test_logging_config.py:30: AssertionError
+_______________ test_configuration_reaches_default_formatter[33] _______________
+
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x7f0ae3b1b0e0>
+value = '33'
+
+    @pytest.mark.parametrize("value", ["32", "33", "96", "1000"])
+    def test_configuration_reaches_default_formatter(monkeypatch, value):
+>       formatter = configure(monkeypatch, value)
+                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+.course/test_logging_config.py:49: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x7f0ae3b1b0e0>
+value = '33'
+
+    def configure(monkeypatch, value):
+>       assert NAME in environ._descriptors, "新增配置须接入原有 EnvVar 描述符机制"
+E       AssertionError: 新增配置须接入原有 EnvVar 描述符机制
+E       assert 'DEEPINFER_LOG_MAX_MESSAGE_CHARS' in {'DEEPINFER_ACCELERATOR': <deepinfer.environ.EnvVar object at 0x7f0ae3c9cf40>, 'DEEPINFER_BATCH_INVARIANT': <deepinfer...t 0x7f0ae3c618c0>, 'DEEPINFER_CUDAGRAPH_BATCH_SIZE_INTERVAL': <deepinfer.environ.EnvVar object at 0x7f0ae3c9fac0>, ...}
+E        +  where {'DEEPINFER_ACCELERATOR': <deepinfer.environ.EnvVar object at 0x7f0ae3c9cf40>, 'DEEPINFER_BATCH_INVARIANT': <deepinfer...t 0x7f0ae3c618c0>, 'DEEPINFER_CUDAGRAPH_BATCH_SIZE_INTERVAL': <deepinfer.environ.EnvVar object at 0x7f0ae3c9fac0>, ...} = environ._descriptors
+
+.course/test_logging_config.py:30: AssertionError
+_______________ test_configuration_reaches_default_formatter[96] _______________
+
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x7f0ae3b181a0>
+value = '96'
+
+    @pytest.mark.parametrize("value", ["32", "33", "96", "1000"])
+    def test_configuration_reaches_default_formatter(monkeypatch, value):
+>       formatter = configure(monkeypatch, value)
+                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+.course/test_logging_config.py:49: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x7f0ae3b181a0>
+value = '96'
+
+    def configure(monkeypatch, value):
+>       assert NAME in environ._descriptors, "新增配置须接入原有 EnvVar 描述符机制"
+E       AssertionError: 新增配置须接入原有 EnvVar 描述符机制
+E       assert 'DEEPINFER_LOG_MAX_MESSAGE_CHARS' in {'DEEPINFER_ACCELERATOR': <deepinfer.environ.EnvVar object at 0x7f0ae3c9cf40>, 'DEEPINFER_BATCH_INVARIANT': <deepinfer...t 0x7f0ae3c618c0>, 'DEEPINFER_CUDAGRAPH_BATCH_SIZE_INTERVAL': <deepinfer.environ.EnvVar object at 0x7f0ae3c9fac0>, ...}
+E        +  where {'DEEPINFER_ACCELERATOR': <deepinfer.environ.EnvVar object at 0x7f0ae3c9cf40>, 'DEEPINFER_BATCH_INVARIANT': <deepinfer...t 0x7f0ae3c618c0>, 'DEEPINFER_CUDAGRAPH_BATCH_SIZE_INTERVAL': <deepinfer.environ.EnvVar object at 0x7f0ae3c9fac0>, ...} = environ._descriptors
+
+.course/test_logging_config.py:30: AssertionError
+______________ test_configuration_reaches_default_formatter[1000] ______________
+
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x7f0ae3b185c0>
+value = '1000'
+
+    @pytest.mark.parametrize("value", ["32", "33", "96", "1000"])
+    def test_configuration_reaches_default_formatter(monkeypatch, value):
+>       formatter = configure(monkeypatch, value)
+                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+.course/test_logging_config.py:49: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x7f0ae3b185c0>
+value = '1000'
+
+    def configure(monkeypatch, value):
+>       assert NAME in environ._descriptors, "新增配置须接入原有 EnvVar 描述符机制"
+E       AssertionError: 新增配置须接入原有 EnvVar 描述符机制
+E       assert 'DEEPINFER_LOG_MAX_MESSAGE_CHARS' in {'DEEPINFER_ACCELERATOR': <deepinfer.environ.EnvVar object at 0x7f0ae3c9cf40>, 'DEEPINFER_BATCH_INVARIANT': <deepinfer...t 0x7f0ae3c618c0>, 'DEEPINFER_CUDAGRAPH_BATCH_SIZE_INTERVAL': <deepinfer.environ.EnvVar object at 0x7f0ae3c9fac0>, ...}
+E        +  where {'DEEPINFER_ACCELERATOR': <deepinfer.environ.EnvVar object at 0x7f0ae3c9cf40>, 'DEEPINFER_BATCH_INVARIANT': <deepinfer...t 0x7f0ae3c618c0>, 'DEEPINFER_CUDAGRAPH_BATCH_SIZE_INTERVAL': <deepinfer.environ.EnvVar object at 0x7f0ae3c9fac0>, ...} = environ._descriptors
+
+.course/test_logging_config.py:30: AssertionError
+_________________ test_invalid_environment_has_variable_name[] _________________
+
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x7f0ae3b1a6f0>
+value = ''
+
+    @pytest.mark.parametrize("value", ["", "0", "31", "-1", "32.5", "true", "many"])
+    def test_invalid_environment_has_variable_name(monkeypatch, value):
+>       assert NAME in environ._descriptors
+E       AssertionError: assert 'DEEPINFER_LOG_MAX_MESSAGE_CHARS' in {'DEEPINFER_ACCELERATOR': <deepinfer.environ.EnvVar object at 0x7f0ae3c9cf40>, 'DEEPINFER_BATCH_INVARIANT': <deepinfer...t 0x7f0ae3c618c0>, 'DEEPINFER_CUDAGRAPH_BATCH_SIZE_INTERVAL': <deepinfer.environ.EnvVar object at 0x7f0ae3c9fac0>, ...}
+E        +  where {'DEEPINFER_ACCELERATOR': <deepinfer.environ.EnvVar object at 0x7f0ae3c9cf40>, 'DEEPINFER_BATCH_INVARIANT': <deepinfer...t 0x7f0ae3c618c0>, 'DEEPINFER_CUDAGRAPH_BATCH_SIZE_INTERVAL': <deepinfer.environ.EnvVar object at 0x7f0ae3c9fac0>, ...} = environ._descriptors
+
+.course/test_logging_config.py:57: AssertionError
+________________ test_invalid_environment_has_variable_name[0] _________________
+
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x7f0ae3b1af30>
+value = '0'
+
+    @pytest.mark.parametrize("value", ["", "0", "31", "-1", "32.5", "true", "many"])
+    def test_invalid_environment_has_variable_name(monkeypatch, value):
+>       assert NAME in environ._descriptors
+E       AssertionError: assert 'DEEPINFER_LOG_MAX_MESSAGE_CHARS' in {'DEEPINFER_ACCELERATOR': <deepinfer.environ.EnvVar object at 0x7f0ae3c9cf40>, 'DEEPINFER_BATCH_INVARIANT': <deepinfer...t 0x7f0ae3c618c0>, 'DEEPINFER_CUDAGRAPH_BATCH_SIZE_INTERVAL': <deepinfer.environ.EnvVar object at 0x7f0ae3c9fac0>, ...}
+E        +  where {'DEEPINFER_ACCELERATOR': <deepinfer.environ.EnvVar object at 0x7f0ae3c9cf40>, 'DEEPINFER_BATCH_INVARIANT': <deepinfer...t 0x7f0ae3c618c0>, 'DEEPINFER_CUDAGRAPH_BATCH_SIZE_INTERVAL': <deepinfer.environ.EnvVar object at 0x7f0ae3c9fac0>, ...} = environ._descriptors
+
+.course/test_logging_config.py:57: AssertionError
+________________ test_invalid_environment_has_variable_name[31] ________________
+
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x7f0ae3b0e990>
+value = '31'
+
+    @pytest.mark.parametrize("value", ["", "0", "31", "-1", "32.5", "true", "many"])
+    def test_invalid_environment_has_variable_name(monkeypatch, value):
+>       assert NAME in environ._descriptors
+E       AssertionError: assert 'DEEPINFER_LOG_MAX_MESSAGE_CHARS' in {'DEEPINFER_ACCELERATOR': <deepinfer.environ.EnvVar object at 0x7f0ae3c9cf40>, 'DEEPINFER_BATCH_INVARIANT': <deepinfer...t 0x7f0ae3c618c0>, 'DEEPINFER_CUDAGRAPH_BATCH_SIZE_INTERVAL': <deepinfer.environ.EnvVar object at 0x7f0ae3c9fac0>, ...}
+E        +  where {'DEEPINFER_ACCELERATOR': <deepinfer.environ.EnvVar object at 0x7f0ae3c9cf40>, 'DEEPINFER_BATCH_INVARIANT': <deepinfer...t 0x7f0ae3c618c0>, 'DEEPINFER_CUDAGRAPH_BATCH_SIZE_INTERVAL': <deepinfer.environ.EnvVar object at 0x7f0ae3c9fac0>, ...} = environ._descriptors
+
+.course/test_logging_config.py:57: AssertionError
+________________ test_invalid_environment_has_variable_name[-1] ________________
+
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x7f0ae3b1be00>
+value = '-1'
+
+    @pytest.mark.parametrize("value", ["", "0", "31", "-1", "32.5", "true", "many"])
+    def test_invalid_environment_has_variable_name(monkeypatch, value):
+>       assert NAME in environ._descriptors
+E       AssertionError: assert 'DEEPINFER_LOG_MAX_MESSAGE_CHARS' in {'DEEPINFER_ACCELERATOR': <deepinfer.environ.EnvVar object at 0x7f0ae3c9cf40>, 'DEEPINFER_BATCH_INVARIANT': <deepinfer...t 0x7f0ae3c618c0>, 'DEEPINFER_CUDAGRAPH_BATCH_SIZE_INTERVAL': <deepinfer.environ.EnvVar object at 0x7f0ae3c9fac0>, ...}
+E        +  where {'DEEPINFER_ACCELERATOR': <deepinfer.environ.EnvVar object at 0x7f0ae3c9cf40>, 'DEEPINFER_BATCH_INVARIANT': <deepinfer...t 0x7f0ae3c618c0>, 'DEEPINFER_CUDAGRAPH_BATCH_SIZE_INTERVAL': <deepinfer.environ.EnvVar object at 0x7f0ae3c9fac0>, ...} = environ._descriptors
+
+.course/test_logging_config.py:57: AssertionError
+_______________ test_invalid_environment_has_variable_name[32.5] _______________
+
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x7f0ae3b18830>
+value = '32.5'
+
+    @pytest.mark.parametrize("value", ["", "0", "31", "-1", "32.5", "true", "many"])
+    def test_invalid_environment_has_variable_name(monkeypatch, value):
+>       assert NAME in environ._descriptors
+E       AssertionError: assert 'DEEPINFER_LOG_MAX_MESSAGE_CHARS' in {'DEEPINFER_ACCELERATOR': <deepinfer.environ.EnvVar object at 0x7f0ae3c9cf40>, 'DEEPINFER_BATCH_INVARIANT': <deepinfer...t 0x7f0ae3c618c0>, 'DEEPINFER_CUDAGRAPH_BATCH_SIZE_INTERVAL': <deepinfer.environ.EnvVar object at 0x7f0ae3c9fac0>, ...}
+E        +  where {'DEEPINFER_ACCELERATOR': <deepinfer.environ.EnvVar object at 0x7f0ae3c9cf40>, 'DEEPINFER_BATCH_INVARIANT': <deepinfer...t 0x7f0ae3c618c0>, 'DEEPINFER_CUDAGRAPH_BATCH_SIZE_INTERVAL': <deepinfer.environ.EnvVar object at 0x7f0ae3c9fac0>, ...} = environ._descriptors
+
+.course/test_logging_config.py:57: AssertionError
+_______________ test_invalid_environment_has_variable_name[true] _______________
+
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x7f0ae3b18fb0>
+value = 'true'
+
+    @pytest.mark.parametrize("value", ["", "0", "31", "-1", "32.5", "true", "many"])
+    def test_invalid_environment_has_variable_name(monkeypatch, value):
+>       assert NAME in environ._descriptors
+E       AssertionError: assert 'DEEPINFER_LOG_MAX_MESSAGE_CHARS' in {'DEEPINFER_ACCELERATOR': <deepinfer.environ.EnvVar object at 0x7f0ae3c9cf40>, 'DEEPINFER_BATCH_INVARIANT': <deepinfer...t 0x7f0ae3c618c0>, 'DEEPINFER_CUDAGRAPH_BATCH_SIZE_INTERVAL': <deepinfer.environ.EnvVar object at 0x7f0ae3c9fac0>, ...}
+E        +  where {'DEEPINFER_ACCELERATOR': <deepinfer.environ.EnvVar object at 0x7f0ae3c9cf40>, 'DEEPINFER_BATCH_INVARIANT': <deepinfer...t 0x7f0ae3c618c0>, 'DEEPINFER_CUDAGRAPH_BATCH_SIZE_INTERVAL': <deepinfer.environ.EnvVar object at 0x7f0ae3c9fac0>, ...} = environ._descriptors
+
+.course/test_logging_config.py:57: AssertionError
+_______________ test_invalid_environment_has_variable_name[many] _______________
+
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x7f0ae3a4d7c0>
+value = 'many'
+
+    @pytest.mark.parametrize("value", ["", "0", "31", "-1", "32.5", "true", "many"])
+    def test_invalid_environment_has_variable_name(monkeypatch, value):
+>       assert NAME in environ._descriptors
+E       AssertionError: assert 'DEEPINFER_LOG_MAX_MESSAGE_CHARS' in {'DEEPINFER_ACCELERATOR': <deepinfer.environ.EnvVar object at 0x7f0ae3c9cf40>, 'DEEPINFER_BATCH_INVARIANT': <deepinfer...t 0x7f0ae3c618c0>, 'DEEPINFER_CUDAGRAPH_BATCH_SIZE_INTERVAL': <deepinfer.environ.EnvVar object at 0x7f0ae3c9fac0>, ...}
+E        +  where {'DEEPINFER_ACCELERATOR': <deepinfer.environ.EnvVar object at 0x7f0ae3c9cf40>, 'DEEPINFER_BATCH_INVARIANT': <deepinfer...t 0x7f0ae3c618c0>, 'DEEPINFER_CUDAGRAPH_BATCH_SIZE_INTERVAL': <deepinfer.environ.EnvVar object at 0x7f0ae3c9fac0>, ...} = environ._descriptors
+
+.course/test_logging_config.py:57: AssertionError
+_________________ test_environment_cache_and_explicit_refresh __________________
+
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x7f0ae3a4ddc0>
+
+    def test_environment_cache_and_explicit_refresh(monkeypatch):
+>       old = configure(monkeypatch, "32")
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+.course/test_logging_config.py:65: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x7f0ae3a4ddc0>
+value = '32'
+
+    def configure(monkeypatch, value):
+>       assert NAME in environ._descriptors, "新增配置须接入原有 EnvVar 描述符机制"
+E       AssertionError: 新增配置须接入原有 EnvVar 描述符机制
+E       assert 'DEEPINFER_LOG_MAX_MESSAGE_CHARS' in {'DEEPINFER_ACCELERATOR': <deepinfer.environ.EnvVar object at 0x7f0ae3c9cf40>, 'DEEPINFER_BATCH_INVARIANT': <deepinfer...t 0x7f0ae3c618c0>, 'DEEPINFER_CUDAGRAPH_BATCH_SIZE_INTERVAL': <deepinfer.environ.EnvVar object at 0x7f0ae3c9fac0>, ...}
+E        +  where {'DEEPINFER_ACCELERATOR': <deepinfer.environ.EnvVar object at 0x7f0ae3c9cf40>, 'DEEPINFER_BATCH_INVARIANT': <deepinfer...t 0x7f0ae3c618c0>, 'DEEPINFER_CUDAGRAPH_BATCH_SIZE_INTERVAL': <deepinfer.environ.EnvVar object at 0x7f0ae3c9fac0>, ...} = environ._descriptors
+
+.course/test_logging_config.py:30: AssertionError
+___________________ test_rearm_all_refreshes_new_descriptor ____________________
+
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x7f0ae3a4c410>
+
+    def test_rearm_all_refreshes_new_descriptor(monkeypatch):
+>       configure(monkeypatch, "32")
+
+.course/test_logging_config.py:79: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x7f0ae3a4c410>
+value = '32'
+
+    def configure(monkeypatch, value):
+>       assert NAME in environ._descriptors, "新增配置须接入原有 EnvVar 描述符机制"
+E       AssertionError: 新增配置须接入原有 EnvVar 描述符机制
+E       assert 'DEEPINFER_LOG_MAX_MESSAGE_CHARS' in {'DEEPINFER_ACCELERATOR': <deepinfer.environ.EnvVar object at 0x7f0ae3c9cf40>, 'DEEPINFER_BATCH_INVARIANT': <deepinfer...t 0x7f0ae3c618c0>, 'DEEPINFER_CUDAGRAPH_BATCH_SIZE_INTERVAL': <deepinfer.environ.EnvVar object at 0x7f0ae3c9fac0>, ...}
+E        +  where {'DEEPINFER_ACCELERATOR': <deepinfer.environ.EnvVar object at 0x7f0ae3c9cf40>, 'DEEPINFER_BATCH_INVARIANT': <deepinfer...t 0x7f0ae3c618c0>, 'DEEPINFER_CUDAGRAPH_BATCH_SIZE_INTERVAL': <deepinfer.environ.EnvVar object at 0x7f0ae3c9fac0>, ...} = environ._descriptors
+
+.course/test_logging_config.py:30: AssertionError
+________________ test_default_setup_does_not_duplicate_handlers ________________
+
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x7f0ae3a9eae0>
+
+    def test_default_setup_does_not_duplicate_handlers(monkeypatch):
+>       configure(monkeypatch, "64")
+
+.course/test_logging_config.py:86: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x7f0ae3a9eae0>
+value = '64'
+
+    def configure(monkeypatch, value):
+>       assert NAME in environ._descriptors, "新增配置须接入原有 EnvVar 描述符机制"
+E       AssertionError: 新增配置须接入原有 EnvVar 描述符机制
+E       assert 'DEEPINFER_LOG_MAX_MESSAGE_CHARS' in {'DEEPINFER_ACCELERATOR': <deepinfer.environ.EnvVar object at 0x7f0ae3c9cf40>, 'DEEPINFER_BATCH_INVARIANT': <deepinfer...t 0x7f0ae3c618c0>, 'DEEPINFER_CUDAGRAPH_BATCH_SIZE_INTERVAL': <deepinfer.environ.EnvVar object at 0x7f0ae3c9fac0>, ...}
+E        +  where {'DEEPINFER_ACCELERATOR': <deepinfer.environ.EnvVar object at 0x7f0ae3c9cf40>, 'DEEPINFER_BATCH_INVARIANT': <deepinfer...t 0x7f0ae3c618c0>, 'DEEPINFER_CUDAGRAPH_BATCH_SIZE_INTERVAL': <deepinfer.environ.EnvVar object at 0x7f0ae3c9fac0>, ...} = environ._descriptors
+
+.course/test_logging_config.py:30: AssertionError
+_____________ test_only_literal_true_preserves_full_message[True] ______________
+
+flag = True
+
+    @pytest.mark.parametrize("flag", [True, False, 1, "true", None])
+    def test_only_literal_true_preserves_full_message(flag):
+        entry = record("字" * 200)
+        entry.keep_full_message = flag
+>       actual = module.NewLineFormatter("%(message)s", max_message_chars=32).format(entry)
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       TypeError: NewLineFormatter.__init__() got an unexpected keyword argument 'max_message_chars'
+
+.course/test_logging_config.py:98: TypeError
+_____________ test_only_literal_true_preserves_full_message[False] _____________
+
+flag = False
+
+    @pytest.mark.parametrize("flag", [True, False, 1, "true", None])
+    def test_only_literal_true_preserves_full_message(flag):
+        entry = record("字" * 200)
+        entry.keep_full_message = flag
+>       actual = module.NewLineFormatter("%(message)s", max_message_chars=32).format(entry)
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       TypeError: NewLineFormatter.__init__() got an unexpected keyword argument 'max_message_chars'
+
+.course/test_logging_config.py:98: TypeError
+_______________ test_only_literal_true_preserves_full_message[1] _______________
+
+flag = 1
+
+    @pytest.mark.parametrize("flag", [True, False, 1, "true", None])
+    def test_only_literal_true_preserves_full_message(flag):
+        entry = record("字" * 200)
+        entry.keep_full_message = flag
+>       actual = module.NewLineFormatter("%(message)s", max_message_chars=32).format(entry)
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       TypeError: NewLineFormatter.__init__() got an unexpected keyword argument 'max_message_chars'
+
+.course/test_logging_config.py:98: TypeError
+_____________ test_only_literal_true_preserves_full_message[true] ______________
+
+flag = 'true'
+
+    @pytest.mark.parametrize("flag", [True, False, 1, "true", None])
+    def test_only_literal_true_preserves_full_message(flag):
+        entry = record("字" * 200)
+        entry.keep_full_message = flag
+>       actual = module.NewLineFormatter("%(message)s", max_message_chars=32).format(entry)
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       TypeError: NewLineFormatter.__init__() got an unexpected keyword argument 'max_message_chars'
+
+.course/test_logging_config.py:98: TypeError
+_____________ test_only_literal_true_preserves_full_message[None] ______________
+
+flag = None
+
+    @pytest.mark.parametrize("flag", [True, False, 1, "true", None])
+    def test_only_literal_true_preserves_full_message(flag):
+        entry = record("字" * 200)
+        entry.keep_full_message = flag
+>       actual = module.NewLineFormatter("%(message)s", max_message_chars=32).format(entry)
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       TypeError: NewLineFormatter.__init__() got an unexpected keyword argument 'max_message_chars'
+
+.course/test_logging_config.py:98: TypeError
+___________ test_independent_formatter_does_not_inherit_environment ____________
+
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x7f0ae3a9e570>
+
+    def test_independent_formatter_does_not_inherit_environment(monkeypatch):
+>       configure(monkeypatch, "32")
+
+.course/test_logging_config.py:103: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x7f0ae3a9e570>
+value = '32'
+
+    def configure(monkeypatch, value):
+>       assert NAME in environ._descriptors, "新增配置须接入原有 EnvVar 描述符机制"
+E       AssertionError: 新增配置须接入原有 EnvVar 描述符机制
+E       assert 'DEEPINFER_LOG_MAX_MESSAGE_CHARS' in {'DEEPINFER_ACCELERATOR': <deepinfer.environ.EnvVar object at 0x7f0ae3c9cf40>, 'DEEPINFER_BATCH_INVARIANT': <deepinfer...t 0x7f0ae3c618c0>, 'DEEPINFER_CUDAGRAPH_BATCH_SIZE_INTERVAL': <deepinfer.environ.EnvVar object at 0x7f0ae3c9fac0>, ...}
+E        +  where {'DEEPINFER_ACCELERATOR': <deepinfer.environ.EnvVar object at 0x7f0ae3c9cf40>, 'DEEPINFER_BATCH_INVARIANT': <deepinfer...t 0x7f0ae3c618c0>, 'DEEPINFER_CUDAGRAPH_BATCH_SIZE_INTERVAL': <deepinfer.environ.EnvVar object at 0x7f0ae3c9fac0>, ...} = environ._descriptors
+
+.course/test_logging_config.py:30: AssertionError
+________________ test_real_default_handler_and_statistics_queue ________________
+
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x7f0ae3a4e360>
+
+    def test_real_default_handler_and_statistics_queue(monkeypatch):
+>       configure(monkeypatch, "64")
+
+.course/test_logging_config.py:109: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x7f0ae3a4e360>
+value = '64'
+
+    def configure(monkeypatch, value):
+>       assert NAME in environ._descriptors, "新增配置须接入原有 EnvVar 描述符机制"
+E       AssertionError: 新增配置须接入原有 EnvVar 描述符机制
+E       assert 'DEEPINFER_LOG_MAX_MESSAGE_CHARS' in {'DEEPINFER_ACCELERATOR': <deepinfer.environ.EnvVar object at 0x7f0ae3c9cf40>, 'DEEPINFER_BATCH_INVARIANT': <deepinfer...t 0x7f0ae3c618c0>, 'DEEPINFER_CUDAGRAPH_BATCH_SIZE_INTERVAL': <deepinfer.environ.EnvVar object at 0x7f0ae3c9fac0>, ...}
+E        +  where {'DEEPINFER_ACCELERATOR': <deepinfer.environ.EnvVar object at 0x7f0ae3c9cf40>, 'DEEPINFER_BATCH_INVARIANT': <deepinfer...t 0x7f0ae3c618c0>, 'DEEPINFER_CUDAGRAPH_BATCH_SIZE_INTERVAL': <deepinfer.environ.EnvVar object at 0x7f0ae3c9fac0>, ...} = environ._descriptors
+
+.course/test_logging_config.py:30: AssertionError
+=========================== short test summary info ============================
+FAILED .course/test_logger.py::test_message_budget_and_alignment[ascii-32] - ...
+FAILED .course/test_logger.py::test_message_budget_and_alignment[ascii-33] - ...
+FAILED .course/test_logger.py::test_message_budget_and_alignment[ascii-64] - ...
+FAILED .course/test_logger.py::test_message_budget_and_alignment[ascii-127]
+FAILED .course/test_logger.py::test_message_budget_and_alignment[unicode-32]
+FAILED .course/test_logger.py::test_message_budget_and_alignment[unicode-33]
+FAILED .course/test_logger.py::test_message_budget_and_alignment[unicode-64]
+FAILED .course/test_logger.py::test_message_budget_and_alignment[unicode-127]
+FAILED .course/test_logger.py::test_message_budget_and_alignment[multiline-32]
+FAILED .course/test_logger.py::test_message_budget_and_alignment[multiline-33]
+FAILED .course/test_logger.py::test_message_budget_and_alignment[multiline-64]
+FAILED .course/test_logger.py::test_message_budget_and_alignment[multiline-127]
+FAILED .course/test_logger.py::test_short_or_exact_message_unchanged[0] - Typ...
+FAILED .course/test_logger.py::test_short_or_exact_message_unchanged[31] - Ty...
+FAILED .course/test_logger.py::test_short_or_exact_message_unchanged[32] - Ty...
+FAILED .course/test_logger.py::test_format_arguments_before_counting_and_keep_record
+FAILED .course/test_logger.py::test_invalid_budget[True] - TypeError: NewLine...
+FAILED .course/test_logger.py::test_invalid_budget[False] - TypeError: NewLin...
+FAILED .course/test_logger.py::test_invalid_budget[0] - TypeError: NewLineFor...
+FAILED .course/test_logger.py::test_invalid_budget[31] - TypeError: NewLineFo...
+FAILED .course/test_logger.py::test_invalid_budget[-1] - TypeError: NewLineFo...
+FAILED .course/test_logger.py::test_invalid_budget[32.0] - TypeError: NewLine...
+FAILED .course/test_logger.py::test_invalid_budget[64] - TypeError: NewLineFo...
+FAILED .course/test_logger.py::test_invalid_budget[value7] - TypeError: NewLi...
+FAILED .course/test_logger.py::test_invalid_budget[value8] - TypeError: NewLi...
+FAILED .course/test_logger.py::test_none_explicitly_keeps_full_message - Type...
+FAILED .course/test_logger.py::test_exception_and_stack_are_not_message_budget
+FAILED .course/test_logger.py::test_two_real_handlers_share_one_record - Type...
+FAILED .course/test_logging_config.py::test_unset_configuration_is_unlimited
+FAILED .course/test_logging_config.py::test_configuration_reaches_default_formatter[32]
+FAILED .course/test_logging_config.py::test_configuration_reaches_default_formatter[33]
+FAILED .course/test_logging_config.py::test_configuration_reaches_default_formatter[96]
+FAILED .course/test_logging_config.py::test_configuration_reaches_default_formatter[1000]
+FAILED .course/test_logging_config.py::test_invalid_environment_has_variable_name[]
+FAILED .course/test_logging_config.py::test_invalid_environment_has_variable_name[0]
+FAILED .course/test_logging_config.py::test_invalid_environment_has_variable_name[31]
+FAILED .course/test_logging_config.py::test_invalid_environment_has_variable_name[-1]
+FAILED .course/test_logging_config.py::test_invalid_environment_has_variable_name[32.5]
+FAILED .course/test_logging_config.py::test_invalid_environment_has_variable_name[true]
+FAILED .course/test_logging_config.py::test_invalid_environment_has_variable_name[many]
+FAILED .course/test_logging_config.py::test_environment_cache_and_explicit_refresh
+FAILED .course/test_logging_config.py::test_rearm_all_refreshes_new_descriptor
+FAILED .course/test_logging_config.py::test_default_setup_does_not_duplicate_handlers
+FAILED .course/test_logging_config.py::test_only_literal_true_preserves_full_message[True]
+FAILED .course/test_logging_config.py::test_only_literal_true_preserves_full_message[False]
+FAILED .course/test_logging_config.py::test_only_literal_true_preserves_full_message[1]
+FAILED .course/test_logging_config.py::test_only_literal_true_preserves_full_message[true]
+FAILED .course/test_logging_config.py::test_only_literal_true_preserves_full_message[None]
+FAILED .course/test_logging_config.py::test_independent_formatter_does_not_inherit_environment
+FAILED .course/test_logging_config.py::test_real_default_handler_and_statistics_queue
+50 failed, 10 passed in 5.87s
