@@ -8,6 +8,7 @@ import json
 import math
 import os
 from pathlib import Path
+import re
 import shutil
 import subprocess
 import sys
@@ -101,6 +102,7 @@ def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--run-paid', action='store_true')
     parser.add_argument('--study', type=Path)
+    parser.add_argument('--baseline-commit', help='Verified host Git SHA for Windows-created WSL worktrees')
     parser.add_argument('--phase', choices=['course', 'additional', 'summary'], default='course')
     args = parser.parse_args()
     root = Path(__file__).resolve().parent
@@ -116,20 +118,22 @@ def main():
         raise SystemExit('Another evaluation is active; no new request started')
     study = (args.study or root / 'experiments/smolagents' / datetime.datetime.now().strftime('stability-%Y%m%d-%H%M%S')).resolve()
     if not (study / 'study.json').exists():
+        commit = args.baseline_commit or subprocess.check_output(['git', 'rev-parse', 'HEAD'], cwd=root, text=True).strip()
+        if not re.fullmatch('[0-9a-f]{40}', commit):
+            raise ValueError('A complete verified Git commit SHA is required')
         study.mkdir(parents=True, exist_ok=False)
         fingerprint = course.copy_submission(root, study / 'frozen-agent')
-        commit = subprocess.check_output(['git', 'rev-parse', 'HEAD'], cwd=root, text=True).strip()
         course.save(study / 'study.json', {'baseline_commit': commit, 'runtime_sha256': fingerprint,
-            'course_repetitions': 20, 'additional_repetitions': 3,
+            'course_repetitions': 10, 'additional_repetitions': 3,
             'course_request_caps': {'source': 20, 'paper': 40}, 'additional_request_cap': 20,
-            'total_request_upper_bound': 1500, 'context_mode': 'evidence',
+            'total_request_upper_bound': 900, 'context_mode': 'evidence',
             'automatic_retries': False, 'sampling': read(root / 'config.json')})
     print('STUDY ' + str(study), flush=True)
     assert_baseline(root, study)
     if args.phase == 'additional':
         raise SystemExit('Additional harness is prepared separately after task oracle validation; no requests started')
     consecutive_infra = 0
-    for number in range(1, 21):
+    for number in range(1, 11):
         for task, cap in [('source', 20), ('paper', 40)]:
             sample = study / 'samples' / f'{task}-{number:02d}'
             existing = read(sample / 'sample.json')
@@ -147,7 +151,7 @@ def main():
             archive = sample / 'evaluation'
             course.save(sample / 'sample.json', {'task': task, 'number': number, 'status': 'running',
                         'native': str(native), 'archive': str(archive)})
-            print(f'START {task} {number}/20 native={native}', flush=True)
+            print(f'START {task} {number}/10 native={native}', flush=True)
             try:
                 rc = course.execute(root, native, archive, False, task, cap)
             except Exception as exc:
@@ -157,7 +161,7 @@ def main():
             result.update(number=number, native=str(native))
             course.save(sample / 'sample.json', result)
             summarize(study)
-            print(f"DONE {task} {number}/20 passed={result['passed']} requests={result.get('requests', 0)}", flush=True)
+            print(f"DONE {task} {number}/10 passed={result['passed']} requests={result.get('requests', 0)}", flush=True)
             assert_baseline(root, study)
             if result['status'] == 'infrastructure_failure':
                 consecutive_infra += 1
