@@ -66,7 +66,7 @@ def make_agent(model, session, context=None, code_block_tags='markdown', use_str
             session.log("finish", summary=str(step.output))
 
     agent = CourseCodeAgent(tools=session.tools(), model=model, context=context,
-                            prompt_templates=course_prompt_templates(use_structured_outputs_internally)
+                            prompt_templates=course_prompt_templates(use_structured_outputs_internally, session.static_context_compact)
                             if session.contract.profile in {'source', 'paper'}
                             else None,
                             max_steps=session.contract.max_calls, planning_interval=None,

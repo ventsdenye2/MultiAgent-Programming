@@ -44,9 +44,29 @@ Available tools:
 {%- endif %}
 '''
 
+COMPACT_SYSTEM = '''Complete the task using the Python tools below.
+__OUTPUT_PROTOCOL__
+Call tools with keyword arguments; arrays are Python lists. Print needed output. Variables and imports persist,
+and successful statements before an error remain executed. Paths are relative to the task repository.
+Use tools for all file/command operations; edit only allowed files, never tests. Use current file_hash as expected_hash.
+Imports allowed: {{authorized_imports}}; import before use. Read sufficient evidence and avoid repeated unchanged reads.
+When the business deliverable is ready, call final_answer: it runs missing current-version verification,
+completes the plan on success, or returns the failure for repair. It cannot supply missing reading, baseline or report.
 
-def course_prompt_templates(structured=True):
+Available tools:
+```python
+{%- for tool in tools.values() %}
+{% if tool.compact_code_prompt is defined %}{{ tool.compact_code_prompt() }}{% else %}{{ tool.to_code_prompt() }}{% endif %}
+{% endfor %}
+```
+{%- if custom_instructions %}
+{{custom_instructions}}
+{%- endif %}
+'''
+
+
+def course_prompt_templates(structured=True, compact=False):
     templates = yaml.safe_load(importlib.resources.files('smolagents.prompts')
                                .joinpath('structured_code_agent.yaml' if structured else 'code_agent.yaml').read_text())
-    templates['system_prompt'] = SYSTEM.replace('__OUTPUT_PROTOCOL__', JSON_PROTOCOL if structured else PYTHON_PROTOCOL)
+    templates['system_prompt'] = (COMPACT_SYSTEM if compact else SYSTEM).replace('__OUTPUT_PROTOCOL__', JSON_PROTOCOL if structured else PYTHON_PROTOCOL)
     return templates

@@ -33,6 +33,24 @@ COURSE_TOOL_DETAILS = {
                 'Queued ids are not yet read. Do not print all pages.',
 }
 
+COMPACT_TOOL_DETAILS = {
+    'write_note': ' Returns dict: note_id, sources, chars.',
+    'save_answer': ' answer must contain exactly value. Returns dict: section, question_id, saved.',
+    'save_section': ' Returns dict: section, saved.',
+    'submit_report': ' Returns dict: ok, path, before_hash, file_hash, changed.',
+}
+
+SOURCE_WORKFLOW = '''Read all three files with read_file first, then read/reuse complete mechanisms from all three
+before the first edit. Source notes are OPTIONAL; current source blocks can be used directly.
+When progress says phase=edit, the initial reading and baseline are satisfied. Apply a scoped edit and verify.
+A note may replace original text only after its mechanisms were exposed. Do not repeat full reads to register them again.
+'''
+PAPER_WORKFLOW = '''Paper workflow: Plan, baseline pytest, read report.json and paper.json, then call read_pdf once for the full range. Read the delivered batches; they advance automatically after successful actions. On error use the retained batch. Do not print all pages or reread just to advance.
+Incrementally write_note for each topic, citing delivered evidence ids. Each final note must contain both answers, page numbers and continuous exact quotations supporting every answer item, within 1500 characters. Preserve earlier facts when updating.
+Save each answer via save_answer(section, question_id, answer={'value': ...}, evidence_id, page, quote); save prose via save_section. Choose answers and citations yourself: exact matching proves provenance, not semantic support. Support every array item. After all pages and all five latest notes have appeared together in a later request, call submit_report(overview, expected_hash), then final_answer.
+Multi-agent collaboration and training are future suggestions, not implemented features.
+'''
+
 
 class CourseTool(Tool):
     skip_forward_signature_validation = True  # Official wrapper-tool extension point.
@@ -59,10 +77,28 @@ class CourseTool(Tool):
         WorkspaceTools._validate_schema_value(arguments, self.parameters)
         return self.session.invoke(self.name, arguments)
 
+    def compact_code_prompt(self):
+        # Derive requiredness and Python defaults from the actual wrapper signature,
+        # never from Tool.inputs nullable (which describes a different property).
+        args, details = [], []
+        types = {'string': 'str', 'integer': 'int', 'number': 'float', 'boolean': 'bool',
+                 'array': 'list', 'object': 'dict'}
+        for key, parameter in self.call_signature.parameters.items():
+            schema = self.parameters['properties'][key]
+            detail = json.dumps(schema, ensure_ascii=False, separators=(',', ':'))
+            default = '' if parameter.default is Parameter.empty else ' = ' + repr(parameter.default)
+            args.append(f'{key}: {types.get(schema.get("type"), "object")}{default}')
+            details.append(f'{key}: {detail}')
+        description = self.description + COMPACT_TOOL_DETAILS.get(self.name, '')
+        doc = description + ('\n' + '\n'.join(details) if details else '')
+        # repr produces a valid Python string literal even for arbitrary metadata.
+        return f'def {self.name}({", ".join(args)}) -> dict:\n    {doc!r}'
+
 
 class CourseSession:
     def __init__(self, contract, output, log, config, auto=True):
         self.contract, self.log, self.auto = contract, log, auto
+        self.static_context_compact = config.get('static_context_compact', False)
         self.workspace = WorkspaceTools(contract.repo, output, contract.editable, log,
                                         command_rules=contract.verify_commands,
                                         command_timeout=config.get('command_timeout', 120),
@@ -349,6 +385,8 @@ class CourseSession:
         return True
 
     def task_prompt(self):
+        if self.static_context_compact and self.contract.profile in {'source', 'paper'}:
+            return self._compact_task_prompt()
         instructions = '''
 Use update_plan before editing, run baseline checks, then read the required files with read_file.
 Tools return Python dicts; use their file_hash for expected_hash. Variables persist across actions.
@@ -370,16 +408,24 @@ All writes and tests must use these tools.
             instructions += ('When calling write_note, include its complete exact content in the prose before the code '
                              'and pass the same text as one content string literal.\n')
         if self.contract.profile == 'source':
-            instructions += '''Read all three files with read_file first, then read/reuse complete mechanisms from all three
-before the first edit. Source notes are OPTIONAL; current source blocks can be used directly.
-When progress says phase=edit, the initial reading and baseline are satisfied. Apply a scoped edit and verify.
-A note may replace original text only after its mechanisms were exposed. Do not repeat full reads to register them again.
-'''
+            instructions += SOURCE_WORKFLOW
         elif self.contract.profile == 'paper':
-            instructions += '''Paper workflow: Plan, baseline pytest, read report.json and paper.json, then call read_pdf once for the full range. Read the delivered batches; they advance automatically after successful actions. On error use the retained batch. Do not print all pages or reread just to advance.
-Incrementally write_note for each topic, citing delivered evidence ids. Each final note must contain both answers, page numbers and continuous exact quotations supporting every answer item, within 1500 characters. Preserve earlier facts when updating.
-Save each answer via save_answer(section, question_id, answer={'value': ...}, evidence_id, page, quote); save prose via save_section. Choose answers and citations yourself: exact matching proves provenance, not semantic support. Support every array item. After all pages and all five latest notes have appeared together in a later request, call submit_report(overview, expected_hash), then final_answer.
-Multi-agent collaboration and training are future suggestions, not implemented features.
-'''
+            instructions += PAPER_WORKFLOW
+        return (self.contract.text + '\n\nCourse execution contract:\n' +
+                json.dumps(self.contract.view(), ensure_ascii=False) + instructions)
+
+    def _compact_task_prompt(self):
+        instructions = ('\nUse update_plan before editing and run baseline checks. '
+                        'os and pathlib are unavailable in action code.\n')
+        if self.agent._use_structured_outputs_internally:
+            instructions += ('For write_note, put the complete exact note text in thought and pass the same text '
+                             'as one content string literal in code.\n')
+        else:
+            instructions += ('For write_note, include its complete exact content in the prose before the code '
+                             'and pass the same text as one content string literal.\n')
+        if self.contract.profile == 'source':
+            instructions += SOURCE_WORKFLOW
+        else:
+            instructions += PAPER_WORKFLOW
         return (self.contract.text + '\n\nCourse execution contract:\n' +
                 json.dumps(self.contract.view(), ensure_ascii=False) + instructions)

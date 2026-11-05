@@ -1,0 +1,5 @@
+--- a/calc.py
++++ b/calc.py
+@@ -1 +1 @@
+-answer = 0
++answer = 42

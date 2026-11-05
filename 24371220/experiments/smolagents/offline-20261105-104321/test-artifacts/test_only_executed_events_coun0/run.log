@@ -1,0 +1,8 @@
+{"event": "model_request", "number": 1, "seq": 0}
+{"event": "command_result", "argv": ["/python", "-m", "pytest", "-q"], "rc": 1, "seq": 1}
+{"event": "model_request", "number": 2, "seq": 2}
+{"event": "file_write", "path": "report.json", "changed": true, "file_hash": "v2", "seq": 3}
+{"event": "agent_error", "error_type": "AgentExecutionError", "error": "import os", "seq": 4}
+{"event": "model_request", "number": 3, "seq": 5}
+{"event": "command_result", "argv": ["/python", "-m", "pytest", "-q"], "rc": 0, "seq": 6}
+{"event": "agent_step", "step": {"is_final_answer": true}, "seq": 7}

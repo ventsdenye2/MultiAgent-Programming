@@ -36,6 +36,70 @@ def strings(value):
             yield from strings(item)
 
 
+CONTEXT_CATEGORIES = ('core', 'tool', 'task', 'status', 'plan', 'recent', 'notes', 'evidence', 'other')
+
+
+def content_texts(content):
+    """Only message text, excluding roles, content types and image metadata."""
+    if isinstance(content, str):
+        yield content
+    elif isinstance(content, list):
+        for part in content:
+            yield from content_texts(part)
+    elif isinstance(content, dict) and isinstance(content.get('text'), str):
+        yield content['text']
+
+
+def system_segments(text):
+    """A reproducible boundary in the existing prompt, without rewriting it."""
+    before, marker, after = text.partition('Available tools:')
+    return [('core', before), ('tool', marker + after)] if marker else [('core', text)]
+
+
+def context_accounting(body, segments=()):
+    """Attribute actual SDK text; count JSON wrapping exactly once as residual.
+
+    Contributions count the serialized string interior, so quotes, backslashes
+    and control-character escapes reconcile with compact(body). Metadata,
+    roles, string quotes and all non-text request parameters belong to wrapping.
+    Exact sending-view segments survive SDK adjacent-role message merging;
+    unmatched text (including merge separators) is explicitly 'other'.
+    """
+    remaining = [(kind, text) for kind, text in segments
+                 if kind in CONTEXT_CATEGORIES and text]
+    raw = dict.fromkeys(CONTEXT_CATEGORIES, 0)
+    serialized = dict.fromkeys(CONTEXT_CATEGORIES, 0)
+
+    def add(kind, text):
+        raw[kind] += len(text)
+        serialized[kind] += len(compact(text)) - 2
+
+    for message in body.get('messages', []):
+        for text in content_texts(message.get('content')):
+            # System/tool declarations are present in native upstream views too.
+            if message.get('role') == 'system':
+                for kind, part in system_segments(text):
+                    add(kind, part)
+                continue
+            while text:
+                matches = [(text.find(value), -len(value), index, kind, value)
+                           for index, (kind, value) in enumerate(remaining) if value in text]
+                if not matches:
+                    add('other', text)
+                    break
+                offset, _, index, kind, value = min(matches)
+                add('other', text[:offset])
+                add(kind, value)
+                text = text[offset + len(value):]
+                remaining.pop(index)
+    total = len(compact(body))
+    text_total = sum(serialized.values())
+    return {'basis': 'actual_sdk_compact_json', 'compact_json_chars': total,
+            'text_chars': raw, 'text_json_chars': serialized,
+            'json_wrapper_chars': total - text_total,
+            'unmatched_manifest_segments': len(remaining)}
+
+
 def contains(value, text):
     forms = (text, json.dumps(text, ensure_ascii=False)[1:-1], json.dumps(text)[1:-1])
     return any(form in item for item in strings(value) for form in forms)
@@ -66,7 +130,7 @@ def reserve_request(path):
 
 
 class RequestAudit:
-    def __init__(self, contract, log, evidence=None):
+    def __init__(self, contract, log, evidence=None, context_accounting=True):
         self.contract, self.log, self.evidence = contract, log, evidence
         self.started = time.monotonic()
         self.calls = 0
@@ -77,6 +141,8 @@ class RequestAudit:
         self.stop_reason = None
         self.last_classification = None
         self.request_budget_path = os.environ.get('CODE_AGENT_REQUEST_BUDGET_FILE')
+        self.context_accounting = context_accounting
+        self.context_segments = []
 
     def guard(self):
         if self.calls >= self.contract.max_calls:
@@ -106,6 +172,11 @@ class RequestAudit:
         self.calls += 1
         self.bodies.append(body)
         self.log("model_request", number=self.calls, body=body, **size)
+        if self.context_accounting:
+            self.log('context_accounting', number=self.calls,
+                     wire_chars=len(request.content.decode('utf-8')),
+                     wire_bytes=len(request.content),
+                     **context_accounting(body, self.context_segments))
 
     def response(self, response):
         response.read()

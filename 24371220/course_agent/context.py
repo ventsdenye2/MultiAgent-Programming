@@ -4,7 +4,7 @@ import json
 from smolagents.memory import ActionStep, TaskStep
 from smolagents.models import ChatMessage, MessageRole
 
-from .audit import contains, strings
+from .audit import contains, strings, content_texts
 
 
 def message(text, role=MessageRole.USER):
@@ -146,17 +146,23 @@ class EvidenceContext:
         self.store.offered = []
         progress = self.session.progress(sending=True)
         fixed = memory.system_prompt.to_messages()
+        # Sidecar attribution follows message objects, never enters model input.
+        categories = {}
         for step in memory.steps:
             if isinstance(step, TaskStep):
-                fixed.extend(step.to_messages())
+                task_messages = step.to_messages()
+                fixed.extend(task_messages)
+                categories.update((id(m), 'task') for m in task_messages)
         if progress.plan:
             # The plan API requires exact titles/order. This is required control
             # state, not optional feedback: never hide it while enforcing it.
             fixed.append(message('Current plan; retain these exact titles and order, update status only:\n' +
                                  json.dumps(progress.plan_items, ensure_ascii=False)))
+            categories[id(fixed[-1])] = 'plan'
         minimum = ((80, 160, 256) if self.session.contract.profile in {'basic', 'generic'}
                    else (250, 700, 1200))
         prefix, recent = fixed + [self._status(progress)], self._recent(memory, minimum)
+        categories[id(prefix[-1])] = 'status'
         base = prefix + recent
         if not self.fits(base, model):
             size = model.measure(base)
@@ -321,5 +327,15 @@ class EvidenceContext:
                                                'minimum_frame': model.measure(base)['chars'],
                                                'payload_text': sum(len(s) for m in payload for s in strings(m.content))},
                               'reason': 'reserve required evidence before expanding recent feedback'}
+        categories.update((id(m), 'recent') for m in recent)
+        categories.update((id(m), 'notes') for m in payload)
+        categories.update((id(m), 'evidence') for m in original_payload)
+        if self.session.audit:
+            # Keep exact text only in the in-memory sidecar, not duplicated in
+            # context_selection logs. The HTTP hook reconciles after SDK conversion.
+            self.session.audit.context_segments = [
+                (categories.get(id(m), 'other'), text)
+                for m in messages if m.role != MessageRole.SYSTEM
+                for text in content_texts(m.content)]
         self.log('context_selection', **self.last_manifest)
         return messages
