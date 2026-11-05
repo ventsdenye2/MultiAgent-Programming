@@ -1,0 +1,21 @@
+{
+  "exit_code": 1,
+  "native": "/tmp/smolagents-offline-7z7_6337",
+  "filesystem": "ext2/ext3",
+  "python": "3.12.3 (main, Aug 31 2026, 10:18:26) [GCC 13.3.0]",
+  "provider_calls": 0,
+  "command": [
+    "/mnt/d/Muiti-Agent Programing/experiments/code-agent-smolagents/24371220/.venv/bin/python",
+    "-m",
+    "pytest",
+    "-q",
+    "test_static_context.py",
+    "test_static_acceptance.py",
+    "test_context_accounting.py",
+    "test_context_comparison.py",
+    "--basetemp",
+    "/tmp/smolagents-offline-7z7_6337/pytest",
+    "--junitxml",
+    "/mnt/d/Muiti-Agent Programing/experiments/code-agent-smolagents/24371220/experiments/smolagents/offline-20261105-150743/junit.xml"
+  ]
+}

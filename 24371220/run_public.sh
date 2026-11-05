@@ -1,7 +1,8 @@
 #!/usr/bin/env bash
 set -euo pipefail
 submission="$(cd "$(dirname "$0")" && pwd)"
-course="$(dirname "$submission")"
+workspace="$(cd "$submission/../../.." && pwd)"
+course="$workspace/题目要求/01"
 if [[ $# -ne 1 ]]; then
   echo '用法：bash 24371220/run_public.sh 新轮次名（例如 attempt05）' >&2
   exit 2

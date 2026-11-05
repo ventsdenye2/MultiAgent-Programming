@@ -1,0 +1,83 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="0" failures="2" skipped="0" tests="5" time="64.715" timestamp="2026-11-05T10:40:38.425180+08:00" hostname="VENTSDENYE5"><testcase classname="test_static_context" name="test_compact_actual_agent_tools_and_original_task[True-source]" time="27.216" /><testcase classname="test_static_context" name="test_compact_actual_agent_tools_and_original_task[True-paper]" time="0.003"><failure message="FileNotFoundError: [Errno 2] No such file or directory: '/tmp/smolagents-offline-o3sga6xb/pytest/test_compact_actual_agent_tool1/False/repo/paper.json'">tmp_path = PosixPath('/tmp/smolagents-offline-o3sga6xb/pytest/test_compact_actual_agent_tool1')
+profile = 'paper', structured = True
+
+    @pytest.mark.parametrize('profile', ['source', 'paper'])
+    @pytest.mark.parametrize('structured', [True, False])
+    def test_compact_actual_agent_tools_and_original_task(tmp_path, profile, structured):
+        runtimes = []
+        for compact in (False, True):
+            root = tmp_path / str(compact)
+            root.mkdir()
+&gt;           session, _, agent, model, log = make_session(root, profile, {'static_context_compact': compact},
+                                                        text='原题全文：第一行\n第二行。\n')
+
+test_static_context.py:28: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+test_smolagents.py:319: in make_session
+    contract = load_task(text, repo, cfg, profile)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+course_agent/policy.py:82: in load_task
+    metadata = json.loads((repo / "paper.json").read_text(encoding="utf-8"))
+                          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+/usr/lib/python3.12/pathlib.py:1029: in read_text
+    with self.open(mode='r', encoding=encoding, errors=errors) as f:
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = PosixPath('/tmp/smolagents-offline-o3sga6xb/pytest/test_compact_actual_agent_tool1/False/repo/paper.json')
+mode = 'r', buffering = -1, encoding = 'utf-8', errors = None, newline = None
+
+    def open(self, mode='r', buffering=-1, encoding=None,
+             errors=None, newline=None):
+        """
+        Open the file pointed by this path and return a file object, as
+        the built-in open() function does.
+        """
+        if "b" not in mode:
+            encoding = io.text_encoding(encoding)
+&gt;       return io.open(self, mode, buffering, encoding, errors, newline)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       FileNotFoundError: [Errno 2] No such file or directory: '/tmp/smolagents-offline-o3sga6xb/pytest/test_compact_actual_agent_tool1/False/repo/paper.json'
+
+/usr/lib/python3.12/pathlib.py:1015: FileNotFoundError</failure></testcase><testcase classname="test_static_context" name="test_compact_actual_agent_tools_and_original_task[False-source]" time="0.165" /><testcase classname="test_static_context" name="test_compact_actual_agent_tools_and_original_task[False-paper]" time="0.002"><failure message="FileNotFoundError: [Errno 2] No such file or directory: '/tmp/smolagents-offline-o3sga6xb/pytest/test_compact_actual_agent_tool3/False/repo/paper.json'">tmp_path = PosixPath('/tmp/smolagents-offline-o3sga6xb/pytest/test_compact_actual_agent_tool3')
+profile = 'paper', structured = False
+
+    @pytest.mark.parametrize('profile', ['source', 'paper'])
+    @pytest.mark.parametrize('structured', [True, False])
+    def test_compact_actual_agent_tools_and_original_task(tmp_path, profile, structured):
+        runtimes = []
+        for compact in (False, True):
+            root = tmp_path / str(compact)
+            root.mkdir()
+&gt;           session, _, agent, model, log = make_session(root, profile, {'static_context_compact': compact},
+                                                        text='原题全文：第一行\n第二行。\n')
+
+test_static_context.py:28: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+test_smolagents.py:319: in make_session
+    contract = load_task(text, repo, cfg, profile)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+course_agent/policy.py:82: in load_task
+    metadata = json.loads((repo / "paper.json").read_text(encoding="utf-8"))
+                          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+/usr/lib/python3.12/pathlib.py:1029: in read_text
+    with self.open(mode='r', encoding=encoding, errors=errors) as f:
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = PosixPath('/tmp/smolagents-offline-o3sga6xb/pytest/test_compact_actual_agent_tool3/False/repo/paper.json')
+mode = 'r', buffering = -1, encoding = 'utf-8', errors = None, newline = None
+
+    def open(self, mode='r', buffering=-1, encoding=None,
+             errors=None, newline=None):
+        """
+        Open the file pointed by this path and return a file object, as
+        the built-in open() function does.
+        """
+        if "b" not in mode:
+            encoding = io.text_encoding(encoding)
+&gt;       return io.open(self, mode, buffering, encoding, errors, newline)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       FileNotFoundError: [Errno 2] No such file or directory: '/tmp/smolagents-offline-o3sga6xb/pytest/test_compact_actual_agent_tool3/False/repo/paper.json'
+
+/usr/lib/python3.12/pathlib.py:1015: FileNotFoundError</failure></testcase><testcase classname="test_static_context" name="test_default_is_baseline" time="0.038" /></testsuite></testsuites>

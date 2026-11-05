@@ -24,7 +24,7 @@ import httpx
 from test_smolagents import CONFIG, response, code, run_script
 
 
-MATERIALS = Path(os.environ.get('COURSE_MATERIALS', Path(__file__).resolve().parents[3] / 'materials/long-context'))
+MATERIALS = Path(os.environ.get('COURSE_MATERIALS', Path(__file__).resolve().parents[3] / '题目要求/02'))
 
 
 @pytest.fixture
@@ -36,8 +36,9 @@ def build_session(tmp_path):
             cfg['read_only'] = True
         spec = load_task(task, repo, cfg, profile)
         spec.verify_commands = []  # This suite tests capacity; command execution is tested separately.
-        log = RunLog(tmp_path / 'run')
-        session = CourseSession(spec, tmp_path / 'run', log, cfg)
+        output = tmp_path / ('run' if not resources else f'run-{len(resources)}')
+        log = RunLog(output)
+        session = CourseSession(spec, output, log, cfg)
         audit = RequestAudit(spec, log, session.evidence)
         model = AuditedOpenAIModel(cfg, audit, 'offline', transport=httpx.MockTransport(lambda r: httpx.Response(500)))
         context = EvidenceContext(session)

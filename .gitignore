@@ -25,3 +25,7 @@
 24371220/experiments/offline-tmp*/
 24371220/experiments/smolagents/**/workspace/
 24371220/experiments/smolagents/.evaluation.lock
+
+# Keep offline summaries/logs in Git; retain bulky per-test runtime copies locally.
+# Already tracked historical artifacts remain tracked.
+24371220/experiments/smolagents/offline-*/test-artifacts/

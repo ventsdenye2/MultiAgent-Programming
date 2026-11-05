@@ -1,0 +1,35 @@
+.....F...                                                                [100%]
+=================================== FAILURES ===================================
+___ test_context_sidecar_preserves_multi_request_body_and_evidence_selection ___
+
+tmp_path = PosixPath('/tmp/smolagents-offline-bg_x3rr8/pytest/test_context_sidecar_preserves0')
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x7f6573ed8ce0>
+
+    def test_context_sidecar_preserves_multi_request_body_and_evidence_selection(tmp_path, monkeypatch):
+        original_init = RequestAudit.__init__
+        runs = []
+        for enabled in (True, False):
+            def init(self, *args, **kwargs):
+                original_init(self, *args, **kwargs, context_accounting=enabled)
+            monkeypatch.setattr(RequestAudit, '__init__', init)
+            root = tmp_path / str(enabled)
+            root.mkdir()
+            result = run_script(root, [
+                "update_plan(items=[{'title':'read and finish','status':'doing'}])\nprint(read_file(path='data.txt'))",
+                "update_plan(items=[{'title':'read and finish','status':'done'}])\nfinal_answer('done')",
+            ], setup=lambda repo: (repo / 'data.txt').write_text('source line\n' * 20))
+>           assert result[0] == 0, result[1]
+E           AssertionError: {'context_mode': 'evidence', 'engine': 'smolagents', 'reason': 'AgentGenerationError: Error in generating model output:
+E             Connection error.', 'remaining': ['finish all plan items after their work and checks'], ...}
+E           assert 1 == 0
+
+test_context_accounting.py:101: AssertionError
+----------------------------- Captured stdout call -----------------------------
+Check check_final failed with error: finish all plan items after their work and 
+checks
+Error in generating model output:
+Connection error.
+- generated xml file: /mnt/d/Muiti-Agent Programing/experiments/code-agent-smolagents/24371220/experiments/smolagents/offline-20261105-103840/junit.xml -
+=========================== short test summary info ============================
+FAILED test_context_accounting.py::test_context_sidecar_preserves_multi_request_body_and_evidence_selection
+1 failed, 8 passed in 118.43s (0:01:58)

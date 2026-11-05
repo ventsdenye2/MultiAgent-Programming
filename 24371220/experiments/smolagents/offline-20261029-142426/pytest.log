@@ -1,0 +1,33 @@
+.............F............................                               [100%]
+=================================== FAILURES ===================================
+__ test_course_markdown_protocol_uses_upstream_parser_and_configured_sampling __
+
+tmp_path = PosixPath('/tmp/smolagents-offline-sw93dsin/pytest/test_course_markdown_protocol_0')
+
+    def test_course_markdown_protocol_uses_upstream_parser_and_configured_sampling(tmp_path):
+        def setup(repo):
+            (repo / 'test_protocol.py').write_text('def test_ready():\n    assert 1 + 1 == 2\n')
+        rc, result, calls, events = run_script(tmp_path, [
+            "update_plan(items=[{'title':'check protocol','status':'doing'}])\n"
+            "run_command(argv=['python','-m','pytest','-q'])\nvalue=41",
+            DONE + "\nfinal_answer(str(value+1))",
+        ],
+            {'use_structured_outputs_internally': False, 'max_tokens': 16384,
+             'thinking': 'enabled', 'reasoning_effort': 'high'}, profile='source', setup=setup)
+>       assert rc == 0 and result['answer'] == '42', result
+E       AssertionError: {'context_mode': 'evidence', 'engine': 'smolagents', 'reason': 'AgentGenerationError: Error in generating model output:
+E         Connection error.', 'remaining': ['finish all plan items after their work and checks'], ...}
+E       assert (1 == 0)
+
+test_smolagents.py:223: AssertionError
+----------------------------- Captured stdout call -----------------------------
+Code execution failed at line 'update_plan(items=[{'title':'complete 
+task','status':'done'}])' due to: ValueError: Preserve plan titles and order. 
+Retrieve items = task_status()['plan']; change only each item's status, then 
+call update_plan(items=items).
+Error in generating model output:
+Connection error.
+- generated xml file: /mnt/d/Muiti-Agent Programing/experiments/code-agent-smolagents/24371220/experiments/smolagents/offline-20261029-142426/junit.xml -
+=========================== short test summary info ============================
+FAILED test_smolagents.py::test_course_markdown_protocol_uses_upstream_parser_and_configured_sampling
+1 failed, 41 passed in 183.82s (0:03:03)

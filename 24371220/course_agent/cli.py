@@ -30,6 +30,7 @@ def execute(contract, config, output, auto=True, context_mode='evidence', transp
     log('run_start', engine='smolagents', context_mode=context_mode, contract=contract.view(),
         model=config['model'], code_block_tags=agent.code_block_tags,
         use_structured_outputs_internally=structured,
+        dsml_compat=model.dsml_compat,
         upstream_commit='12c1bc820eca50ace6f80a21d90426d41d74f845')
     log('file_read', path=contract.task_path, content=contract.text)
     code = 1

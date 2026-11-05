@@ -1,0 +1,77 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="0" failures="2" skipped="0" tests="29" time="95.319" timestamp="2026-11-05T15:07:44.273104+08:00" hostname="VENTSDENYE5"><testcase classname="test_static_context" name="test_compact_actual_agent_tools_and_original_task[True-source]" time="11.796" /><testcase classname="test_static_context" name="test_compact_actual_agent_tools_and_original_task[True-paper]" time="0.100" /><testcase classname="test_static_context" name="test_compact_actual_agent_tools_and_original_task[False-source]" time="0.137" /><testcase classname="test_static_context" name="test_compact_actual_agent_tools_and_original_task[False-paper]" time="0.120" /><testcase classname="test_static_context" name="test_default_is_baseline" time="0.026" /><testcase classname="test_static_acceptance" name="test_real_pdf_52_pages_fit_batched_and_five_notes_reused[False]" time="1.899" /><testcase classname="test_static_acceptance" name="test_real_pdf_52_pages_fit_batched_and_five_notes_reused[True]" time="2.226" /><testcase classname="test_static_acceptance" name="test_real_three_file_preedit_coverage_and_source_notes" time="0.237" /><testcase classname="test_static_acceptance" name="test_large_source_cannot_evict_latest_error" time="0.029" /><testcase classname="test_static_acceptance" name="test_final_note_revision_requires_new_http_before_report_and_finish" time="14.652" /><testcase classname="test_static_acceptance" name="test_failed_http_batch_recovers_then_success_advances[empty]" time="0.152" /><testcase classname="test_static_acceptance" name="test_failed_http_batch_recovers_then_success_advances[truncated-empty]" time="0.061" /><testcase classname="test_static_acceptance" name="test_failed_http_batch_recovers_then_success_advances[parser-error]" time="0.062" /><testcase classname="test_static_acceptance" name="test_failed_http_batch_recovers_then_success_advances[action-error]" time="0.056" /><testcase classname="test_static_acceptance" name="test_official_final_check_runs_current_verification_and_records_success" time="5.640" /><testcase classname="test_static_acceptance" name="test_official_final_check_failure_recovers_after_model_repairs" time="10.586" /><testcase classname="test_static_acceptance" name="test_official_final_check_rejects_passed_test_from_previous_version" time="11.002" /><testcase classname="test_static_acceptance" name="test_successful_write_survives_later_statement_error" time="5.234" /><testcase classname="test_static_acceptance" name="test_real_task_initial_request_savings[source-\u9898\u76ee2]" time="0.041"><failure message="ValueError: Existing run.log; use a fresh output directory">tmp_path = PosixPath('/tmp/smolagents-offline-7z7_6337/pytest/test_real_task_initial_request0')
+build_session = &lt;function build_session.&lt;locals&gt;.build at 0x7ff073de9c60&gt;
+monkeypatch = &lt;_pytest.monkeypatch.MonkeyPatch object at 0x7ff0732b8320&gt;
+profile = 'source', task_number = '题目2'
+
+    @pytest.mark.parametrize('profile,task_number', [('source', '题目2'), ('paper', '题目1')])
+    def test_real_task_initial_request_savings(tmp_path, build_session, monkeypatch, profile, task_number):
+        task = (MATERIALS / '公开任务' / task_number / 'task.md').read_text(encoding='utf-8')
+        measurements = []
+        for compact in (False, True):
+            monkeypatch.setitem(CONFIG, 'static_context_compact', compact)
+            repo = tmp_path / str(compact)
+            repo.mkdir()
+            if profile == 'paper':
+                (repo / 'paper.json').write_text('{"required_pages":[1,52]}')
+                (repo / 'report.json').write_text('{}')
+&gt;           session, context, agent, model = build_session(profile, repo, task)
+                                             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+test_static_acceptance.py:42: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+test_smolagents_materials.py:39: in build
+    log = RunLog(tmp_path / 'run')
+          ^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = &lt;course_agent.recording.RunLog object at 0x7ff0770fc440&gt;
+output = PosixPath('/tmp/smolagents-offline-7z7_6337/pytest/test_real_task_initial_request0/run')
+key_env = ''
+
+    def __init__(self, output, key_env=""):
+        self.output = Path(output).resolve()
+        self.output.mkdir(parents=True, exist_ok=True)
+        for name in ("run.log", "patch.diff", "run-result.json", "evidence.json"):
+            if (self.output / name).exists() or (self.output / name).is_symlink():
+&gt;               raise ValueError(f"Existing {name}; use a fresh output directory")
+E               ValueError: Existing run.log; use a fresh output directory
+
+course_agent/recording.py:15: ValueError</failure></testcase><testcase classname="test_static_acceptance" name="test_real_task_initial_request_savings[paper-\u9898\u76ee1]" time="0.037"><failure message="ValueError: Existing run.log; use a fresh output directory">tmp_path = PosixPath('/tmp/smolagents-offline-7z7_6337/pytest/test_real_task_initial_request1')
+build_session = &lt;function build_session.&lt;locals&gt;.build at 0x7ff073244400&gt;
+monkeypatch = &lt;_pytest.monkeypatch.MonkeyPatch object at 0x7ff0732ba360&gt;
+profile = 'paper', task_number = '题目1'
+
+    @pytest.mark.parametrize('profile,task_number', [('source', '题目2'), ('paper', '题目1')])
+    def test_real_task_initial_request_savings(tmp_path, build_session, monkeypatch, profile, task_number):
+        task = (MATERIALS / '公开任务' / task_number / 'task.md').read_text(encoding='utf-8')
+        measurements = []
+        for compact in (False, True):
+            monkeypatch.setitem(CONFIG, 'static_context_compact', compact)
+            repo = tmp_path / str(compact)
+            repo.mkdir()
+            if profile == 'paper':
+                (repo / 'paper.json').write_text('{"required_pages":[1,52]}')
+                (repo / 'report.json').write_text('{}')
+&gt;           session, context, agent, model = build_session(profile, repo, task)
+                                             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+test_static_acceptance.py:42: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+test_smolagents_materials.py:39: in build
+    log = RunLog(tmp_path / 'run')
+          ^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = &lt;course_agent.recording.RunLog object at 0x7ff0732b9e80&gt;
+output = PosixPath('/tmp/smolagents-offline-7z7_6337/pytest/test_real_task_initial_request1/run')
+key_env = ''
+
+    def __init__(self, output, key_env=""):
+        self.output = Path(output).resolve()
+        self.output.mkdir(parents=True, exist_ok=True)
+        for name in ("run.log", "patch.diff", "run-result.json", "evidence.json"):
+            if (self.output / name).exists() or (self.output / name).is_symlink():
+&gt;               raise ValueError(f"Existing {name}; use a fresh output directory")
+E               ValueError: Existing run.log; use a fresh output directory
+
+course_agent/recording.py:15: ValueError</failure></testcase><testcase classname="test_context_accounting" name="test_text_contributions_escape_once_and_wrapper_includes_roles[user]" time="0.001" /><testcase classname="test_context_accounting" name="test_text_contributions_escape_once_and_wrapper_includes_roles[assistant]" time="0.000" /><testcase classname="test_context_accounting" name="test_text_contributions_escape_once_and_wrapper_includes_roles[tool]" time="0.000" /><testcase classname="test_context_accounting" name="test_unknown_message_and_unmatched_manifest_fall_back_without_guessing" time="0.000" /><testcase classname="test_context_accounting" name="test_actual_sdk_body_identical_with_meter_disabled_and_all_groups_accounted" time="0.004" /><testcase classname="test_context_accounting" name="test_context_sidecar_preserves_multi_request_body_and_evidence_selection" time="0.084" /><testcase classname="test_context_comparison" name="test_schedule_has_three_per_arm_task_and_alternates" time="0.000" /><testcase classname="test_context_comparison" name="test_resume_preserves_failures_and_blocks_unresolved_sample" time="0.002" /><testcase classname="test_context_comparison" name="test_freeze_only_changes_prompt_switch_and_detects_material_drift" time="0.004" /></testsuite></testsuites>

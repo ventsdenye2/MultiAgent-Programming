@@ -147,7 +147,7 @@ def execute(root, native, archive, preflight_only=True, stage='all', request_lim
     try:
         save(out / "protocol.json", protocol)
         course = native / "course"
-        origin = root.parents[2] / "materials/long-context"
+        origin = Path(os.environ.get("COURSE_MATERIALS", root.parents[2] / "题目要求/02"))
         shutil.copytree(origin, course, ignore=shutil.ignore_patterns(
             ".git", ".venv", "__pycache__", ".pytest_cache", "experiments"))
         protocol["course_sha256"] = hashes(course)
@@ -181,10 +181,11 @@ def execute(root, native, archive, preflight_only=True, stage='all', request_lim
         if stage in {'smoke', 'basic', 'all'}:
             basic = native / 'basic-course'
             basic.mkdir()
+            basic_origin = root.parents[2] / '题目要求/01'
             for name in ('tools', '公开任务'):
-                shutil.copytree(root.parent / name, basic / name,
+                shutil.copytree(basic_origin / name, basic / name,
                                 ignore=shutil.ignore_patterns('__pycache__', '.pytest_cache'))
-            shutil.copy2(root.parent / 'run_eval.py', basic / 'run_eval.py')
+            shutil.copy2(basic_origin / 'run_eval.py', basic / 'run_eval.py')
             if stage == 'smoke':
                 # One real public coding task is the bounded smoke stage.
                 # --case is passed only through the official public checker below.

@@ -1,0 +1,17 @@
+
+==================================== ERRORS ====================================
+___________________ ERROR collecting test_static_context.py ____________________
+ImportError while importing test module '/mnt/d/Muiti-Agent Programing/experiments/code-agent-smolagents/24371220/test_static_context.py'.
+Hint: make sure your test modules/packages have valid Python names.
+Traceback:
+/usr/lib/python3.12/importlib/__init__.py:90: in import_module
+    return _bootstrap._gcd_import(name[level:], package, level)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+test_static_context.py:7: in <module>
+    from smolagents import Tool
+E   ModuleNotFoundError: No module named 'smolagents'
+- generated xml file: /mnt/d/Muiti-Agent Programing/experiments/code-agent-smolagents/24371220/experiments/smolagents/offline-20261105-103935/junit.xml -
+=========================== short test summary info ============================
+ERROR test_static_context.py
+!!!!!!!!!!!!!!!!!!!! Interrupted: 1 error during collection !!!!!!!!!!!!!!!!!!!!
+1 error in 2.42s

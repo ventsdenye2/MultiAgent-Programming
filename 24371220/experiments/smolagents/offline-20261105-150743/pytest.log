@@ -1,0 +1,89 @@
+..................FF.........                                            [100%]
+=================================== FAILURES ===================================
+_________ test_real_task_initial_request_savings[source-\u9898\u76ee2] _________
+
+tmp_path = PosixPath('/tmp/smolagents-offline-7z7_6337/pytest/test_real_task_initial_request0')
+build_session = <function build_session.<locals>.build at 0x7ff073de9c60>
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x7ff0732b8320>
+profile = 'source', task_number = '题目2'
+
+    @pytest.mark.parametrize('profile,task_number', [('source', '题目2'), ('paper', '题目1')])
+    def test_real_task_initial_request_savings(tmp_path, build_session, monkeypatch, profile, task_number):
+        task = (MATERIALS / '公开任务' / task_number / 'task.md').read_text(encoding='utf-8')
+        measurements = []
+        for compact in (False, True):
+            monkeypatch.setitem(CONFIG, 'static_context_compact', compact)
+            repo = tmp_path / str(compact)
+            repo.mkdir()
+            if profile == 'paper':
+                (repo / 'paper.json').write_text('{"required_pages":[1,52]}')
+                (repo / 'report.json').write_text('{}')
+>           session, context, agent, model = build_session(profile, repo, task)
+                                             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+test_static_acceptance.py:42: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+test_smolagents_materials.py:39: in build
+    log = RunLog(tmp_path / 'run')
+          ^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = <course_agent.recording.RunLog object at 0x7ff0770fc440>
+output = PosixPath('/tmp/smolagents-offline-7z7_6337/pytest/test_real_task_initial_request0/run')
+key_env = ''
+
+    def __init__(self, output, key_env=""):
+        self.output = Path(output).resolve()
+        self.output.mkdir(parents=True, exist_ok=True)
+        for name in ("run.log", "patch.diff", "run-result.json", "evidence.json"):
+            if (self.output / name).exists() or (self.output / name).is_symlink():
+>               raise ValueError(f"Existing {name}; use a fresh output directory")
+E               ValueError: Existing run.log; use a fresh output directory
+
+course_agent/recording.py:15: ValueError
+_________ test_real_task_initial_request_savings[paper-\u9898\u76ee1] __________
+
+tmp_path = PosixPath('/tmp/smolagents-offline-7z7_6337/pytest/test_real_task_initial_request1')
+build_session = <function build_session.<locals>.build at 0x7ff073244400>
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x7ff0732ba360>
+profile = 'paper', task_number = '题目1'
+
+    @pytest.mark.parametrize('profile,task_number', [('source', '题目2'), ('paper', '题目1')])
+    def test_real_task_initial_request_savings(tmp_path, build_session, monkeypatch, profile, task_number):
+        task = (MATERIALS / '公开任务' / task_number / 'task.md').read_text(encoding='utf-8')
+        measurements = []
+        for compact in (False, True):
+            monkeypatch.setitem(CONFIG, 'static_context_compact', compact)
+            repo = tmp_path / str(compact)
+            repo.mkdir()
+            if profile == 'paper':
+                (repo / 'paper.json').write_text('{"required_pages":[1,52]}')
+                (repo / 'report.json').write_text('{}')
+>           session, context, agent, model = build_session(profile, repo, task)
+                                             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+test_static_acceptance.py:42: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+test_smolagents_materials.py:39: in build
+    log = RunLog(tmp_path / 'run')
+          ^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = <course_agent.recording.RunLog object at 0x7ff0732b9e80>
+output = PosixPath('/tmp/smolagents-offline-7z7_6337/pytest/test_real_task_initial_request1/run')
+key_env = ''
+
+    def __init__(self, output, key_env=""):
+        self.output = Path(output).resolve()
+        self.output.mkdir(parents=True, exist_ok=True)
+        for name in ("run.log", "patch.diff", "run-result.json", "evidence.json"):
+            if (self.output / name).exists() or (self.output / name).is_symlink():
+>               raise ValueError(f"Existing {name}; use a fresh output directory")
+E               ValueError: Existing run.log; use a fresh output directory
+
+course_agent/recording.py:15: ValueError
+- generated xml file: /mnt/d/Muiti-Agent Programing/experiments/code-agent-smolagents/24371220/experiments/smolagents/offline-20261105-150743/junit.xml -
+=========================== short test summary info ============================
+FAILED test_static_acceptance.py::test_real_task_initial_request_savings[source-\u9898\u76ee2]
+FAILED test_static_acceptance.py::test_real_task_initial_request_savings[paper-\u9898\u76ee1]
+2 failed, 27 passed in 95.35s (0:01:35)

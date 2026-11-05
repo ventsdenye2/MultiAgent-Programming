@@ -1,0 +1,95 @@
+.F.F.                                                                    [100%]
+=================================== FAILURES ===================================
+________ test_compact_actual_agent_tools_and_original_task[True-paper] _________
+
+tmp_path = PosixPath('/tmp/smolagents-offline-o3sga6xb/pytest/test_compact_actual_agent_tool1')
+profile = 'paper', structured = True
+
+    @pytest.mark.parametrize('profile', ['source', 'paper'])
+    @pytest.mark.parametrize('structured', [True, False])
+    def test_compact_actual_agent_tools_and_original_task(tmp_path, profile, structured):
+        runtimes = []
+        for compact in (False, True):
+            root = tmp_path / str(compact)
+            root.mkdir()
+>           session, _, agent, model, log = make_session(root, profile, {'static_context_compact': compact},
+                                                        text='原题全文：第一行\n第二行。\n')
+
+test_static_context.py:28: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+test_smolagents.py:319: in make_session
+    contract = load_task(text, repo, cfg, profile)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+course_agent/policy.py:82: in load_task
+    metadata = json.loads((repo / "paper.json").read_text(encoding="utf-8"))
+                          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+/usr/lib/python3.12/pathlib.py:1029: in read_text
+    with self.open(mode='r', encoding=encoding, errors=errors) as f:
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = PosixPath('/tmp/smolagents-offline-o3sga6xb/pytest/test_compact_actual_agent_tool1/False/repo/paper.json')
+mode = 'r', buffering = -1, encoding = 'utf-8', errors = None, newline = None
+
+    def open(self, mode='r', buffering=-1, encoding=None,
+             errors=None, newline=None):
+        """
+        Open the file pointed by this path and return a file object, as
+        the built-in open() function does.
+        """
+        if "b" not in mode:
+            encoding = io.text_encoding(encoding)
+>       return io.open(self, mode, buffering, encoding, errors, newline)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       FileNotFoundError: [Errno 2] No such file or directory: '/tmp/smolagents-offline-o3sga6xb/pytest/test_compact_actual_agent_tool1/False/repo/paper.json'
+
+/usr/lib/python3.12/pathlib.py:1015: FileNotFoundError
+________ test_compact_actual_agent_tools_and_original_task[False-paper] ________
+
+tmp_path = PosixPath('/tmp/smolagents-offline-o3sga6xb/pytest/test_compact_actual_agent_tool3')
+profile = 'paper', structured = False
+
+    @pytest.mark.parametrize('profile', ['source', 'paper'])
+    @pytest.mark.parametrize('structured', [True, False])
+    def test_compact_actual_agent_tools_and_original_task(tmp_path, profile, structured):
+        runtimes = []
+        for compact in (False, True):
+            root = tmp_path / str(compact)
+            root.mkdir()
+>           session, _, agent, model, log = make_session(root, profile, {'static_context_compact': compact},
+                                                        text='原题全文：第一行\n第二行。\n')
+
+test_static_context.py:28: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+test_smolagents.py:319: in make_session
+    contract = load_task(text, repo, cfg, profile)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+course_agent/policy.py:82: in load_task
+    metadata = json.loads((repo / "paper.json").read_text(encoding="utf-8"))
+                          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+/usr/lib/python3.12/pathlib.py:1029: in read_text
+    with self.open(mode='r', encoding=encoding, errors=errors) as f:
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = PosixPath('/tmp/smolagents-offline-o3sga6xb/pytest/test_compact_actual_agent_tool3/False/repo/paper.json')
+mode = 'r', buffering = -1, encoding = 'utf-8', errors = None, newline = None
+
+    def open(self, mode='r', buffering=-1, encoding=None,
+             errors=None, newline=None):
+        """
+        Open the file pointed by this path and return a file object, as
+        the built-in open() function does.
+        """
+        if "b" not in mode:
+            encoding = io.text_encoding(encoding)
+>       return io.open(self, mode, buffering, encoding, errors, newline)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       FileNotFoundError: [Errno 2] No such file or directory: '/tmp/smolagents-offline-o3sga6xb/pytest/test_compact_actual_agent_tool3/False/repo/paper.json'
+
+/usr/lib/python3.12/pathlib.py:1015: FileNotFoundError
+- generated xml file: /mnt/d/Muiti-Agent Programing/experiments/code-agent-smolagents/24371220/experiments/smolagents/offline-20261105-104033/junit.xml -
+=========================== short test summary info ============================
+FAILED test_static_context.py::test_compact_actual_agent_tools_and_original_task[True-paper]
+FAILED test_static_context.py::test_compact_actual_agent_tools_and_original_task[False-paper]
+2 failed, 3 passed in 64.77s (0:01:04)

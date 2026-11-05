@@ -112,9 +112,10 @@ def test_markdown_protocol_ignores_xml_marker_in_prose_and_matches_wire_size(tmp
     assert estimates == actual
 
 
-def test_dsml_failure_uses_upstream_recovery_without_a_second_action_parser(tmp_path):
+def test_dsml_disabled_uses_upstream_recovery(tmp_path):
     malformed = '<｜｜DSML｜｜ calls><｜｜DSML｜｜ invoke name="task_status"></｜｜DSML｜｜ invoke></｜｜DSML｜｜ calls>'
-    rc, result, calls, events = run_script(tmp_path, [response(malformed), DONE + "\nfinal_answer('Recovered')"])
+    rc, result, calls, events = run_script(tmp_path, [response(malformed), DONE + "\nfinal_answer('Recovered')"],
+                                         {'dsml_compat': False})
     assert rc == 0, result
     errors = [e for e in events if e['event'] == 'agent_error']
     assert len(errors) == 1 and errors[0]['error_type'] == 'AgentParsingError'

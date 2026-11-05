@@ -78,6 +78,10 @@ def make_agent(model, session, context=None, code_block_tags='markdown', use_str
                             use_structured_outputs_internally=use_structured_outputs_internally,
                             stream_outputs=False, max_print_outputs_length=1000000,
                             verbosity_level=0)
+    if getattr(model, 'dsml_compat', False):
+        from .protocol import DSMLAdapter
+        model.protocol_adapter = DSMLAdapter(agent.tools, agent.code_block_tags,
+                                             use_structured_outputs_internally, session.audit)
     session.agent = agent
     # Match the official CodeAgent generation arguments when estimating the
     # actual wire body. Markdown's closing tag is contained in its opening tag,

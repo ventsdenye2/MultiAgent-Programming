@@ -225,6 +225,10 @@ class AuditedOpenAIModel(OpenAIModel):
     """Official SDK transport with auditing and DeepSeek response-format support."""
     def __init__(self, config, audit, api_key, transport=None):
         self.audit = audit
+        self.dsml_compat = config.get('dsml_compat', True)
+        if type(self.dsml_compat) is not bool:
+            raise ValueError('dsml_compat must be a boolean')
+        self.protocol_adapter = None
         self.action_stop_sequences = ['Observation:', 'Calling tools:']
         self.action_response_format = None
         client = httpx.Client(timeout=httpx.Timeout(float(config.get("timeout", 210))),
@@ -252,10 +256,11 @@ class AuditedOpenAIModel(OpenAIModel):
     def generate(self, messages, **kwargs):
         self.audit.guard()
         try:
-            return super().generate(messages, **kwargs)
+            result = super().generate(messages, **kwargs)
         except Exception as exc:
             self.audit.error("NETWORK_OR_RESPONSE_ERROR", error_type=type(exc).__name__)
             raise
+        return self.protocol_adapter.adapt(result) if self.protocol_adapter else result
 
     def measure(self, messages):
         body = self._prepare_completion_kwargs(messages, model=self.model_id,

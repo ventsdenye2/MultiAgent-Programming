@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="0" failures="1" skipped="0" tests="9" time="118.385" timestamp="2026-11-05T10:38:51.134935+08:00" hostname="VENTSDENYE5"><testcase classname="test_context_accounting" name="test_text_contributions_escape_once_and_wrapper_includes_roles[user]" time="0.001" /><testcase classname="test_context_accounting" name="test_text_contributions_escape_once_and_wrapper_includes_roles[assistant]" time="0.001" /><testcase classname="test_context_accounting" name="test_text_contributions_escape_once_and_wrapper_includes_roles[tool]" time="0.001" /><testcase classname="test_context_accounting" name="test_unknown_message_and_unmatched_manifest_fall_back_without_guessing" time="0.000" /><testcase classname="test_context_accounting" name="test_actual_sdk_body_identical_with_meter_disabled_and_all_groups_accounted" time="51.992" /><testcase classname="test_context_accounting" name="test_context_sidecar_preserves_multi_request_body_and_evidence_selection" time="0.232"><failure message="AssertionError: {'context_mode': 'evidence', 'engine': 'smolagents', 'reason': 'AgentGenerationError: Error in generating model output:&#10;  Connection error.', 'remaining': ['finish all plan items after their work and checks'], ...}&#10;assert 1 == 0">tmp_path = PosixPath('/tmp/smolagents-offline-bg_x3rr8/pytest/test_context_sidecar_preserves0')
+monkeypatch = &lt;_pytest.monkeypatch.MonkeyPatch object at 0x7f6573ed8ce0&gt;
+
+    def test_context_sidecar_preserves_multi_request_body_and_evidence_selection(tmp_path, monkeypatch):
+        original_init = RequestAudit.__init__
+        runs = []
+        for enabled in (True, False):
+            def init(self, *args, **kwargs):
+                original_init(self, *args, **kwargs, context_accounting=enabled)
+            monkeypatch.setattr(RequestAudit, '__init__', init)
+            root = tmp_path / str(enabled)
+            root.mkdir()
+            result = run_script(root, [
+                "update_plan(items=[{'title':'read and finish','status':'doing'}])\nprint(read_file(path='data.txt'))",
+                "update_plan(items=[{'title':'read and finish','status':'done'}])\nfinal_answer('done')",
+            ], setup=lambda repo: (repo / 'data.txt').write_text('source line\n' * 20))
+&gt;           assert result[0] == 0, result[1]
+E           AssertionError: {'context_mode': 'evidence', 'engine': 'smolagents', 'reason': 'AgentGenerationError: Error in generating model output:
+E             Connection error.', 'remaining': ['finish all plan items after their work and checks'], ...}
+E           assert 1 == 0
+
+test_context_accounting.py:101: AssertionError</failure></testcase><testcase classname="test_context_comparison" name="test_schedule_has_three_per_arm_task_and_alternates" time="0.001" /><testcase classname="test_context_comparison" name="test_resume_preserves_failures_and_blocks_unresolved_sample" time="0.004" /><testcase classname="test_context_comparison" name="test_freeze_only_changes_prompt_switch_and_detects_material_drift" time="0.008" /></testsuite></testsuites>
