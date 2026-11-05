@@ -11,7 +11,7 @@ def setup(tmp_path, monkeypatch):
     (root / 'codeagent').mkdir()
     (root / 'agent.py').write_text('# offline')
     (root / 'config.json').write_text(json.dumps({'model':'fake','key_env':'OFFLINE_KEY'}))
-    course = root.parents[2] / 'materials/long-context'
+    course = root.parents[2] / '题目要求/02'
     course.mkdir(parents=True)
     (course / 'eval_paper.py').write_text('# unchanged course')
     native = tmp_path / 'native'

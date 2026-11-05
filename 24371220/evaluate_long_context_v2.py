@@ -130,7 +130,7 @@ def execute(root, native, archive, preflight_only=False):
     try:
         save(out / "protocol.json", protocol)
         course = native / "course"
-        origin = root.parents[2] / "materials/long-context"
+        origin = Path(os.environ.get("COURSE_MATERIALS", root.parents[2] / "题目要求/02"))
         shutil.copytree(origin, course, ignore=shutil.ignore_patterns(
             ".git", ".venv", "__pycache__", ".pytest_cache", "experiments"))
         protocol["course_sha256"] = hashes(course)

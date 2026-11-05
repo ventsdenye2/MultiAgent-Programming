@@ -6,7 +6,7 @@ from pathlib import Path
 import sys
 
 root = Path(__file__).resolve().parent
-course = root.parent
+course = root.parents[2] / '题目要求/01'
 sys.path.insert(0, str(course / 'tools'))
 from evaluator import evaluate
 
