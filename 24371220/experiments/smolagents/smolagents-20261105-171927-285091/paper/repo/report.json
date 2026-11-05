@@ -1,0 +1,135 @@
+{
+  "overview": "综述系统梳理 agentic LLM：以自然语言为接口、能推理并自主行动以达成目标的系统，并按推理、行动、交互三类能力组织文献。推理章涵盖 CoT、Self-Consistency、Tree of Thoughts、自我改进与检索增强；行动章涵盖世界模型与机器人、工具/API 调用、代码与网页代理；交互章涵盖多智能体角色协作、社会模拟与规范涌现。作者用 Google Scholar 检索加 snowballing 扩展文献，并在展望中提出长程推理、机器人交互、科学发现、安全责任、多智能体协作与训练五个议题，强调推理与自我验证是各类能力共享的基础，行动与交互产生的新数据还能反哺预训练与微调。",
+  "sections": [
+    {
+      "id": "overview",
+      "summary": "论文将 agentic LLM 定义为能接收自然语言指令、进行推理并自主行动以达成目标的系统，并按能力分为三类：推理（reasoning，如 CoT、Self-Consistency、Tree of Thoughts、自我改进与检索增强）、行动（acting，含机器人与工具/API 调用、代码与网页代理）、交互（interacting，多智能体协作、社会模拟与规范涌现）。作者指出三类能力彼此支撑：推理服务于行动，交互产生的数据又回流用于训练，形成循环。文献组织上，作者先用 Google Scholar 检索 Agentic LLM 相关论文，再用 snowballing 沿引用网络扩展，只保留基于 LLM 的方法。",
+      "application": "我的 agent 采用同样的“先分批读、再归纳”的结构：通过命令工具调用 read_pdf.py 逐批取页，把整页原文送入模型，再落成带页码的主题笔记，最后归并为 JSON 报告。不足是主题划分由我预先固定，没有让模型自己发现新的分类维度，也没有自动回溯核对引文。",
+      "answers": {
+        "categories": [
+          "reason",
+          "act",
+          "interact"
+        ],
+        "search_methods": [
+          "google_scholar",
+          "snowballing"
+        ]
+      },
+      "evidence": [
+        {
+          "question": "categories",
+          "page": 1,
+          "quote": "Agentic LLMs are LLMs that (1) reason, (2) act, and (3) interact. We organize the literature according to these three categories."
+        },
+        {
+          "question": "search_methods",
+          "page": 5,
+          "quote": "The papers were initially selected with a Google Scholar search on Agentic LLM. From there, we used a snowballing approach to discover work that was cited but not yet included in our initial set."
+        }
+      ]
+    },
+    {
+      "id": "reasoning",
+      "summary": "推理一章把单次前向的链式思维视为贪心单路径；Self-Consistency 改为对同一问题采样多条推理路径，再按多数投票（取最一致的最终答案）决定输出；Tree of Thoughts 把推理展开为树，用外部搜索算法遍历并可回溯，论文介绍了广度优先与深度优先两种搜索控制器。其后是自我改进循环（PHP、Self-Refine、Reflexion、Self-Discover）与检索增强（RAG、推理时决定何时检索）。局限在于多数投票只适用于答案可比较的任务，搜索则带来显著推理开销。",
+      "application": "我的 agent 目前每条结论只采样一次，没有多路径投票，也没有回溯式搜索；遇到引文与答案不匹配时不会自动重读原页。可先加入“同一页多次抽取答案再投票”的小机制，再考虑对失败题回溯到相邻页重读。",
+      "answers": {
+        "self_consistency_selection": "majority voting",
+        "tot_search": [
+          "breadth_first",
+          "depth_first"
+        ]
+      },
+      "evidence": [
+        {
+          "question": "self_consistency_selection",
+          "page": 10,
+          "quote": "Self Consistency is an ensemble approach that samples diverse reasoning paths, evaluates them, and selects the most consistent answer using majority voting."
+        },
+        {
+          "question": "tot_search",
+          "page": 13,
+          "quote": "The paper describes both a breadth-first and a depth-first controller."
+        }
+      ]
+    },
+    {
+      "id": "tool_use",
+      "summary": "行动一章从世界模型与视觉-语言-动作模型讲到工具调用：Toolformer 让模型自学何时调用哪个 API、传什么参数、如何把结果融入后续生成，实验中测试了计算器、问答、搜索引擎、翻译系统、日历五类工具。ToolBench 收录 16,464 个 RapidAPI 供训练与评测；ToolAlpaca 用少量 API 合成大量实例，Gorilla 通过微调生成 API 调用。工程上常见“规划器—调用器—摘要器”的多 LLM 架构，把长任务的搜索与执行分开。局限是 API 文档与返回值格式多变，幻觉调用难以完全避免。",
+      "application": "我的 agent 只暴露了一个命令行工具，参数受限、没有返回值校验；这与论文中的工具调用相比缺少“何时调用、如何解析结果”的显式决策。未来可把 read_pdf.py 包装成带 schema 的工具，并对返回 JSON 做字段校验与重试。",
+      "answers": {
+        "toolbench_api_count": 16464,
+        "toolformer_tools": [
+          "calculator",
+          "question_answering",
+          "search_engine",
+          "translation_system",
+          "calendar"
+        ]
+      },
+      "evidence": [
+        {
+          "question": "toolbench_api_count",
+          "page": 23,
+          "quote": "ToolBench [Qin et al., 2023] contains 16,464 APIs from RapidAPI, a large dataset of publicly available REST APIs."
+        },
+        {
+          "question": "toolformer_tools",
+          "page": 23,
+          "quote": "A range of tools is tested: a calculator, a question-answering system, a search engine, a translation system, and a calendar."
+        }
+      ]
+    },
+    {
+      "id": "multi_agent",
+      "summary": "交互一章区分角色扮演式协作与开放社会模拟。CAMEL 用 inception prompting 让两个角色在对话中保持身份并合作完成任务；Generative Agents 模拟 25 个具有人设、记忆与反思的 agent，其可信度评估邀请人类评估者参与打分；AgentVerse 分专家招募、协作决策、行动执行与评估四阶段；AgentSociety 与 OASIS 把规模推到上万乃至百万 agent。规范研究（命名游戏、metanorm）显示局部互动可涌现全局约定，但也可能放大集体偏见。局限是规模扩大后评测成本与可复现性都变差。",
+      "application": "我的 agent 是单体的：一个模型顺序完成读、记、写，没有角色分工或评审者。已实现的是可复用的命令工具与笔记记录；不足是没有交叉校验机制。可尝试把“提取答案”和“核验引文”拆成两个角色互相批评，仍由我控制请求预算。",
+      "answers": {
+        "camel_prompting": "inception_prompting",
+        "generative_agents_evaluators": 100
+      },
+      "evidence": [
+        {
+          "question": "camel_prompting",
+          "page": 37,
+          "quote": "By using inception prompting and role descriptions, the agents stay in character and collaborate toward the goal"
+        },
+        {
+          "question": "generative_agents_evaluators",
+          "page": 47,
+          "quote": "Whether the Generative Agents system generates believable behavior is evaluated with the help of 100 human evaluators."
+        }
+      ]
+    },
+    {
+      "id": "outlook",
+      "summary": "Table 4 列出五个研究议题：长程推理、机器人交互、科学发现、安全与助手的责任归属、多智能体协作与训练。结论强调三类能力并不独立：推理是基础，行动与工具使用受益于有据可依的检索增强，社会互动受益于自我反思，而所有类别都受益于推理与自我验证；行动与交互产生的新数据还能反哺预训练与微调。作者同时指出多智能体训练、安全责任划分与长程可靠性仍是开放问题。",
+      "application": "这一展望提示我把“自我验证”做进流程：我的 agent 已实现分批读页、主题笔记和结构化报告，但答案与引文的对应关系尚未自动复核。未来可在提交前加一步回读引用页并逐字比对，仍受 40 次请求与 32000 字符预算约束。",
+      "answers": {
+        "agenda_topics": [
+          "training_data",
+          "hallucination",
+          "agent_behavior",
+          "self_reflection",
+          "safety"
+        ],
+        "shared_foundations": [
+          "reasoning",
+          "self_verification"
+        ]
+      },
+      "evidence": [
+        {
+          "question": "agenda_topics",
+          "page": 51,
+          "quote": "Topic Challenge Training Data Finetune with inference time reasoning data Convergent/stable reinforcement learning VLA, Multimodal signals, such as speech Hallucination Use Self Verification Use Mechanistic Interpretability Use Open Ended/Open World Models for exploration Agent Behavior Scalable simulation infrastructure, role playing Distill reasoning to small models Models of agent and human behavior, emergent behavior, future of society Self reflection In-model self reflection and metareasoning Metacognition, personality Automated Scientific Discovery Safety Assistants: Responsibility, liability"
+        },
+        {
+          "question": "shared_foundations",
+          "page": 52,
+          "quote": "At the basis is the reasoning technology of category 1. Robotic interaction and tool-use build on grounded retrieval augmentation, social interaction (such as theory of mind) builds on self reflection, and all categories benefit from reasoning and self-verification."
+        }
+      ]
+    }
+  ]
+}

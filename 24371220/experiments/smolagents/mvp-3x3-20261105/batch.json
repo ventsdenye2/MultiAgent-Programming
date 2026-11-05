@@ -1,0 +1,90 @@
+{
+  "status": "completed",
+  "fingerprint": {
+    "config.json": "68f72539a43d0e2b2fae5a87d54eeef8414f458f321c8037b77947fa6875a61e",
+    "agent.py": "190f4b07b3db9562253aca4ff1f39095d983785e679b4b757e619e55092c71df",
+    "evaluate_course.py": "494e7c7bbd90913f898407de550f78591fdae8eea0e28fc16b97fe3fc1612740",
+    "course_agent/__init__.py": "4481743579f616f68de54ebc841f0f705857e33c79c1ad4d1175995f070384b6",
+    "course_agent/audit.py": "bd5abc520877d80ae2d04288ed0726251fe220d4f4d7f60b30564d43130cd652",
+    "course_agent/cli.py": "7b371e3982196d54bc4b0470536807c075693da8881946db634f2105b0d40586",
+    "course_agent/context.py": "88cdd1ec6b5b43b05a740e3d6174b23bdfbf76062b890caab14b90923977acb2",
+    "course_agent/engine.py": "3b08b9c8f707797d74fc015d4ac767bb802a6886b7cbeec2acc84abdf14ec532",
+    "course_agent/evidence.py": "51612fc060ddf7e58322591e97902b88193030e67ee5f07d9a199c7ed4d2e198",
+    "course_agent/policy.py": "a1eabcfabb4de1c9e9e7a38273ef04ebc03065671608941822658859b2762aaa",
+    "course_agent/progress.py": "f4c99de0d82fefb37a8af0fcdaa5c25365455be7b8803a542c707203550afcfd",
+    "course_agent/prompts.py": "b709bbbd4c0cc5e9519ff4f0c753ac68eabc3ff213ea87dc4fb5dda3417fdebd",
+    "course_agent/protocol.py": "d3186c97da055f1ce18c04fcf1ac10d77b32bcb352eae590f7ad9d2a16520c90",
+    "course_agent/recording.py": "95e76f97d4f44a48b7e7e2a79be19b0f308bc4d286d87ed72dc009f801428b67",
+    "course_agent/session.py": "d06690bc9f0b835ca6fcf8edc156f9713ef6978da9df0660745586ff980607c9",
+    "course_agent/workspace.py": "eb0719e018eda2274dae1120add99772556a888a53c447d7acd748c8a9f879ae"
+  },
+  "runs": [
+    {
+      "name": "paper-01",
+      "stage": "paper",
+      "index": 1,
+      "status": "finished",
+      "started": 1793869565.6971567,
+      "exit_code": 0,
+      "seconds": 245.64,
+      "native": "/home/ventsdenye/.local/state/code-agent/evaluations/run-7ykbeotg",
+      "archive": "/mnt/d/Muiti-Agent Programing/experiments/code-agent-smolagents/24371220/experiments/smolagents/smolagents-20261105-170605-886189"
+    },
+    {
+      "name": "source-01",
+      "stage": "source",
+      "index": 1,
+      "status": "finished",
+      "started": 1793869811.467722,
+      "exit_code": 1,
+      "seconds": 204.77,
+      "native": "/home/ventsdenye/.local/state/code-agent/evaluations/run-d9kjxgua",
+      "archive": "/mnt/d/Muiti-Agent Programing/experiments/code-agent-smolagents/24371220/experiments/smolagents/smolagents-20261105-171011-683348"
+    },
+    {
+      "name": "paper-02",
+      "stage": "paper",
+      "index": 2,
+      "status": "finished",
+      "started": 1793870016.3229704,
+      "exit_code": 0,
+      "seconds": 220.11,
+      "native": "/home/ventsdenye/.local/state/code-agent/evaluations/run-h174c7t7",
+      "archive": "/mnt/d/Muiti-Agent Programing/experiments/code-agent-smolagents/24371220/experiments/smolagents/smolagents-20261105-171336-502114"
+    },
+    {
+      "name": "source-02",
+      "stage": "source",
+      "index": 2,
+      "status": "finished",
+      "started": 1793870236.559555,
+      "exit_code": 0,
+      "seconds": 130.46,
+      "native": "/home/ventsdenye/.local/state/code-agent/evaluations/run-v1sioyz_",
+      "archive": "/mnt/d/Muiti-Agent Programing/experiments/code-agent-smolagents/24371220/experiments/smolagents/smolagents-20261105-171716-795222"
+    },
+    {
+      "name": "paper-03",
+      "stage": "paper",
+      "index": 3,
+      "status": "finished",
+      "started": 1793870367.0930111,
+      "exit_code": 0,
+      "seconds": 190.53,
+      "native": "/home/ventsdenye/.local/state/code-agent/evaluations/run-sqbi36i_",
+      "archive": "/mnt/d/Muiti-Agent Programing/experiments/code-agent-smolagents/24371220/experiments/smolagents/smolagents-20261105-171927-285091"
+    },
+    {
+      "name": "source-03",
+      "stage": "source",
+      "index": 3,
+      "status": "finished",
+      "started": 1793870557.7525282,
+      "exit_code": 0,
+      "seconds": 182.71,
+      "native": "/home/ventsdenye/.local/state/code-agent/evaluations/run-60hc5__l",
+      "archive": "/mnt/d/Muiti-Agent Programing/experiments/code-agent-smolagents/24371220/experiments/smolagents/smolagents-20261105-172238-054040"
+    }
+  ],
+  "automatic_retries": false
+}

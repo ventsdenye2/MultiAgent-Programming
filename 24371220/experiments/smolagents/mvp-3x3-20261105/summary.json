@@ -1,0 +1,267 @@
+{
+  "status": "completed",
+  "same_runtime_fingerprint": true,
+  "runs": [
+    {
+      "name": "paper-01",
+      "stage": "paper",
+      "passed": true,
+      "score": 5,
+      "requests": 39,
+      "input_tokens": 314103,
+      "output_tokens": 23414,
+      "usage_complete": true,
+      "reason": null,
+      "seconds": 245.64,
+      "checks": {
+        "真实运行、PDF提取、分块笔记和补丁": true,
+        "报告结构": true,
+        "overview.categories：答案与原文引用": true,
+        "overview.search_methods：答案与原文引用": true,
+        "reasoning.self_consistency_selection：答案与原文引用": true,
+        "reasoning.tot_search：答案与原文引用": true,
+        "tool_use.toolformer_tools：答案与原文引用": true,
+        "tool_use.toolbench_api_count：答案与原文引用": true,
+        "multi_agent.camel_prompting：答案与原文引用": true,
+        "multi_agent.generative_agents_evaluators：答案与原文引用": true,
+        "outlook.agenda_topics：答案与原文引用": true,
+        "outlook.shared_foundations：答案与原文引用": true
+      },
+      "archive": "D:/Muiti-Agent Programing/experiments/code-agent-smolagents/24371220/experiments/smolagents/smolagents-20261105-170605-886189"
+    },
+    {
+      "name": "source-01",
+      "stage": "source",
+      "passed": false,
+      "score": 0,
+      "requests": 20,
+      "input_tokens": 166526,
+      "output_tokens": 21253,
+      "usage_complete": true,
+      "reason": "MAX_STEPS_NO_EXTRA_REQUEST",
+      "seconds": 204.77,
+      "checks": {
+        "真实开发过程与修改范围": "agent 退出码 1，查看 agent-console.log",
+        "补丁可还原实际修改": true,
+        "相关源码真实读取并入模": true,
+        "首次修改复用相关源码或模型笔记": true,
+        "独立兼容与新增功能测试": true,
+        "真实日志处理链路": true,
+        "运行后修改范围仍合规": true,
+        "学生代码与本轮开始一致": true,
+        "服务端真实用量完整": true
+      },
+      "archive": "D:/Muiti-Agent Programing/experiments/code-agent-smolagents/24371220/experiments/smolagents/smolagents-20261105-171011-683348",
+      "actual_models": [
+        "deepseek-flash"
+      ]
+    },
+    {
+      "name": "paper-02",
+      "stage": "paper",
+      "passed": true,
+      "score": 5,
+      "requests": 39,
+      "input_tokens": 264642,
+      "output_tokens": 18786,
+      "usage_complete": true,
+      "reason": null,
+      "seconds": 220.11,
+      "checks": {
+        "真实运行、PDF提取、分块笔记和补丁": true,
+        "报告结构": true,
+        "overview.categories：答案与原文引用": true,
+        "overview.search_methods：答案与原文引用": true,
+        "reasoning.self_consistency_selection：答案与原文引用": true,
+        "reasoning.tot_search：答案与原文引用": true,
+        "tool_use.toolformer_tools：答案与原文引用": true,
+        "tool_use.toolbench_api_count：答案与原文引用": true,
+        "multi_agent.camel_prompting：答案与原文引用": true,
+        "multi_agent.generative_agents_evaluators：答案与原文引用": true,
+        "outlook.agenda_topics：答案与原文引用": true,
+        "outlook.shared_foundations：答案与原文引用": true
+      },
+      "archive": "D:/Muiti-Agent Programing/experiments/code-agent-smolagents/24371220/experiments/smolagents/smolagents-20261105-171336-502114"
+    },
+    {
+      "name": "source-02",
+      "stage": "source",
+      "passed": true,
+      "score": 1,
+      "requests": 6,
+      "input_tokens": 38056,
+      "output_tokens": 4850,
+      "usage_complete": true,
+      "reason": null,
+      "seconds": 130.46,
+      "checks": {
+        "真实开发过程与修改范围": true,
+        "补丁可还原实际修改": true,
+        "相关源码真实读取并入模": true,
+        "首次修改复用相关源码或模型笔记": true,
+        "独立兼容与新增功能测试": true,
+        "真实日志处理链路": true,
+        "运行后修改范围仍合规": true,
+        "学生代码与本轮开始一致": true,
+        "服务端真实用量完整": true
+      },
+      "archive": "D:/Muiti-Agent Programing/experiments/code-agent-smolagents/24371220/experiments/smolagents/smolagents-20261105-171716-795222",
+      "actual_models": [
+        "deepseek-flash"
+      ]
+    },
+    {
+      "name": "paper-03",
+      "stage": "paper",
+      "passed": true,
+      "score": 5,
+      "requests": 25,
+      "input_tokens": 196027,
+      "output_tokens": 11515,
+      "usage_complete": true,
+      "reason": null,
+      "seconds": 190.53,
+      "checks": {
+        "真实运行、PDF提取、分块笔记和补丁": true,
+        "报告结构": true,
+        "overview.categories：答案与原文引用": true,
+        "overview.search_methods：答案与原文引用": true,
+        "reasoning.self_consistency_selection：答案与原文引用": true,
+        "reasoning.tot_search：答案与原文引用": true,
+        "tool_use.toolformer_tools：答案与原文引用": true,
+        "tool_use.toolbench_api_count：答案与原文引用": true,
+        "multi_agent.camel_prompting：答案与原文引用": true,
+        "multi_agent.generative_agents_evaluators：答案与原文引用": true,
+        "outlook.agenda_topics：答案与原文引用": true,
+        "outlook.shared_foundations：答案与原文引用": true
+      },
+      "archive": "D:/Muiti-Agent Programing/experiments/code-agent-smolagents/24371220/experiments/smolagents/smolagents-20261105-171927-285091"
+    },
+    {
+      "name": "source-03",
+      "stage": "source",
+      "passed": true,
+      "score": 1,
+      "requests": 19,
+      "input_tokens": 155788,
+      "output_tokens": 14368,
+      "usage_complete": true,
+      "reason": null,
+      "seconds": 182.71,
+      "checks": {
+        "真实开发过程与修改范围": true,
+        "补丁可还原实际修改": true,
+        "相关源码真实读取并入模": true,
+        "首次修改复用相关源码或模型笔记": true,
+        "独立兼容与新增功能测试": true,
+        "真实日志处理链路": true,
+        "运行后修改范围仍合规": true,
+        "学生代码与本轮开始一致": true,
+        "服务端真实用量完整": true
+      },
+      "archive": "D:/Muiti-Agent Programing/experiments/code-agent-smolagents/24371220/experiments/smolagents/smolagents-20261105-172238-054040",
+      "actual_models": [
+        "deepseek-flash"
+      ]
+    }
+  ],
+  "aggregate": {
+    "paper": {
+      "passed": 3,
+      "total": 3,
+      "requests": 103,
+      "input_tokens": 774772,
+      "output_tokens": 53715
+    },
+    "source": {
+      "passed": 2,
+      "total": 3,
+      "requests": 45,
+      "input_tokens": 360370,
+      "output_tokens": 40471
+    }
+  },
+  "paper_context": [
+    {
+      "name": "paper-01",
+      "first_full_coverage_request": 23,
+      "first_answer_request": 7,
+      "page_sends": 104,
+      "original_chars": 392235,
+      "repeated_original_chars": 197619,
+      "by_reason_chars": {
+        "first_coverage": 194616,
+        "auto_recovery": 45208,
+        "explicit": 135995,
+        "auto_carry": 16416
+      },
+      "automatic_window_violations": []
+    },
+    {
+      "name": "paper-02",
+      "first_full_coverage_request": 18,
+      "first_answer_request": 4,
+      "page_sends": 55,
+      "original_chars": 207195,
+      "repeated_original_chars": 12579,
+      "by_reason_chars": {
+        "first_coverage": 194616,
+        "auto_carry": 12579
+      },
+      "automatic_window_violations": []
+    },
+    {
+      "name": "paper-03",
+      "first_full_coverage_request": 21,
+      "first_answer_request": 4,
+      "page_sends": 54,
+      "original_chars": 203520,
+      "repeated_original_chars": 8904,
+      "by_reason_chars": {
+        "first_coverage": 194616,
+        "explicit": 4832,
+        "auto_carry": 4072
+      },
+      "automatic_window_violations": []
+    }
+  ],
+  "current_runtime_matches_start": true,
+  "quality_review": {
+    "scope": "重点复核三份报告的outlook摘要和application，并非逐句完成全文语义审校",
+    "correct_table4_topics": [
+      "training_data",
+      "hallucination",
+      "agent_behavior",
+      "self_reflection",
+      "safety"
+    ],
+    "correct_shared_foundations": [
+      "reasoning",
+      "self_verification"
+    ],
+    "issues": [
+      {
+        "run": "paper-01",
+        "issues": [
+          "outlook.summary 的 Table 4 五类主题与原文不符；把共同基础写为推理与检索，正确答案是 reasoning 与 self_verification。",
+          "application 错称当前系统缺少预算与证据审计；实现已有相关核验。"
+        ]
+      },
+      {
+        "run": "paper-02",
+        "issues": [
+          "outlook.summary 的 Table 4 五类主题与原文不符；把共同基础写为 memory 与 planning，与本报告自己的正确答案矛盾。",
+          "tool_use.application 错称没有参数校验；现有工具包装器已有 Schema 校验。"
+        ]
+      },
+      {
+        "run": "paper-03",
+        "issues": [
+          "outlook.summary 的 Table 4 五类主题与原文不符。",
+          "tool_use.application 错称只暴露一个命令行工具且无校验；已有 read_pdf、recall_pages、save_answer 等多种工具与参数校验。"
+        ]
+      }
+    ],
+    "raw_outputs_unchanged": true
+  }
+}

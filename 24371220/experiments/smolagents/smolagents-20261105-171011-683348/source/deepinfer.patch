@@ -1,0 +1,126 @@
+--- a/deepinfer/engine/stats_logger.py
++++ b/deepinfer/engine/stats_logger.py
+@@ -120,7 +120,7 @@
+             if need_sleep:
+                 time.sleep((dist.get_rank() % 8) * 0.005)
+             for m in msgs:
+-                logger.info(m)
++                logger.info(m, extra={"keep_full_message": True})
+             need_sleep = q.empty()  # we skip sleep when q has backlog
+         except Exception:
+             traceback.print_exc()
+--- a/deepinfer/environ.py
++++ b/deepinfer/environ.py
+@@ -83,6 +83,20 @@
+         return EnvVar(lambda v: int(v) if v is not None else None)
+ 
+     @staticmethod
++    def int_or_none_min(*, minimum: int) -> EnvVar[int | None]:
++        """未设置时为 None；设置时必须能按 int 解析且不小于 minimum。"""
++
++        def _init(v: str | None) -> int | None:
++            if v is None:
++                return None
++            value = int(v)
++            if value < minimum:
++                raise ValueError(f"{value}, must be >= {minimum}")
++            return value
++
++        return EnvVar(_init)
++
++    @staticmethod
+     def choice(*, default: str | None = None, choices: tuple[str, ...]) -> EnvVar[str | None]:
+         def _init(v: str | None) -> str | None:
+             if v is None:
+@@ -179,6 +193,9 @@
+     DEEPINFER_ZERO_OVERHEAD_SCHEDULING = EnvVar.bool()
+ 
+     # -- Logging --
++    DEEPINFER_LOG_MAX_MESSAGE_CHARS = EnvVar.int_or_none_min(minimum=32)
++    """普通诊断日志消息正文的最大字符数：未设置表示不限长；设置时须为 >= 32 的
++    整数，否则抛出 ValueError。统计日志通过 keep_full_message 不受该预算限制。"""
+     DEEPINFER_LOGGING_INTERVAL_STEP = EnvVar.int(default=100)
+     DEEPINFER_NCCL_MEMORY_SAMPLE_INTERVAL_STEPS = EnvVar.int(default=1000)
+     DEEPINFER_RINGBUFFER_WARNING_INTERVAL = EnvVar.int(default=60)
+--- a/deepinfer/logger.py
++++ b/deepinfer/logger.py
+@@ -5,6 +5,7 @@
+ # https://github.com/skypilot-org/skypilot/blob/86dc0f6283a335e4aa37b3c10716f90999f48ab6/sky/sky_logging.py
+ """Logging configuration for DeepInfer."""
+ 
++import copy
+ import datetime
+ import logging
+ import multiprocessing
+@@ -16,6 +17,8 @@
+ from multiprocessing.process import BaseProcess
+ from types import TracebackType
+ 
++from deepinfer.environ import envs
++
+ _FORMAT = "[%(levelname)s %(asctime)s %(filename)s:%(lineno)d] %(message)s"
+ _DATE_FORMAT = "%m-%d %H:%M:%S"
+ 
+@@ -29,6 +32,22 @@
+ }
+ _COLOR_RESET = "\033[0m"
+ 
++_OMISSION_MARKER = "...<omitted>..."
++
++
++def _truncate_message(message: str, max_message_chars: int) -> str:
++    """超出预算时用固定标记省略中间内容，开头保留向上取整的一半。"""
++    if len(message) <= max_message_chars:
++        return message
++    remaining = max_message_chars - len(_OMISSION_MARKER)
++    if remaining <= 0:
++        return _OMISSION_MARKER
++    head = (remaining + 1) // 2
++    tail = remaining - head
++    if tail <= 0:
++        return message[:head] + _OMISSION_MARKER
++    return message[:head] + _OMISSION_MARKER + message[-tail:]
++
+ 
+ class NewLineFormatter(logging.Formatter):
+     """Adds logging prefix to newlines to align multi-line messages, optionally with microsecond precision.
+@@ -42,10 +61,17 @@
+         datefmt: str | None = None,
+         high_precision: bool = False,
+         use_color: bool = False,
++        *,
++        max_message_chars: int | None = None,
+     ) -> None:
+         super().__init__(fmt, datefmt)
++        if max_message_chars is not None and (
++            isinstance(max_message_chars, bool) or not isinstance(max_message_chars, int) or max_message_chars < 32
++        ):
++            raise ValueError(f"max_message_chars must be an int >= 32 or None, got {max_message_chars!r}")
+         self.high_precision = high_precision
+         self.use_color = use_color
++        self.max_message_chars = max_message_chars
+ 
+     def formatTime(self, record: logging.LogRecord, datefmt: str | None = None) -> str:
+         if not self.high_precision:
+@@ -56,6 +82,13 @@
+         return f"{base}.{record.msecs * 1000:06.0f}"
+ 
+     def format(self, record: logging.LogRecord) -> str:
++        if self.max_message_chars is not None and getattr(record, "keep_full_message", None) is not True:
++            message = record.getMessage()
++            if len(message) > self.max_message_chars:
++                # 复制记录，避免改写共享 LogRecord 的 msg/args/exc_info/stack_info
++                record = copy.copy(record)
++                record.msg = _truncate_message(message, self.max_message_chars)
++                record.args = ()
+         msg = super().format(record)
+         # 快速路径：单行日志（绝大多数情况）无需做对齐处理
+         if "\n" in msg and record.message:
+@@ -85,6 +118,7 @@
+         _FORMAT,
+         datefmt=_DATE_FORMAT,
+         use_color=sys.stdout.isatty(),
++        max_message_chars=envs.DEEPINFER_LOG_MAX_MESSAGE_CHARS,
+     )
+     _default_handler.setFormatter(fmt)
+     _root_logger.propagate = False

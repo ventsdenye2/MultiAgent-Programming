@@ -1,0 +1,391 @@
+[
+  {
+    "name": "paper-01",
+    "full": 23,
+    "after": [
+      {
+        "r": 23,
+        "tools": [
+          "task_status",
+          "recall_pages"
+        ]
+      },
+      {
+        "r": 24,
+        "tools": [
+          "task_status"
+        ]
+      },
+      {
+        "r": 25,
+        "tools": [
+          "task_status"
+        ]
+      },
+      {
+        "r": 26,
+        "tools": [
+          "read_pdf",
+          "read_pdf"
+        ]
+      },
+      {
+        "r": 27,
+        "tools": [
+          "read_pdf",
+          "read_pdf"
+        ]
+      },
+      {
+        "r": 28,
+        "tools": [
+          "save_answer",
+          "save_answer",
+          "recall_pages"
+        ]
+      },
+      {
+        "r": 29,
+        "tools": [
+          "recall_pages"
+        ]
+      },
+      {
+        "r": 30,
+        "tools": [
+          "recall_pages"
+        ]
+      },
+      {
+        "r": 31,
+        "tools": [
+          "task_status"
+        ]
+      },
+      {
+        "r": 32,
+        "tools": [
+          "save_answer",
+          "save_answer"
+        ]
+      },
+      {
+        "r": 33,
+        "tools": [
+          "save_answer",
+          "recall_pages"
+        ]
+      },
+      {
+        "r": 34,
+        "tools": [
+          "task_status"
+        ]
+      },
+      {
+        "r": 35,
+        "tools": [
+          "save_answer",
+          "recall_pages"
+        ]
+      },
+      {
+        "r": 36,
+        "tools": [
+          "save_answer"
+        ]
+      },
+      {
+        "r": 37,
+        "tools": [
+          "save_answer",
+          "write_note",
+          "write_note",
+          "write_note",
+          "write_note",
+          "write_note"
+        ]
+      },
+      {
+        "r": 38,
+        "tools": [
+          "read_file",
+          "save_section",
+          "save_section",
+          "save_section",
+          "save_section",
+          "save_section",
+          "submit_report",
+          "write_file"
+        ]
+      },
+      {
+        "r": 39,
+        "tools": [
+          "run_command"
+        ]
+      }
+    ],
+    "errors": [
+      {
+        "r": 9,
+        "error": "Code execution failed at line 'if 'PDF' not in dir():\n    PDF = {}' due to: InterpreterError: Forbidden function evaluation: 'dir' is not among the explicitly allowed tools or defined/imported in the preceding code"
+      },
+      {
+        "r": 25,
+        "error": "Code execution failed at line 'print(json.dumps({k: s.get(k) for k in ('phase','next_requirement','notes','answers','sections','pending_pages','requests_left')}, ensure_ascii=False)[:4000])' due to: InterpreterError: The variable `json` is not define"
+      },
+      {
+        "r": 32,
+        "error": "Code execution failed at line 'r2 = save_answer(\"overview\", \"search_methods\", {\"value\": [\"google_scholar\", \"snowballing\"]}, \"ev-a9b70da77a1c104405a2\", 5, \"The papers were initially selected with a Google Scholar search on Agentic LLM. From there, we "
+      },
+      {
+        "r": 36,
+        "error": "Code execution failed at line 'print(save_answer(\"overview\", \"categories\", {\"value\": [\"reason\", \"act\", \"interact\"]}, \"ev-03c9580cc4ea3469a3d3\", 1, \"We survey the growing body of literature on agentic LLMs, which we define as large language models tha"
+      }
+    ],
+    "tool_counts": {
+      "update_plan": 2,
+      "run_command": 2,
+      "read_file": 3,
+      "read_pdf": 14,
+      "write_note": 7,
+      "save_answer": 12,
+      "task_status": 6,
+      "recall_pages": 12,
+      "recall": 2,
+      "save_section": 5,
+      "submit_report": 1,
+      "write_file": 1
+    }
+  },
+  {
+    "name": "paper-02",
+    "full": 18,
+    "after": [
+      {
+        "r": 18,
+        "tools": [
+          "save_answer",
+          "save_answer",
+          "task_status"
+        ]
+      },
+      {
+        "r": 19,
+        "tools": [
+          "task_status"
+        ]
+      },
+      {
+        "r": 20,
+        "tools": [
+          "task_status"
+        ]
+      },
+      {
+        "r": 21,
+        "tools": [
+          "task_status"
+        ]
+      },
+      {
+        "r": 22,
+        "tools": [
+          "task_status"
+        ]
+      },
+      {
+        "r": 23,
+        "tools": [
+          "task_status",
+          "read_file"
+        ]
+      },
+      {
+        "r": 24,
+        "tools": [
+          "task_status"
+        ]
+      },
+      {
+        "r": 25,
+        "tools": [
+          "task_status"
+        ]
+      },
+      {
+        "r": 26,
+        "tools": []
+      },
+      {
+        "r": 27,
+        "tools": []
+      },
+      {
+        "r": 28,
+        "tools": [
+          "task_status"
+        ]
+      },
+      {
+        "r": 29,
+        "tools": [
+          "task_status"
+        ]
+      },
+      {
+        "r": 30,
+        "tools": [
+          "task_status"
+        ]
+      },
+      {
+        "r": 31,
+        "tools": [
+          "task_status"
+        ]
+      },
+      {
+        "r": 32,
+        "tools": [
+          "write_note"
+        ]
+      },
+      {
+        "r": 33,
+        "tools": [
+          "task_status",
+          "read_file"
+        ]
+      },
+      {
+        "r": 34,
+        "tools": [
+          "task_status"
+        ]
+      },
+      {
+        "r": 35,
+        "tools": [
+          "task_status"
+        ]
+      },
+      {
+        "r": 36,
+        "tools": [
+          "task_status"
+        ]
+      },
+      {
+        "r": 37,
+        "tools": [
+          "task_status"
+        ]
+      },
+      {
+        "r": 38,
+        "tools": [
+          "update_plan",
+          "write_note",
+          "write_note",
+          "write_note",
+          "write_note",
+          "save_section",
+          "save_section",
+          "save_section",
+          "save_section"
+        ]
+      },
+      {
+        "r": 39,
+        "tools": [
+          "submit_report",
+          "write_file",
+          "run_command"
+        ]
+      }
+    ],
+    "errors": [
+      {
+        "r": 19,
+        "error": "Code execution failed at line 'print(json.dumps(st, ensure_ascii=False, indent=1))' due to: InterpreterError: The variable `json` is not defined."
+      },
+      {
+        "r": 32,
+        "error": "Code execution failed at line 'res = write_note(title=\"overview framework and literature organization\", content=note, evidence_ids=[], section=\"overview\")' due to: ValueError: Notes must cite current-version evidence already sent to the model"
+      }
+    ],
+    "tool_counts": {
+      "update_plan": 3,
+      "read_file": 4,
+      "run_command": 3,
+      "read_pdf": 13,
+      "save_answer": 11,
+      "save_section": 5,
+      "write_note": 6,
+      "task_status": 20,
+      "recall_pages": 2,
+      "submit_report": 1,
+      "write_file": 1
+    }
+  },
+  {
+    "name": "paper-03",
+    "full": 21,
+    "after": [
+      {
+        "r": 21,
+        "tools": [
+          "save_answer",
+          "task_status"
+        ]
+      },
+      {
+        "r": 22,
+        "tools": [
+          "write_note",
+          "read_file"
+        ]
+      },
+      {
+        "r": 23,
+        "tools": [
+          "save_section",
+          "save_section",
+          "save_section",
+          "save_section",
+          "save_section",
+          "read_file"
+        ]
+      },
+      {
+        "r": 24,
+        "tools": [
+          "submit_report",
+          "write_file",
+          "run_command"
+        ]
+      },
+      {
+        "r": 25,
+        "tools": []
+      }
+    ],
+    "errors": [],
+    "tool_counts": {
+      "update_plan": 3,
+      "run_command": 2,
+      "read_file": 4,
+      "read_pdf": 1,
+      "write_note": 7,
+      "save_answer": 11,
+      "recall_pages": 14,
+      "recall": 1,
+      "task_status": 2,
+      "save_section": 5,
+      "submit_report": 1,
+      "write_file": 1
+    }
+  }
+]

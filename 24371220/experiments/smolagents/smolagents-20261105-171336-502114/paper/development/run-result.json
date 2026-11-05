@@ -1,0 +1,15 @@
+{
+  "status": "completed",
+  "engine": "smolagents",
+  "upstream_version": "1.26.0",
+  "context_mode": "evidence",
+  "reason": null,
+  "usage": {
+    "requests": 39,
+    "complete": true,
+    "prompt_tokens": 264642,
+    "completion_tokens": 18786
+  },
+  "answer": "报告已提交并通过格式检查",
+  "remaining": []
+}

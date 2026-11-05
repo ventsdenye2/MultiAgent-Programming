@@ -1,0 +1,15 @@
+{
+  "status": "completed",
+  "engine": "smolagents",
+  "upstream_version": "1.26.0",
+  "context_mode": "evidence",
+  "reason": null,
+  "usage": {
+    "requests": 25,
+    "complete": true,
+    "prompt_tokens": 196027,
+    "completion_tokens": 11515
+  },
+  "answer": "{'status': 'done', 'report': 'report.json', 'pytest': '1 passed', 'summary': '已分批读取 paper.pdf 第1-52页，保存五个主题笔记与十条带原文引用的答案，report.json 结构校验通过。'}",
+  "remaining": []
+}

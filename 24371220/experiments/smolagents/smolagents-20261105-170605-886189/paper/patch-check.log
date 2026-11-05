@@ -1,0 +1,2 @@
+命令：["patch", "--batch", "--forward", "-p1", "--input", "/home/ventsdenye/.local/state/code-agent/evaluations/run-7ykbeotg/results/paper/development/patch.diff"]
+patching file report.json

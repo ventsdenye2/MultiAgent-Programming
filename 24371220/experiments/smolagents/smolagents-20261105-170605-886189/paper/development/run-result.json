@@ -1,0 +1,15 @@
+{
+  "status": "completed",
+  "engine": "smolagents",
+  "upstream_version": "1.26.0",
+  "context_mode": "evidence",
+  "reason": null,
+  "usage": {
+    "requests": 39,
+    "complete": true,
+    "prompt_tokens": 314103,
+    "completion_tokens": 23414
+  },
+  "answer": "report.json 已生成：包含总览、五个主题的总结与启发、十个答案及对应原文证据，并通过 python -m pytest -q 格式检查。",
+  "remaining": []
+}

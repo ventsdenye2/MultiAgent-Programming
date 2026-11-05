@@ -1,0 +1,44 @@
+[
+  {
+    "name": "paper-01",
+    "first_full_coverage_request": 23,
+    "first_answer_request": 7,
+    "page_sends": 104,
+    "original_chars": 392235,
+    "repeated_original_chars": 197619,
+    "by_reason_chars": {
+      "first_coverage": 194616,
+      "auto_recovery": 45208,
+      "explicit": 135995,
+      "auto_carry": 16416
+    },
+    "automatic_window_violations": []
+  },
+  {
+    "name": "paper-02",
+    "first_full_coverage_request": 18,
+    "first_answer_request": 4,
+    "page_sends": 55,
+    "original_chars": 207195,
+    "repeated_original_chars": 12579,
+    "by_reason_chars": {
+      "first_coverage": 194616,
+      "auto_carry": 12579
+    },
+    "automatic_window_violations": []
+  },
+  {
+    "name": "paper-03",
+    "first_full_coverage_request": 21,
+    "first_answer_request": 4,
+    "page_sends": 54,
+    "original_chars": 203520,
+    "repeated_original_chars": 8904,
+    "by_reason_chars": {
+      "first_coverage": 194616,
+      "explicit": 4832,
+      "auto_carry": 4072
+    },
+    "automatic_window_violations": []
+  }
+]

@@ -1,0 +1,15 @@
+{
+  "status": "completed",
+  "engine": "smolagents",
+  "upstream_version": "1.26.0",
+  "context_mode": "evidence",
+  "reason": null,
+  "usage": {
+    "requests": 6,
+    "complete": true,
+    "prompt_tokens": 38056,
+    "completion_tokens": 4850
+  },
+  "answer": "Implemented DEEPINFER_LOG_MAX_MESSAGE_CHARS across environ.py (cached descriptor + refresh), logger.py (NewLineFormatter budget with ...<omitted>... marker and keep_full_message passthrough), and stats_logger.py (queue consumer passes extra keep_full_message=True). Full pytest: 60 passed.",
+  "remaining": []
+}

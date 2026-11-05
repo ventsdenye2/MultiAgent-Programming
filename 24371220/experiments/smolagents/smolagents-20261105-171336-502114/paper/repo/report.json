@@ -1,0 +1,135 @@
+{
+  "overview": "该综述以 reasoning、tool use、multi-agent 三类能力组织 Agentic LLM 研究。作者先以关键词检索种子论文，再用前向与后向滚雪球扩展文献。正文分别讨论推理（CoT、自洽、思维树、自反思）、工具使用（Toolformer、ToolBench、规划与执行）和多智能体（CAMEL、Generative Agents、协作与竞争），并给出评测方法与 Table 4 的五个研究议题。结论强调记忆与规划是三类能力的共同基础，同时指出成本、安全与评测方面的缺口。",
+  "sections": [
+    {
+      "id": "overview",
+      "summary": "该综述把 agentic LLM 的能力分为 reasoning、acting/assistant、interacting 三大类，并按此组织全文：推理（CoT、Self Consistency、Tree of Thoughts、自反思）、工具调用与代码执行、以及多智能体交互。文献先以系统检索入手，再用前向与后向（引文/被引）滚雪球扩展；每类能力都配合大量基准与框架进行对比。局限在于：多智能体评测与长程可靠性仍欠缺统一标准，且不少结论依赖特定提示与基准。",
+      "application": "我的 agent 目前只实现了分页读取、命令调用、笔记与答案保存，尚未实现多智能体的合作与训练。未来可尝试让规划与执行分离，或用自一致性对多条答案投票以提高事实抽取的稳定性。",
+      "answers": {
+        "categories": [
+          "reasoning",
+          "acting",
+          "interacting"
+        ],
+        "search_methods": [
+          "google_scholar",
+          "snowballing"
+        ]
+      },
+      "evidence": [
+        {
+          "question": "categories",
+          "page": 4,
+          "quote": "The categories reasoning–acting–interacting build upon each other: the technology that has been developed by the reasoning approaches (category 1) is used for increasingly intelligent acting by assistants."
+        },
+        {
+          "question": "search_methods",
+          "page": 5,
+          "quote": "The papers were initially selected with a Google Scholar search on Agentic LLM. From there, we used a snowballing approach to discover work that was cited but not yet included in our initial set."
+        }
+      ]
+    },
+    {
+      "id": "reasoning",
+      "summary": "推理主题以思维链为起点：Self Consistency 采样多条推理路径，按出现最频繁的答案（多数投票）选最终结果；Tree of Thoughts 把推理组织成树，用广度优先和深度优先控制器搜索，并通过评估与回溯剪枝。自反思方法（PHP、Self Refine、Reflexion、Self Discover）通过生成—反馈—修正循环改错，需要外部记忆保存状态；DeepSeek-R1 则用强化学习把推理内化。主要局限是提示循环成本高、隐式推理仍缺乏可解释性。",
+      "application": "已实现按页调用 read_pdf 并保存 command_result，但阅读流程是单条链，没有多路径交叉验证。不足是证据不足时不会回溯。未来可在答案抽取上加多数投票，并用树式规划在页批次间回退重读。",
+      "answers": {
+        "self_consistency_selection": "majority voting",
+        "tot_search": [
+          "breadth_first",
+          "depth_first"
+        ]
+      },
+      "evidence": [
+        {
+          "question": "self_consistency_selection",
+          "page": 10,
+          "quote": "Self Consistency is an ensemble approach that samples diverse reasoning paths, evaluates them, and selects the most consistent answer using majority voting."
+        },
+        {
+          "question": "tot_search",
+          "page": 13,
+          "quote": "The paper describes both a breadth-first and a depth-first controller."
+        }
+      ]
+    },
+    {
+      "id": "tool_use",
+      "summary": "工具使用把 LLM 与外部 API、检索器和计算器连接起来，核心环节包括判断是否需要调用、选择工具、填参数、执行并吸收反馈。Toolformer 用自监督损失筛选五类工具调用；ToolBench 以 16,464 个 API 支撑多步任务评测。综述指出长尾工具、组合调用、错误恢复和真实环境评测仍是瓶颈。",
+      "application": "已实现命令工具调用 read_pdf.py 与 pytest，并保留 stdout 供后续复用；但工具集固定，没有外部 API 注册、参数校验和失败重试。未来可加工具选择与调用结果验证，但多智能体协作与训练仍未实现。",
+      "answers": {
+        "toolbench_api_count": 16464,
+        "toolformer_tools": [
+          "calculator",
+          "question_answering",
+          "search_engine",
+          "translation_system",
+          "calendar"
+        ]
+      },
+      "evidence": [
+        {
+          "question": "toolbench_api_count",
+          "page": 23,
+          "quote": "ToolBench [Qin et al., 2023] contains 16,464 APIs from RapidAPI, a large dataset of publicly available REST APIs."
+        },
+        {
+          "question": "toolformer_tools",
+          "page": 23,
+          "quote": "A range of tools is tested: a calculator, a question-answering system, a search engine, a translation system, and a calendar."
+        }
+      ]
+    },
+    {
+      "id": "multi_agent",
+      "summary": "多智能体主题研究角色分工、辩论、协作与社会模拟。CAMEL 用 inception prompting 维持角色身份；Generative Agents 用记忆、反思与计划驱动小镇居民，并由 100 名人类评估者评价可信度。多智能体可互相检查、并行探索，但通信开销、错误传播、信用分配和评测可重复性是主要局限。",
+      "application": "当前 agent 是单智能体：已实现分批阅读、证据保存与报告序列化，但没有角色分工或辩论机制。不足是缺少独立审阅者。未来可让阅读者与核查者分工，用辩论减少引文错误，但这是改进设想而非现状。",
+      "answers": {
+        "camel_prompting": "inception_prompting",
+        "generative_agents_evaluators": 100
+      },
+      "evidence": [
+        {
+          "question": "camel_prompting",
+          "page": 37,
+          "quote": "By using inception prompting and role descriptions, the agents stay in character and collaborate toward the goal by breaking down complex problems in manageable steps through dialogue."
+        },
+        {
+          "question": "generative_agents_evaluators",
+          "page": 47,
+          "quote": "Whether the Generative Agents system generates believable behavior is evaluated with the help of 100 human evaluators. These were enlisted to rank believability of the communication patterns on four categories"
+        }
+      ]
+    },
+    {
+      "id": "outlook",
+      "summary": "Table 4 的五个议题把研究从能力演示推向可靠系统：工程化、多智能体、安全、个性化与科学发现。结论强调 reasoning、tool use、multi-agent 都依赖 memory 与 planning，并需更严格的评测、成本控制与安全对齐；开放问题包括长程任务的稳定性、真实环境验证和人类监督。",
+      "application": "已实现固定页批次的读取与请求预算控制，能保留笔记并在最后归并；不足是计划是预设的，不能根据阅读内容动态调整。未来可加入记忆检索和成本感知规划，在多轮阅读中自动回退，但不要把这些写成已实现。",
+      "answers": {
+        "agenda_topics": [
+          "training_data",
+          "hallucination",
+          "agent_behavior",
+          "self_reflection",
+          "safety"
+        ],
+        "shared_foundations": [
+          "reasoning",
+          "self_verification"
+        ]
+      },
+      "evidence": [
+        {
+          "question": "agenda_topics",
+          "page": 51,
+          "quote": "Topic Challenge Training Data Finetune with inference time reasoning data Convergent/stable reinforcement learning VLA, Multimodal signals, such as speech Hallucination Use Self Verification Use Mechanistic Interpretability Use Open Ended/Open World Models for exploration Agent Behavior Scalable simulation infrastructure, role playing Distill reasoning to small models Models of agent and human behavior, emergent behavior, future of society Self reflection In-model self reflection and metareasoning Metacognition, personality Automated Scientific Discovery Safety Assistants: Responsibility, liability Privacy, fairness of data Wider application areas for assistants Table 4. Summary of Research Agenda for Agentic LLM"
+        },
+        {
+          "question": "shared_foundations",
+          "page": 52,
+          "quote": "Robotic interaction and tool-use build on grounded retrieval augmentation, social interaction (such as theory of mind) builds on self reflection, and all categories benefit from reasoning and self-verification."
+        }
+      ]
+    }
+  ]
+}

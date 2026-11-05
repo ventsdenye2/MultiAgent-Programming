@@ -1,0 +1,145 @@
+--- a/deepinfer/engine/stats_logger.py
++++ b/deepinfer/engine/stats_logger.py
+@@ -120,7 +120,7 @@
+             if need_sleep:
+                 time.sleep((dist.get_rank() % 8) * 0.005)
+             for m in msgs:
+-                logger.info(m)
++                logger.info(m, extra={"keep_full_message": True})
+             need_sleep = q.empty()  # we skip sleep when q has backlog
+         except Exception:
+             traceback.print_exc()
+--- a/deepinfer/environ.py
++++ b/deepinfer/environ.py
+@@ -23,6 +23,16 @@
+ 
+ def _str(v: str | None, default: str = "") -> str:
+     return v if v is not None else default
++
++
++def _int_or_none_at_least(v: str | None, minimum: int) -> int | None:
++    """未设置时返回 None（不限），否则解析为 >= minimum 的整数。"""
++    if v is None:
++        return None
++    parsed = int(v)
++    if parsed < minimum:
++        raise ValueError(f"{parsed} must be >= {minimum}")
++    return parsed
+ 
+ 
+ _descriptors: dict[str, EnvVar[Any]] = {}
+@@ -83,6 +93,10 @@
+         return EnvVar(lambda v: int(v) if v is not None else None)
+ 
+     @staticmethod
++    def int_or_none_at_least(*, minimum: int) -> EnvVar[int | None]:
++        return EnvVar(lambda v: _int_or_none_at_least(v, minimum))
++
++    @staticmethod
+     def choice(*, default: str | None = None, choices: tuple[str, ...]) -> EnvVar[str | None]:
+         def _init(v: str | None) -> str | None:
+             if v is None:
+@@ -179,6 +193,8 @@
+     DEEPINFER_ZERO_OVERHEAD_SCHEDULING = EnvVar.bool()
+ 
+     # -- Logging --
++    DEEPINFER_LOG_MAX_MESSAGE_CHARS = EnvVar.int_or_none_at_least(minimum=32)
++    "普通诊断日志单个消息正文的最大字符数；未设置表示不限长。统计日志始终输出完整消息。"
+     DEEPINFER_LOGGING_INTERVAL_STEP = EnvVar.int(default=100)
+     DEEPINFER_NCCL_MEMORY_SAMPLE_INTERVAL_STEPS = EnvVar.int(default=1000)
+     DEEPINFER_RINGBUFFER_WARNING_INTERVAL = EnvVar.int(default=60)
+--- a/deepinfer/logger.py
++++ b/deepinfer/logger.py
+@@ -5,6 +5,7 @@
+ # https://github.com/skypilot-org/skypilot/blob/86dc0f6283a335e4aa37b3c10716f90999f48ab6/sky/sky_logging.py
+ """Logging configuration for DeepInfer."""
+ 
++import copy
+ import datetime
+ import logging
+ import multiprocessing
+@@ -16,6 +17,8 @@
+ from multiprocessing.process import BaseProcess
+ from types import TracebackType
+ 
++from deepinfer.environ import envs
++
+ _FORMAT = "[%(levelname)s %(asctime)s %(filename)s:%(lineno)d] %(message)s"
+ _DATE_FORMAT = "%m-%d %H:%M:%S"
+ 
+@@ -30,6 +33,38 @@
+ _COLOR_RESET = "\033[0m"
+ 
+ 
++_OMITTED_MARKER = "...<omitted>..."
++_MIN_MAX_MESSAGE_CHARS = 32
++
++
++def _validate_max_message_chars(max_message_chars: int | None) -> int | None:
++    """None 表示不限长；其余须为 >= 32 的整数（bool 不算整数）。"""
++    if max_message_chars is None:
++        return None
++    if isinstance(max_message_chars, bool) or not isinstance(max_message_chars, int):
++        raise ValueError(
++            f"max_message_chars must be None or an int >= {_MIN_MAX_MESSAGE_CHARS}, "
++            f"got {max_message_chars!r}"
++        )
++    if max_message_chars < _MIN_MAX_MESSAGE_CHARS:
++        raise ValueError(
++            f"max_message_chars must be None or an int >= {_MIN_MAX_MESSAGE_CHARS}, "
++            f"got {max_message_chars}"
++        )
++    return max_message_chars
++
++
++def _truncate_message(message: str, max_message_chars: int) -> str:
++    """超预算时用固定标记替换中间内容，开头取 ceil 一半，末尾取其余。"""
++    if len(message) <= max_message_chars:
++        return message
++    remaining = max_message_chars - len(_OMITTED_MARKER)
++    head = (remaining + 1) // 2
++    tail = remaining - head
++    ending = message[len(message) - tail :] if tail > 0 else ""
++    return f"{message[:head]}{_OMITTED_MARKER}{ending}"
++
++
+ class NewLineFormatter(logging.Formatter):
+     """Adds logging prefix to newlines to align multi-line messages, optionally with microsecond precision.
+ 
+@@ -42,10 +77,13 @@
+         datefmt: str | None = None,
+         high_precision: bool = False,
+         use_color: bool = False,
++        *,
++        max_message_chars: int | None = None,
+     ) -> None:
+         super().__init__(fmt, datefmt)
+         self.high_precision = high_precision
+         self.use_color = use_color
++        self.max_message_chars = _validate_max_message_chars(max_message_chars)
+ 
+     def formatTime(self, record: logging.LogRecord, datefmt: str | None = None) -> str:
+         if not self.high_precision:
+@@ -56,6 +94,14 @@
+         return f"{base}.{record.msecs * 1000:06.0f}"
+ 
+     def format(self, record: logging.LogRecord) -> str:
++        if self.max_message_chars is not None and getattr(record, "keep_full_message", None) is not True:
++            body = record.getMessage()
++            shortened = _truncate_message(body, self.max_message_chars)
++            if shortened != body:
++                # 复制记录后再改写，绝不改动共享原记录的 msg/args/exc_info/stack_info
++                record = copy.copy(record)
++                record.msg = shortened
++                record.args = ()
+         msg = super().format(record)
+         # 快速路径：单行日志（绝大多数情况）无需做对齐处理
+         if "\n" in msg and record.message:
+@@ -85,6 +131,7 @@
+         _FORMAT,
+         datefmt=_DATE_FORMAT,
+         use_color=sys.stdout.isatty(),
++        max_message_chars=envs.DEEPINFER_LOG_MAX_MESSAGE_CHARS,
+     )
+     _default_handler.setFormatter(fmt)
+     _root_logger.propagate = False
