@@ -1,0 +1,12 @@
+{
+  "arm": "baseline",
+  "task": "paper",
+  "number": 1,
+  "status": "user_paused_before_request",
+  "passed": null,
+  "requests": 0,
+  "score": null,
+  "pause_reason": "User requested analysis and pause. SIGINT during local preflight; no model request or agent run started. Raw protocol and preflight artifacts retained.",
+  "previous_status": "running",
+  "native": "/home/ventsdenye/.local/state/code-agent/evaluations/context-baseline-paper-e9e36jb2"
+}

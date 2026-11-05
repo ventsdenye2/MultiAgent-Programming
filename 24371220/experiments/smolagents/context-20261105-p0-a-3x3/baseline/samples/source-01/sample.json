@@ -1,0 +1,34 @@
+{
+  "task": "source",
+  "exit_code": 1,
+  "archive": "/mnt/d/Muiti-Agent Programing/experiments/code-agent-smolagents/24371220/experiments/smolagents/context-20261105-p0-a-3x3/baseline/samples/source-01/evaluation",
+  "status": "failed",
+  "passed": false,
+  "requests": 20,
+  "prompt_tokens": 176764,
+  "completion_tokens": 27773,
+  "usage_complete": true,
+  "max_request_chars": 31771,
+  "agent_errors": {
+    "AgentParsingError": 4,
+    "AgentExecutionError": 2
+  },
+  "failure_reason": "MAX_STEPS_NO_EXTRA_REQUEST",
+  "agent_status": "failed",
+  "score": 0,
+  "max_score": 1,
+  "checks": {
+    "真实开发过程与修改范围": "agent 退出码 1，查看 agent-console.log",
+    "补丁可还原实际修改": true,
+    "相关源码真实读取并入模": true,
+    "首次修改复用相关源码或模型笔记": true,
+    "独立兼容与新增功能测试": true,
+    "真实日志处理链路": true,
+    "运行后修改范围仍合规": true,
+    "学生代码与本轮开始一致": true,
+    "服务端真实用量完整": true
+  },
+  "arm": "baseline",
+  "number": 1,
+  "native": "/home/ventsdenye/.local/state/code-agent/evaluations/context-baseline-source-a4vjv6b8"
+}

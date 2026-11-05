@@ -1,0 +1,1939 @@
+{
+  "generated_at_utc": "2026-11-05T03:01:50.996744+00:00",
+  "study": "D:\\Muiti-Agent Programing\\experiments\\code-agent-smolagents\\24371220\\experiments\\smolagents\\context-20261105-p0-a-3x3",
+  "scope": "Recorded artifacts snapshot only; no failure-cause or stability inference.",
+  "groups": {
+    "baseline": {
+      "tasks": {
+        "paper": {
+          "expected_or_observed": 3,
+          "finished": 0,
+          "passed": 0,
+          "success_rate": null,
+          "pending": 3
+        },
+        "source": {
+          "expected_or_observed": 3,
+          "finished": 1,
+          "passed": 0,
+          "success_rate": 0.0,
+          "pending": 2
+        }
+      },
+      "samples": [
+        {
+          "sample": "paper-01",
+          "task": "paper",
+          "number": 1,
+          "sample_json_present": false,
+          "status": "not_recorded",
+          "passed": null,
+          "score": null,
+          "sample_metadata": {},
+          "log_present": false
+        },
+        {
+          "sample": "paper-02",
+          "task": "paper",
+          "number": 2,
+          "sample_json_present": false,
+          "status": "not_recorded",
+          "passed": null,
+          "score": null,
+          "sample_metadata": {},
+          "log_present": false
+        },
+        {
+          "sample": "paper-03",
+          "task": "paper",
+          "number": 3,
+          "sample_json_present": false,
+          "status": "not_recorded",
+          "passed": null,
+          "score": null,
+          "sample_metadata": {},
+          "log_present": false
+        },
+        {
+          "sample": "source-01",
+          "task": "source",
+          "number": 1,
+          "sample_json_present": true,
+          "status": "failed",
+          "passed": false,
+          "score": 0,
+          "sample_metadata": {
+            "task": "source",
+            "exit_code": 1,
+            "archive": "/mnt/d/Muiti-Agent Programing/experiments/code-agent-smolagents/24371220/experiments/smolagents/context-20261105-p0-a-3x3/baseline/samples/source-01/evaluation",
+            "status": "failed",
+            "passed": false,
+            "requests": 20,
+            "prompt_tokens": 176764,
+            "completion_tokens": 27773,
+            "usage_complete": true,
+            "max_request_chars": 31771,
+            "agent_errors": {
+              "AgentParsingError": 4,
+              "AgentExecutionError": 2
+            },
+            "failure_reason": "MAX_STEPS_NO_EXTRA_REQUEST",
+            "agent_status": "failed",
+            "score": 0,
+            "max_score": 1,
+            "checks": {
+              "真实开发过程与修改范围": "agent 退出码 1，查看 agent-console.log",
+              "补丁可还原实际修改": true,
+              "相关源码真实读取并入模": true,
+              "首次修改复用相关源码或模型笔记": true,
+              "独立兼容与新增功能测试": true,
+              "真实日志处理链路": true,
+              "运行后修改范围仍合规": true,
+              "学生代码与本轮开始一致": true,
+              "服务端真实用量完整": true
+            },
+            "arm": "baseline",
+            "number": 1,
+            "native": "/home/ventsdenye/.local/state/code-agent/evaluations/context-baseline-source-a4vjv6b8"
+          },
+          "log_present": true,
+          "log": {
+            "path": "D:\\Muiti-Agent Programing\\experiments\\code-agent-smolagents\\24371220\\experiments\\smolagents\\context-20261105-p0-a-3x3\\baseline\\samples\\source-01\\evaluation\\source\\development\\run.log",
+            "invalid_line_numbers": [],
+            "snapshot_ends_with_newline": true,
+            "inspection": {
+              "path": "D:\\Muiti-Agent Programing\\experiments\\code-agent-smolagents\\24371220\\experiments\\smolagents\\context-20261105-p0-a-3x3\\baseline\\samples\\source-01\\evaluation\\source\\development\\run.log",
+              "requests": 20,
+              "responses": 20,
+              "model_errors": 0,
+              "usage_complete": true,
+              "known_prompt_tokens": 176764,
+              "known_completion_tokens": 27773,
+              "known_total_tokens": 204537,
+              "cache_hit_tokens": 81664,
+              "cache_miss_tokens": 95100,
+              "max_request_chars": 31771,
+              "response_classes": {
+                "ok": 20
+              },
+              "last_request_parameters": {
+                "model": "deepseek-flash",
+                "max_tokens": 16384,
+                "thinking": {
+                  "type": "enabled"
+                },
+                "reasoning_effort": "high"
+              },
+              "counts": {
+                "snapshot": 3,
+                "run_start": 1,
+                "file_read": 34,
+                "context_selection": 20,
+                "request_budget": 20,
+                "model_request": 20,
+                "context_accounting": 20,
+                "model_response": 20,
+                "usage": 20,
+                "context_exposure": 20,
+                "tool_call": 45,
+                "plan": 2,
+                "tool_result": 44,
+                "command_result": 3,
+                "verification_result": 3,
+                "context_clip": 15,
+                "agent_step": 20,
+                "evidence": 34,
+                "agent_error": 6,
+                "file_write": 4,
+                "evidence_invalidated": 4,
+                "tool_error": 1,
+                "run_error": 1,
+                "run_result": 1
+              },
+              "commands": [
+                {
+                  "argv": [
+                    "/mnt/d/Muiti-Agent Programing/experiments/code-agent-smolagents/24371220/.venv/bin/python",
+                    "-m",
+                    "pytest",
+                    "-q"
+                  ],
+                  "rc": 1,
+                  "timed_out": false
+                },
+                {
+                  "argv": [
+                    "/mnt/d/Muiti-Agent Programing/experiments/code-agent-smolagents/24371220/.venv/bin/python",
+                    "-m",
+                    "pytest",
+                    "-q"
+                  ],
+                  "rc": 0,
+                  "timed_out": false
+                },
+                {
+                  "argv": [
+                    "/mnt/d/Muiti-Agent Programing/experiments/code-agent-smolagents/24371220/.venv/bin/python",
+                    "-m",
+                    "pytest",
+                    "-q"
+                  ],
+                  "rc": 0,
+                  "timed_out": false
+                }
+              ],
+              "paper_pages_exposed": [],
+              "paper_page_count": 0,
+              "section_note_count": 0,
+              "section_topics": [],
+              "changed_files": [
+                "deepinfer/engine/stats_logger.py",
+                "deepinfer/environ.py",
+                "deepinfer/logger.py"
+              ],
+              "agent_error_types": {
+                "AgentParsingError": 4,
+                "AgentExecutionError": 2
+              },
+              "recent_actions": [
+                {
+                  "event": "tool_call",
+                  "tool": "run_command",
+                  "error_type": null,
+                  "error": null
+                },
+                {
+                  "event": "agent_error",
+                  "tool": null,
+                  "error_type": "AgentExecutionError",
+                  "error": "Code execution failed at line 'log = \"==== command: python -m pytest -q ====\\nrc=%s\\n\" % test['rc'] + test['stdout'] + \"\\n\" + (test.get('stderr') or '')' due to: InterpreterError: Cannot assign to name 'log': doing this would erase the existing tool!"
+                },
+                {
+                  "event": "tool_call",
+                  "tool": "run_command",
+                  "error_type": null,
+                  "error": null
+                },
+                {
+                  "event": "tool_call",
+                  "tool": "run_command",
+                  "error_type": null,
+                  "error": null
+                },
+                {
+                  "event": "tool_error",
+                  "tool": "run_command",
+                  "error_type": "ValueError",
+                  "error": "command is not allowed"
+                },
+                {
+                  "event": "agent_error",
+                  "tool": null,
+                  "error_type": "AgentExecutionError",
+                  "error": "Code execution failed at line 'diff_cmd = run_command(['git', 'diff', '--',\n                        'deepinfer/environ.py', 'deepinfer/logger.py',\n                        'deepinfer/engine/stats_logger.py'], '.')' due to: ValueError: command is not allowed"
+                }
+              ],
+              "result": {
+                "status": "failed",
+                "engine": "smolagents",
+                "upstream_version": "1.26.0",
+                "context_mode": "evidence",
+                "reason": "MAX_STEPS_NO_EXTRA_REQUEST",
+                "usage": {
+                  "requests": 20,
+                  "complete": true,
+                  "prompt_tokens": 176764,
+                  "completion_tokens": 27773
+                },
+                "remaining": [
+                  "finish all plan items after their work and checks"
+                ]
+              },
+              "invalid_lines": 0
+            },
+            "milestones": {
+              "first_write": {
+                "request": 18,
+                "seq": 302,
+                "path": "deepinfer/environ.py",
+                "file_hash": "e6763ac3f03673b05c866b5cd6942e6e6f47725513e456b70f4fc88847181151"
+              },
+              "last_write": {
+                "request": 19,
+                "seq": 335,
+                "path": "deepinfer/engine/stats_logger.py",
+                "file_hash": "554e54ac42df2277016bff89f7ab3deb6cc62af0dc6a89945312751606af5481"
+              },
+              "report_writes": [],
+              "writes": [
+                {
+                  "request": 18,
+                  "seq": 302,
+                  "path": "deepinfer/environ.py",
+                  "file_hash": "e6763ac3f03673b05c866b5cd6942e6e6f47725513e456b70f4fc88847181151"
+                },
+                {
+                  "request": 19,
+                  "seq": 321,
+                  "path": "deepinfer/environ.py",
+                  "file_hash": "7022819b244f2f2404ab29929ffa3164e17cb2fb06cbf55a31142287c9b09ad7"
+                },
+                {
+                  "request": 19,
+                  "seq": 328,
+                  "path": "deepinfer/logger.py",
+                  "file_hash": "19a2f3636e6fff821c6eebff49bc178aa4fa1e60a60c5bbabd5dfa7500074a1f"
+                },
+                {
+                  "request": 19,
+                  "seq": 335,
+                  "path": "deepinfer/engine/stats_logger.py",
+                  "file_hash": "554e54ac42df2277016bff89f7ab3deb6cc62af0dc6a89945312751606af5481"
+                }
+              ],
+              "tests": [
+                {
+                  "request": 1,
+                  "seq": 17,
+                  "rc": 1,
+                  "timed_out": false
+                },
+                {
+                  "request": 19,
+                  "seq": 339,
+                  "rc": 0,
+                  "timed_out": false
+                },
+                {
+                  "request": 20,
+                  "seq": 353,
+                  "rc": 0,
+                  "timed_out": false
+                }
+              ],
+              "tests_after_last_write": [
+                {
+                  "request": 19,
+                  "seq": 339,
+                  "rc": 0,
+                  "timed_out": false
+                },
+                {
+                  "request": 20,
+                  "seq": 353,
+                  "rc": 0,
+                  "timed_out": false
+                }
+              ],
+              "finish": [],
+              "errors": [
+                {
+                  "request": 5,
+                  "seq": 115,
+                  "event": "agent_error",
+                  "type": "AgentParsingError",
+                  "classification": null,
+                  "tool": null,
+                  "error": "Error in code parsing:\nYour code snippet is invalid, because the regex pattern ```python(.*?)``` was not found in it.\n            Here is your code snippet:\n\n\n<｜｜DSML｜｜ calls>\n<｜｜DSML｜｜ invoke name=\"read_range\">\n<｜｜DSML｜｜ parameter name=\"path\" string=\"true\">deepinfer/environ.py</｜｜DSML｜｜ parameter>\n<｜｜DSML｜｜ parameter name=\"start_line\" string=\"false\">95</｜｜DSML｜｜ parameter>\n<｜｜DSML｜｜ parameter name=\"end_line\" string=\"false\">230</｜｜DSML｜｜ parameter>\n</｜｜DSML｜｜ invoke>\n</｜｜DSML｜｜ calls>```\n            Make sure to include code with the correct pattern, for instance:\n            Thoughts: Your thoughts\n            ```python\n            # Your python code here\n            ```\nMake sure to provide correct code blobs."
+                },
+                {
+                  "request": 7,
+                  "seq": 136,
+                  "event": "agent_error",
+                  "type": "AgentParsingError",
+                  "classification": null,
+                  "tool": null,
+                  "error": "Error in code parsing:\nYour code snippet is invalid, because the regex pattern ```python(.*?)``` was not found in it.\n            Here is your code snippet:\n\n\n<｜｜DSML｜｜ calls>\n<｜｜DSML｜｜ invoke name=\"read_range\">\n<｜｜DSML｜｜ parameter name=\"path\" string=\"true\">deepinfer/environ.py</｜｜DSML｜｜ parameter>\n<｜｜DSML｜｜ parameter name=\"start_line\" string=\"false\">1</｜｜DSML｜｜ parameter>\n<｜｜DSML｜｜ parameter name=\"end_line\" string=\"false\">30</｜｜DSML｜｜ parameter>\n</｜｜DSML｜｜ invoke>\n</｜｜DSML｜｜ calls>```\n            Make sure to include code with the correct pattern, for instance:\n            Thoughts: Your thoughts\n            ```python\n            # Your python code here\n            ```\nMake sure to provide correct code blobs."
+                },
+                {
+                  "request": 9,
+                  "seq": 169,
+                  "event": "agent_error",
+                  "type": "AgentParsingError",
+                  "classification": null,
+                  "tool": null,
+                  "error": "Error in code parsing:\nYour code snippet is invalid, because the regex pattern ```python(.*?)``` was not found in it.\n            Here is your code snippet:\n\n\n<｜｜DSML｜｜ calls>\n<｜｜DSML｜｜ invoke name=\"read_range\">\n<｜｜DSML｜｜ parameter name=\"path\" string=\"true\">deepinfer/environ.py</｜｜DSML｜｜ parameter>\n<｜｜DSML｜｜ parameter name=\"start_line\" string=\"false\">1</｜｜DSML｜｜ parameter>\n<｜｜DSML｜｜ parameter name=\"end_line\" string=\"false\">32</｜｜DSML｜｜ parameter>\n</｜｜DSML｜｜ invoke>\n</｜｜DSML｜｜ calls>```\n            Make sure to include code with the correct pattern, for instance:\n            Thoughts: Your thoughts\n            ```python\n            # Your python code here\n            ```\nMake sure to provide correct code blobs."
+                },
+                {
+                  "request": 10,
+                  "seq": 178,
+                  "event": "agent_error",
+                  "type": "AgentParsingError",
+                  "classification": null,
+                  "tool": null,
+                  "error": "Error in code parsing:\nYour code snippet is invalid, because the regex pattern ```python(.*?)``` was not found in it.\n            Here is your code snippet:\n\n\n<｜｜DSML｜｜ calls>\n<｜｜DSML｜｜ invoke name=\"read_range\">\n<｜｜DSML｜｜ parameter name=\"path\" string=\"true\">deepinfer/environ.py</｜｜DSML｜｜ parameter>\n<｜｜DSML｜｜ parameter name=\"start_line\" string=\"false\">95</｜｜DSML｜｜ parameter>\n<｜｜DSML｜｜ parameter name=\"end_line\" string=\"false\">225</｜｜DSML｜｜ parameter>\n</｜｜DSML｜｜ invoke>\n</｜｜DSML｜｜ calls>```\n            Make sure to include code with the correct pattern, for instance:\n            Thoughts: Your thoughts\n            ```python\n            # Your python code here\n            ```\nMake sure to provide correct code blobs."
+                },
+                {
+                  "request": 19,
+                  "seq": 343,
+                  "event": "agent_error",
+                  "type": "AgentExecutionError",
+                  "classification": null,
+                  "tool": null,
+                  "error": "Code execution failed at line 'log = \"==== command: python -m pytest -q ====\\nrc=%s\\n\" % test['rc'] + test['stdout'] + \"\\n\" + (test.get('stderr') or '')' due to: InterpreterError: Cannot assign to name 'log': doing this would erase the existing tool!"
+                },
+                {
+                  "request": 20,
+                  "seq": 357,
+                  "event": "tool_error",
+                  "type": "ValueError",
+                  "classification": null,
+                  "tool": "run_command",
+                  "error": "command is not allowed"
+                },
+                {
+                  "request": 20,
+                  "seq": 359,
+                  "event": "agent_error",
+                  "type": "AgentExecutionError",
+                  "classification": null,
+                  "tool": null,
+                  "error": "Code execution failed at line 'diff_cmd = run_command(['git', 'diff', '--',\n                        'deepinfer/environ.py', 'deepinfer/logger.py',\n                        'deepinfer/engine/stats_logger.py'], '.')' due to: ValueError: command is not allowed"
+                }
+              ],
+              "saved_answer_events": [],
+              "version_checks": [
+                {
+                  "request": 1,
+                  "seq": 18,
+                  "command": [
+                    "python",
+                    "-m",
+                    "pytest",
+                    "-q"
+                  ],
+                  "rc": 1,
+                  "before_versions": {
+                    "deepinfer/engine/stats_logger.py": "9ef93c3930d6dd8d889d4ba69558a85459c2210ae0714d5073c3b4328c8e7cb9",
+                    "deepinfer/environ.py": "fe2c531989c419f0b51b169a07f5ed826dcec7f95c0c5bc3a351805923c4f218",
+                    "deepinfer/logger.py": "5b8f8d9947de692353609c1fc2851097d24f9b6ba6004dce1dbfa394dc6d3ec8"
+                  },
+                  "after_versions": {
+                    "deepinfer/engine/stats_logger.py": "9ef93c3930d6dd8d889d4ba69558a85459c2210ae0714d5073c3b4328c8e7cb9",
+                    "deepinfer/environ.py": "fe2c531989c419f0b51b169a07f5ed826dcec7f95c0c5bc3a351805923c4f218",
+                    "deepinfer/logger.py": "5b8f8d9947de692353609c1fc2851097d24f9b6ba6004dce1dbfa394dc6d3ec8"
+                  },
+                  "timed_out": false
+                },
+                {
+                  "request": 19,
+                  "seq": 340,
+                  "command": [
+                    "python",
+                    "-m",
+                    "pytest",
+                    "-q"
+                  ],
+                  "rc": 0,
+                  "before_versions": {
+                    "deepinfer/engine/stats_logger.py": "554e54ac42df2277016bff89f7ab3deb6cc62af0dc6a89945312751606af5481",
+                    "deepinfer/environ.py": "7022819b244f2f2404ab29929ffa3164e17cb2fb06cbf55a31142287c9b09ad7",
+                    "deepinfer/logger.py": "19a2f3636e6fff821c6eebff49bc178aa4fa1e60a60c5bbabd5dfa7500074a1f"
+                  },
+                  "after_versions": {
+                    "deepinfer/engine/stats_logger.py": "554e54ac42df2277016bff89f7ab3deb6cc62af0dc6a89945312751606af5481",
+                    "deepinfer/environ.py": "7022819b244f2f2404ab29929ffa3164e17cb2fb06cbf55a31142287c9b09ad7",
+                    "deepinfer/logger.py": "19a2f3636e6fff821c6eebff49bc178aa4fa1e60a60c5bbabd5dfa7500074a1f"
+                  },
+                  "timed_out": false
+                },
+                {
+                  "request": 20,
+                  "seq": 354,
+                  "command": [
+                    "python",
+                    "-m",
+                    "pytest",
+                    "-q"
+                  ],
+                  "rc": 0,
+                  "before_versions": {
+                    "deepinfer/engine/stats_logger.py": "554e54ac42df2277016bff89f7ab3deb6cc62af0dc6a89945312751606af5481",
+                    "deepinfer/environ.py": "7022819b244f2f2404ab29929ffa3164e17cb2fb06cbf55a31142287c9b09ad7",
+                    "deepinfer/logger.py": "19a2f3636e6fff821c6eebff49bc178aa4fa1e60a60c5bbabd5dfa7500074a1f"
+                  },
+                  "after_versions": {
+                    "deepinfer/engine/stats_logger.py": "554e54ac42df2277016bff89f7ab3deb6cc62af0dc6a89945312751606af5481",
+                    "deepinfer/environ.py": "7022819b244f2f2404ab29929ffa3164e17cb2fb06cbf55a31142287c9b09ad7",
+                    "deepinfer/logger.py": "19a2f3636e6fff821c6eebff49bc178aa4fa1e60a60c5bbabd5dfa7500074a1f"
+                  },
+                  "timed_out": false
+                }
+              ],
+              "completed_plan_events": [],
+              "quote_rejections": [],
+              "tool_calls": {
+                "update_plan": 2,
+                "run_command": 4,
+                "read_file": 10,
+                "read_range": 23,
+                "search_code": 2,
+                "replace_text_batch": 4
+              },
+              "protocol_errors": 4,
+              "tool_errors": 1,
+              "infrastructure_errors": 0
+            },
+            "requests": [
+              {
+                "request": 1,
+                "seq": 8,
+                "request_time_unix": 1793847338.6274066,
+                "response_time_unix": 1793847340.2382753,
+                "response_latency_seconds": 1.6108686923980713,
+                "response_count": 1,
+                "usage": {
+                  "prompt_tokens": 4264,
+                  "completion_tokens": 140,
+                  "total_tokens": 4404,
+                  "prompt_tokens_details": {
+                    "cached_tokens": 4096
+                  },
+                  "completion_tokens_details": {
+                    "reasoning_tokens": 0
+                  },
+                  "prompt_cache_hit_tokens": 4096,
+                  "prompt_cache_miss_tokens": 168
+                },
+                "usage_missing_fields": [],
+                "usage_complete": true,
+                "context_accounting_count": 1,
+                "context": {
+                  "core": 1457,
+                  "tool": 3734,
+                  "task": 6704,
+                  "status": 650,
+                  "plan": 0,
+                  "recent": 0,
+                  "notes": 0,
+                  "evidence": 0,
+                  "other": 2,
+                  "json_wrapper_chars": 265,
+                  "compact_json_chars": 12812
+                },
+                "text_chars": {
+                  "core": 1435,
+                  "tool": 3543,
+                  "task": 6525,
+                  "status": 613,
+                  "plan": 0,
+                  "recent": 0,
+                  "notes": 0,
+                  "evidence": 0,
+                  "other": 1
+                },
+                "accounting_basis": "actual_sdk_compact_json",
+                "context_reconciles": true
+              },
+              {
+                "request": 2,
+                "seq": 25,
+                "request_time_unix": 1793847349.7583673,
+                "response_time_unix": 1793847351.020236,
+                "response_latency_seconds": 1.2618687152862549,
+                "response_count": 1,
+                "usage": {
+                  "prompt_tokens": 4953,
+                  "completion_tokens": 202,
+                  "total_tokens": 5155,
+                  "prompt_tokens_details": {
+                    "cached_tokens": 3968
+                  },
+                  "completion_tokens_details": {
+                    "reasoning_tokens": 16
+                  },
+                  "prompt_cache_hit_tokens": 3968,
+                  "prompt_cache_miss_tokens": 985
+                },
+                "usage_missing_fields": [],
+                "usage_complete": true,
+                "context_accounting_count": 1,
+                "context": {
+                  "core": 1457,
+                  "tool": 3734,
+                  "task": 6704,
+                  "status": 649,
+                  "plan": 384,
+                  "recent": 2260,
+                  "notes": 0,
+                  "evidence": 0,
+                  "other": 4,
+                  "json_wrapper_chars": 378,
+                  "compact_json_chars": 15570
+                },
+                "text_chars": {
+                  "core": 1435,
+                  "tool": 3543,
+                  "task": 6525,
+                  "status": 612,
+                  "plan": 351,
+                  "recent": 2135,
+                  "notes": 0,
+                  "evidence": 0,
+                  "other": 2
+                },
+                "accounting_basis": "actual_sdk_compact_json",
+                "context_reconciles": true
+              },
+              {
+                "request": 3,
+                "seq": 56,
+                "request_time_unix": 1793847351.070609,
+                "response_time_unix": 1793847354.9924242,
+                "response_latency_seconds": 3.9218151569366455,
+                "response_count": 1,
+                "usage": {
+                  "prompt_tokens": 7202,
+                  "completion_tokens": 523,
+                  "total_tokens": 7725,
+                  "prompt_tokens_details": {
+                    "cached_tokens": 3968
+                  },
+                  "completion_tokens_details": {
+                    "reasoning_tokens": 339
+                  },
+                  "prompt_cache_hit_tokens": 3968,
+                  "prompt_cache_miss_tokens": 3234
+                },
+                "usage_missing_fields": [],
+                "usage_complete": true,
+                "context_accounting_count": 1,
+                "context": {
+                  "core": 1457,
+                  "tool": 3734,
+                  "task": 6704,
+                  "status": 1161,
+                  "plan": 384,
+                  "recent": 1534,
+                  "notes": 0,
+                  "evidence": 7115,
+                  "other": 24,
+                  "json_wrapper_chars": 378,
+                  "compact_json_chars": 22491
+                },
+                "text_chars": {
+                  "core": 1435,
+                  "tool": 3543,
+                  "task": 6525,
+                  "status": 1094,
+                  "plan": 351,
+                  "recent": 1406,
+                  "notes": 0,
+                  "evidence": 6899,
+                  "other": 12
+                },
+                "accounting_basis": "actual_sdk_compact_json",
+                "context_reconciles": true
+              },
+              {
+                "request": 4,
+                "seq": 84,
+                "request_time_unix": 1793847355.033584,
+                "response_time_unix": 1793847365.313605,
+                "response_latency_seconds": 10.280020952224731,
+                "response_count": 1,
+                "usage": {
+                  "prompt_tokens": 9824,
+                  "completion_tokens": 1931,
+                  "total_tokens": 11755,
+                  "prompt_tokens_details": {
+                    "cached_tokens": 4096
+                  },
+                  "completion_tokens_details": {
+                    "reasoning_tokens": 1796
+                  },
+                  "prompt_cache_hit_tokens": 4096,
+                  "prompt_cache_miss_tokens": 5728
+                },
+                "usage_missing_fields": [],
+                "usage_complete": true,
+                "context_accounting_count": 1,
+                "context": {
+                  "core": 1457,
+                  "tool": 3734,
+                  "task": 6704,
+                  "status": 1183,
+                  "plan": 384,
+                  "recent": 1923,
+                  "notes": 0,
+                  "evidence": 14667,
+                  "other": 22,
+                  "json_wrapper_chars": 378,
+                  "compact_json_chars": 30452
+                },
+                "text_chars": {
+                  "core": 1435,
+                  "tool": 3543,
+                  "task": 6525,
+                  "status": 1116,
+                  "plan": 351,
+                  "recent": 1792,
+                  "notes": 0,
+                  "evidence": 14165,
+                  "other": 11
+                },
+                "accounting_basis": "actual_sdk_compact_json",
+                "context_reconciles": true
+              },
+              {
+                "request": 5,
+                "seq": 109,
+                "request_time_unix": 1793847365.3713112,
+                "response_time_unix": 1793847366.6913483,
+                "response_latency_seconds": 1.3200371265411377,
+                "response_count": 1,
+                "usage": {
+                  "prompt_tokens": 8798,
+                  "completion_tokens": 146,
+                  "total_tokens": 8944,
+                  "prompt_tokens_details": {
+                    "cached_tokens": 4096
+                  },
+                  "completion_tokens_details": {
+                    "reasoning_tokens": 69
+                  },
+                  "prompt_cache_hit_tokens": 4096,
+                  "prompt_cache_miss_tokens": 4702
+                },
+                "usage_missing_fields": [],
+                "usage_complete": true,
+                "context_accounting_count": 1,
+                "context": {
+                  "core": 1457,
+                  "tool": 3734,
+                  "task": 6704,
+                  "status": 1183,
+                  "plan": 384,
+                  "recent": 1687,
+                  "notes": 0,
+                  "evidence": 12339,
+                  "other": 30,
+                  "json_wrapper_chars": 378,
+                  "compact_json_chars": 27896
+                },
+                "text_chars": {
+                  "core": 1435,
+                  "tool": 3543,
+                  "task": 6525,
+                  "status": 1116,
+                  "plan": 351,
+                  "recent": 1562,
+                  "notes": 0,
+                  "evidence": 11881,
+                  "other": 15
+                },
+                "accounting_basis": "actual_sdk_compact_json",
+                "context_reconciles": true
+              },
+              {
+                "request": 6,
+                "seq": 118,
+                "request_time_unix": 1793847366.7682252,
+                "response_time_unix": 1793847366.3208523,
+                "response_latency_seconds": -0.4473729133605957,
+                "response_count": 1,
+                "usage": {
+                  "prompt_tokens": 8959,
+                  "completion_tokens": 60,
+                  "total_tokens": 9019,
+                  "prompt_tokens_details": {
+                    "cached_tokens": 4096
+                  },
+                  "completion_tokens_details": {
+                    "reasoning_tokens": 23
+                  },
+                  "prompt_cache_hit_tokens": 4096,
+                  "prompt_cache_miss_tokens": 4863
+                },
+                "usage_missing_fields": [],
+                "usage_complete": true,
+                "context_accounting_count": 1,
+                "context": {
+                  "core": 1457,
+                  "tool": 3734,
+                  "task": 6704,
+                  "status": 1183,
+                  "plan": 384,
+                  "recent": 2213,
+                  "notes": 0,
+                  "evidence": 12339,
+                  "other": 36,
+                  "json_wrapper_chars": 265,
+                  "compact_json_chars": 28315
+                },
+                "text_chars": {
+                  "core": 1435,
+                  "tool": 3543,
+                  "task": 6525,
+                  "status": 1116,
+                  "plan": 351,
+                  "recent": 2074,
+                  "notes": 0,
+                  "evidence": 11881,
+                  "other": 18
+                },
+                "accounting_basis": "actual_sdk_compact_json",
+                "context_reconciles": true
+              },
+              {
+                "request": 7,
+                "seq": 130,
+                "request_time_unix": 1793847366.3793168,
+                "response_time_unix": 1793847384.1482103,
+                "response_latency_seconds": 17.768893480300903,
+                "response_count": 1,
+                "usage": {
+                  "prompt_tokens": 10242,
+                  "completion_tokens": 3049,
+                  "total_tokens": 13291,
+                  "prompt_tokens_details": {
+                    "cached_tokens": 4096
+                  },
+                  "completion_tokens_details": {
+                    "reasoning_tokens": 2972
+                  },
+                  "prompt_cache_hit_tokens": 4096,
+                  "prompt_cache_miss_tokens": 6146
+                },
+                "usage_missing_fields": [],
+                "usage_complete": true,
+                "context_accounting_count": 1,
+                "context": {
+                  "core": 1457,
+                  "tool": 3734,
+                  "task": 6704,
+                  "status": 1183,
+                  "plan": 384,
+                  "recent": 1152,
+                  "notes": 0,
+                  "evidence": 16728,
+                  "other": 26,
+                  "json_wrapper_chars": 378,
+                  "compact_json_chars": 31746
+                },
+                "text_chars": {
+                  "core": 1435,
+                  "tool": 3543,
+                  "task": 6525,
+                  "status": 1116,
+                  "plan": 351,
+                  "recent": 1059,
+                  "notes": 0,
+                  "evidence": 16142,
+                  "other": 13
+                },
+                "accounting_basis": "actual_sdk_compact_json",
+                "context_reconciles": true
+              },
+              {
+                "request": 8,
+                "seq": 139,
+                "request_time_unix": 1793847384.1960993,
+                "response_time_unix": 1793847386.8627553,
+                "response_latency_seconds": 2.666656017303467,
+                "response_count": 1,
+                "usage": {
+                  "prompt_tokens": 8958,
+                  "completion_tokens": 243,
+                  "total_tokens": 9201,
+                  "prompt_tokens_details": {
+                    "cached_tokens": 4096
+                  },
+                  "completion_tokens_details": {
+                    "reasoning_tokens": 81
+                  },
+                  "prompt_cache_hit_tokens": 4096,
+                  "prompt_cache_miss_tokens": 4862
+                },
+                "usage_missing_fields": [],
+                "usage_complete": true,
+                "context_accounting_count": 1,
+                "context": {
+                  "core": 1457,
+                  "tool": 3734,
+                  "task": 6704,
+                  "status": 1183,
+                  "plan": 384,
+                  "recent": 2212,
+                  "notes": 0,
+                  "evidence": 12339,
+                  "other": 36,
+                  "json_wrapper_chars": 265,
+                  "compact_json_chars": 28314
+                },
+                "text_chars": {
+                  "core": 1435,
+                  "tool": 3543,
+                  "task": 6525,
+                  "status": 1116,
+                  "plan": 351,
+                  "recent": 2073,
+                  "notes": 0,
+                  "evidence": 11881,
+                  "other": 18
+                },
+                "accounting_basis": "actual_sdk_compact_json",
+                "context_reconciles": true
+              },
+              {
+                "request": 9,
+                "seq": 163,
+                "request_time_unix": 1793847386.9273756,
+                "response_time_unix": 1793847390.078872,
+                "response_latency_seconds": 3.151496410369873,
+                "response_count": 1,
+                "usage": {
+                  "prompt_tokens": 10192,
+                  "completion_tokens": 264,
+                  "total_tokens": 10456,
+                  "prompt_tokens_details": {
+                    "cached_tokens": 4096
+                  },
+                  "completion_tokens_details": {
+                    "reasoning_tokens": 187
+                  },
+                  "prompt_cache_hit_tokens": 4096,
+                  "prompt_cache_miss_tokens": 6096
+                },
+                "usage_missing_fields": [],
+                "usage_complete": true,
+                "context_accounting_count": 1,
+                "context": {
+                  "core": 1457,
+                  "tool": 3734,
+                  "task": 6704,
+                  "status": 1183,
+                  "plan": 384,
+                  "recent": 1730,
+                  "notes": 0,
+                  "evidence": 15838,
+                  "other": 24,
+                  "json_wrapper_chars": 378,
+                  "compact_json_chars": 31432
+                },
+                "text_chars": {
+                  "core": 1435,
+                  "tool": 3543,
+                  "task": 6525,
+                  "status": 1116,
+                  "plan": 351,
+                  "recent": 1608,
+                  "notes": 0,
+                  "evidence": 15274,
+                  "other": 12
+                },
+                "accounting_basis": "actual_sdk_compact_json",
+                "context_reconciles": true
+              },
+              {
+                "request": 10,
+                "seq": 172,
+                "request_time_unix": 1793847390.137958,
+                "response_time_unix": 1793847393.625152,
+                "response_latency_seconds": 3.487194061279297,
+                "response_count": 1,
+                "usage": {
+                  "prompt_tokens": 8911,
+                  "completion_tokens": 342,
+                  "total_tokens": 9253,
+                  "prompt_tokens_details": {
+                    "cached_tokens": 4096
+                  },
+                  "completion_tokens_details": {
+                    "reasoning_tokens": 215
+                  },
+                  "prompt_cache_hit_tokens": 4096,
+                  "prompt_cache_miss_tokens": 4815
+                },
+                "usage_missing_fields": [],
+                "usage_complete": true,
+                "context_accounting_count": 1,
+                "context": {
+                  "core": 1457,
+                  "tool": 3734,
+                  "task": 6704,
+                  "status": 1184,
+                  "plan": 384,
+                  "recent": 2225,
+                  "notes": 0,
+                  "evidence": 12334,
+                  "other": 32,
+                  "json_wrapper_chars": 265,
+                  "compact_json_chars": 28319
+                },
+                "text_chars": {
+                  "core": 1435,
+                  "tool": 3543,
+                  "task": 6525,
+                  "status": 1117,
+                  "plan": 351,
+                  "recent": 2086,
+                  "notes": 0,
+                  "evidence": 11847,
+                  "other": 16
+                },
+                "accounting_basis": "actual_sdk_compact_json",
+                "context_reconciles": true
+              },
+              {
+                "request": 11,
+                "seq": 181,
+                "request_time_unix": 1793847393.6846905,
+                "response_time_unix": 1793847405.2267427,
+                "response_latency_seconds": 11.542052268981934,
+                "response_count": 1,
+                "usage": {
+                  "prompt_tokens": 8911,
+                  "completion_tokens": 1950,
+                  "total_tokens": 10861,
+                  "prompt_tokens_details": {
+                    "cached_tokens": 4096
+                  },
+                  "completion_tokens_details": {
+                    "reasoning_tokens": 1788
+                  },
+                  "prompt_cache_hit_tokens": 4096,
+                  "prompt_cache_miss_tokens": 4815
+                },
+                "usage_missing_fields": [],
+                "usage_complete": true,
+                "context_accounting_count": 1,
+                "context": {
+                  "core": 1457,
+                  "tool": 3734,
+                  "task": 6704,
+                  "status": 1182,
+                  "plan": 384,
+                  "recent": 2229,
+                  "notes": 0,
+                  "evidence": 12334,
+                  "other": 32,
+                  "json_wrapper_chars": 265,
+                  "compact_json_chars": 28321
+                },
+                "text_chars": {
+                  "core": 1435,
+                  "tool": 3543,
+                  "task": 6525,
+                  "status": 1115,
+                  "plan": 351,
+                  "recent": 2090,
+                  "notes": 0,
+                  "evidence": 11847,
+                  "other": 16
+                },
+                "accounting_basis": "actual_sdk_compact_json",
+                "context_reconciles": true
+              },
+              {
+                "request": 12,
+                "seq": 205,
+                "request_time_unix": 1793847405.2966225,
+                "response_time_unix": 1793847411.8953767,
+                "response_latency_seconds": 6.598754167556763,
+                "response_count": 1,
+                "usage": {
+                  "prompt_tokens": 10294,
+                  "completion_tokens": 270,
+                  "total_tokens": 10564,
+                  "prompt_tokens_details": {
+                    "cached_tokens": 4096
+                  },
+                  "completion_tokens_details": {
+                    "reasoning_tokens": 144
+                  },
+                  "prompt_cache_hit_tokens": 4096,
+                  "prompt_cache_miss_tokens": 6198
+                },
+                "usage_missing_fields": [],
+                "usage_complete": true,
+                "context_accounting_count": 1,
+                "context": {
+                  "core": 1457,
+                  "tool": 3734,
+                  "task": 6704,
+                  "status": 1277,
+                  "plan": 384,
+                  "recent": 1543,
+                  "notes": 0,
+                  "evidence": 16383,
+                  "other": 24,
+                  "json_wrapper_chars": 265,
+                  "compact_json_chars": 31771
+                },
+                "text_chars": {
+                  "core": 1435,
+                  "tool": 3543,
+                  "task": 6525,
+                  "status": 1206,
+                  "plan": 351,
+                  "recent": 1447,
+                  "notes": 0,
+                  "evidence": 15795,
+                  "other": 12
+                },
+                "accounting_basis": "actual_sdk_compact_json",
+                "context_reconciles": true
+              },
+              {
+                "request": 13,
+                "seq": 226,
+                "request_time_unix": 1793847411.9593267,
+                "response_time_unix": 1793847413.971363,
+                "response_latency_seconds": 2.0120363235473633,
+                "response_count": 1,
+                "usage": {
+                  "prompt_tokens": 9237,
+                  "completion_tokens": 168,
+                  "total_tokens": 9405,
+                  "prompt_tokens_details": {
+                    "cached_tokens": 4096
+                  },
+                  "completion_tokens_details": {
+                    "reasoning_tokens": 119
+                  },
+                  "prompt_cache_hit_tokens": 4096,
+                  "prompt_cache_miss_tokens": 5141
+                },
+                "usage_missing_fields": [],
+                "usage_complete": true,
+                "context_accounting_count": 1,
+                "context": {
+                  "core": 1457,
+                  "tool": 3734,
+                  "task": 6704,
+                  "status": 1277,
+                  "plan": 384,
+                  "recent": 1722,
+                  "notes": 0,
+                  "evidence": 13753,
+                  "other": 26,
+                  "json_wrapper_chars": 378,
+                  "compact_json_chars": 29435
+                },
+                "text_chars": {
+                  "core": 1435,
+                  "tool": 3543,
+                  "task": 6525,
+                  "status": 1206,
+                  "plan": 351,
+                  "recent": 1625,
+                  "notes": 0,
+                  "evidence": 13216,
+                  "other": 13
+                },
+                "accounting_basis": "actual_sdk_compact_json",
+                "context_reconciles": true
+              },
+              {
+                "request": 14,
+                "seq": 239,
+                "request_time_unix": 1793847414.032892,
+                "response_time_unix": 1793847422.9085047,
+                "response_latency_seconds": 8.875612735748291,
+                "response_count": 1,
+                "usage": {
+                  "prompt_tokens": 10124,
+                  "completion_tokens": 1598,
+                  "total_tokens": 11722,
+                  "prompt_tokens_details": {
+                    "cached_tokens": 4096
+                  },
+                  "completion_tokens_details": {
+                    "reasoning_tokens": 1549
+                  },
+                  "prompt_cache_hit_tokens": 4096,
+                  "prompt_cache_miss_tokens": 6028
+                },
+                "usage_missing_fields": [],
+                "usage_complete": true,
+                "context_accounting_count": 1,
+                "context": {
+                  "core": 1457,
+                  "tool": 3734,
+                  "task": 6704,
+                  "status": 1277,
+                  "plan": 384,
+                  "recent": 1249,
+                  "notes": 0,
+                  "evidence": 16190,
+                  "other": 20,
+                  "json_wrapper_chars": 378,
+                  "compact_json_chars": 31393
+                },
+                "text_chars": {
+                  "core": 1435,
+                  "tool": 3543,
+                  "task": 6525,
+                  "status": 1206,
+                  "plan": 351,
+                  "recent": 1155,
+                  "notes": 0,
+                  "evidence": 15574,
+                  "other": 10
+                },
+                "accounting_basis": "actual_sdk_compact_json",
+                "context_reconciles": true
+              },
+              {
+                "request": 15,
+                "seq": 252,
+                "request_time_unix": 1793847422.9734104,
+                "response_time_unix": 1793847434.585138,
+                "response_latency_seconds": 11.611727714538574,
+                "response_count": 1,
+                "usage": {
+                  "prompt_tokens": 10033,
+                  "completion_tokens": 1916,
+                  "total_tokens": 11949,
+                  "prompt_tokens_details": {
+                    "cached_tokens": 4096
+                  },
+                  "completion_tokens_details": {
+                    "reasoning_tokens": 1874
+                  },
+                  "prompt_cache_hit_tokens": 4096,
+                  "prompt_cache_miss_tokens": 5937
+                },
+                "usage_missing_fields": [],
+                "usage_complete": true,
+                "context_accounting_count": 1,
+                "context": {
+                  "core": 1457,
+                  "tool": 3734,
+                  "task": 6704,
+                  "status": 1277,
+                  "plan": 384,
+                  "recent": 1257,
+                  "notes": 0,
+                  "evidence": 16195,
+                  "other": 20,
+                  "json_wrapper_chars": 378,
+                  "compact_json_chars": 31406
+                },
+                "text_chars": {
+                  "core": 1435,
+                  "tool": 3543,
+                  "task": 6525,
+                  "status": 1206,
+                  "plan": 351,
+                  "recent": 1163,
+                  "notes": 0,
+                  "evidence": 15620,
+                  "other": 10
+                },
+                "accounting_basis": "actual_sdk_compact_json",
+                "context_reconciles": true
+              },
+              {
+                "request": 16,
+                "seq": 264,
+                "request_time_unix": 1793847434.6541808,
+                "response_time_unix": 1793847446.7945836,
+                "response_latency_seconds": 12.140402793884277,
+                "response_count": 1,
+                "usage": {
+                  "prompt_tokens": 10119,
+                  "completion_tokens": 2487,
+                  "total_tokens": 12606,
+                  "prompt_tokens_details": {
+                    "cached_tokens": 4096
+                  },
+                  "completion_tokens_details": {
+                    "reasoning_tokens": 2422
+                  },
+                  "prompt_cache_hit_tokens": 4096,
+                  "prompt_cache_miss_tokens": 6023
+                },
+                "usage_missing_fields": [],
+                "usage_complete": true,
+                "context_accounting_count": 1,
+                "context": {
+                  "core": 1457,
+                  "tool": 3734,
+                  "task": 6704,
+                  "status": 1277,
+                  "plan": 384,
+                  "recent": 1142,
+                  "notes": 0,
+                  "evidence": 16299,
+                  "other": 22,
+                  "json_wrapper_chars": 378,
+                  "compact_json_chars": 31397
+                },
+                "text_chars": {
+                  "core": 1435,
+                  "tool": 3543,
+                  "task": 6525,
+                  "status": 1206,
+                  "plan": 351,
+                  "recent": 1050,
+                  "notes": 0,
+                  "evidence": 15720,
+                  "other": 11
+                },
+                "accounting_basis": "actual_sdk_compact_json",
+                "context_reconciles": true
+              },
+              {
+                "request": 17,
+                "seq": 278,
+                "request_time_unix": 1793847446.8677473,
+                "response_time_unix": 1793847448.8189878,
+                "response_latency_seconds": 1.9512405395507812,
+                "response_count": 1,
+                "usage": {
+                  "prompt_tokens": 9824,
+                  "completion_tokens": 214,
+                  "total_tokens": 10038,
+                  "prompt_tokens_details": {
+                    "cached_tokens": 4096
+                  },
+                  "completion_tokens_details": {
+                    "reasoning_tokens": 152
+                  },
+                  "prompt_cache_hit_tokens": 4096,
+                  "prompt_cache_miss_tokens": 5728
+                },
+                "usage_missing_fields": [],
+                "usage_complete": true,
+                "context_accounting_count": 1,
+                "context": {
+                  "core": 1457,
+                  "tool": 3734,
+                  "task": 6704,
+                  "status": 1277,
+                  "plan": 384,
+                  "recent": 1071,
+                  "notes": 0,
+                  "evidence": 16714,
+                  "other": 26,
+                  "json_wrapper_chars": 378,
+                  "compact_json_chars": 31745
+                },
+                "text_chars": {
+                  "core": 1435,
+                  "tool": 3543,
+                  "task": 6525,
+                  "status": 1206,
+                  "plan": 351,
+                  "recent": 994,
+                  "notes": 0,
+                  "evidence": 16039,
+                  "other": 13
+                },
+                "accounting_basis": "actual_sdk_compact_json",
+                "context_reconciles": true
+              },
+              {
+                "request": 18,
+                "seq": 293,
+                "request_time_unix": 1793847448.878228,
+                "response_time_unix": 1793847464.7444139,
+                "response_latency_seconds": 15.866185903549194,
+                "response_count": 1,
+                "usage": {
+                  "prompt_tokens": 9839,
+                  "completion_tokens": 2966,
+                  "total_tokens": 12805,
+                  "prompt_tokens_details": {
+                    "cached_tokens": 4096
+                  },
+                  "completion_tokens_details": {
+                    "reasoning_tokens": 2585
+                  },
+                  "prompt_cache_hit_tokens": 4096,
+                  "prompt_cache_miss_tokens": 5743
+                },
+                "usage_missing_fields": [],
+                "usage_complete": true,
+                "context_accounting_count": 1,
+                "context": {
+                  "core": 1457,
+                  "tool": 3734,
+                  "task": 6704,
+                  "status": 1277,
+                  "plan": 384,
+                  "recent": 1016,
+                  "notes": 0,
+                  "evidence": 16754,
+                  "other": 26,
+                  "json_wrapper_chars": 378,
+                  "compact_json_chars": 31730
+                },
+                "text_chars": {
+                  "core": 1435,
+                  "tool": 3543,
+                  "task": 6525,
+                  "status": 1206,
+                  "plan": 351,
+                  "recent": 951,
+                  "notes": 0,
+                  "evidence": 16111,
+                  "other": 13
+                },
+                "accounting_basis": "actual_sdk_compact_json",
+                "context_reconciles": true
+              },
+              {
+                "request": 19,
+                "seq": 309,
+                "request_time_unix": 1793847464.8030462,
+                "response_time_unix": 1793847508.5828207,
+                "response_latency_seconds": 43.77977442741394,
+                "response_count": 1,
+                "usage": {
+                  "prompt_tokens": 9625,
+                  "completion_tokens": 8536,
+                  "total_tokens": 18161,
+                  "prompt_tokens_details": {
+                    "cached_tokens": 4096
+                  },
+                  "completion_tokens_details": {
+                    "reasoning_tokens": 6694
+                  },
+                  "prompt_cache_hit_tokens": 4096,
+                  "prompt_cache_miss_tokens": 5529
+                },
+                "usage_missing_fields": [],
+                "usage_complete": true,
+                "context_accounting_count": 1,
+                "context": {
+                  "core": 1457,
+                  "tool": 3734,
+                  "task": 6704,
+                  "status": 1751,
+                  "plan": 384,
+                  "recent": 2323,
+                  "notes": 0,
+                  "evidence": 13982,
+                  "other": 20,
+                  "json_wrapper_chars": 378,
+                  "compact_json_chars": 30733
+                },
+                "text_chars": {
+                  "core": 1435,
+                  "tool": 3543,
+                  "task": 6525,
+                  "status": 1656,
+                  "plan": 351,
+                  "recent": 2200,
+                  "notes": 0,
+                  "evidence": 13418,
+                  "other": 10
+                },
+                "accounting_basis": "actual_sdk_compact_json",
+                "context_reconciles": true
+              },
+              {
+                "request": 20,
+                "seq": 347,
+                "request_time_unix": 1793847514.8836944,
+                "response_time_unix": 1793847519.6680179,
+                "response_latency_seconds": 4.784323453903198,
+                "response_count": 1,
+                "usage": {
+                  "prompt_tokens": 6455,
+                  "completion_tokens": 768,
+                  "total_tokens": 7223,
+                  "prompt_tokens_details": {
+                    "cached_tokens": 4096
+                  },
+                  "completion_tokens_details": {
+                    "reasoning_tokens": 252
+                  },
+                  "prompt_cache_hit_tokens": 4096,
+                  "prompt_cache_miss_tokens": 2359
+                },
+                "usage_missing_fields": [],
+                "usage_complete": true,
+                "context_accounting_count": 1,
+                "context": {
+                  "core": 1457,
+                  "tool": 3734,
+                  "task": 6704,
+                  "status": 2512,
+                  "plan": 384,
+                  "recent": 4375,
+                  "notes": 0,
+                  "evidence": 0,
+                  "other": 10,
+                  "json_wrapper_chars": 265,
+                  "compact_json_chars": 19441
+                },
+                "text_chars": {
+                  "core": 1435,
+                  "tool": 3543,
+                  "task": 6525,
+                  "status": 2371,
+                  "plan": 351,
+                  "recent": 4185,
+                  "notes": 0,
+                  "evidence": 0,
+                  "other": 5
+                },
+                "accounting_basis": "actual_sdk_compact_json",
+                "context_reconciles": true
+              }
+            ],
+            "usage": {
+              "known_prompt_tokens": 176764,
+              "known_completion_tokens": 27773,
+              "known_total_tokens": 204537,
+              "known_prompt_cache_hit_tokens": 81664,
+              "known_prompt_cache_miss_tokens": 95100,
+              "requests": 20,
+              "requests_with_complete_usage": 20,
+              "missing_or_invalid_usage_requests": [],
+              "complete": true
+            },
+            "context_aggregate": {
+              "core": {
+                "known_sum": 29140,
+                "known_count": 20,
+                "missing_count": 0,
+                "mean": 1457.0,
+                "max": 1457
+              },
+              "tool": {
+                "known_sum": 74680,
+                "known_count": 20,
+                "missing_count": 0,
+                "mean": 3734.0,
+                "max": 3734
+              },
+              "task": {
+                "known_sum": 134080,
+                "known_count": 20,
+                "missing_count": 0,
+                "mean": 6704.0,
+                "max": 6704
+              },
+              "status": {
+                "known_sum": 25126,
+                "known_count": 20,
+                "missing_count": 0,
+                "mean": 1256.3,
+                "max": 2512
+              },
+              "plan": {
+                "known_sum": 7296,
+                "known_count": 20,
+                "missing_count": 0,
+                "mean": 364.8,
+                "max": 384
+              },
+              "recent": {
+                "known_sum": 34863,
+                "known_count": 20,
+                "missing_count": 0,
+                "mean": 1743.15,
+                "max": 4375
+              },
+              "notes": {
+                "known_sum": 0,
+                "known_count": 20,
+                "missing_count": 0,
+                "mean": 0.0,
+                "max": 0
+              },
+              "evidence": {
+                "known_sum": 242303,
+                "known_count": 20,
+                "missing_count": 0,
+                "mean": 12115.15,
+                "max": 16754
+              },
+              "other": {
+                "known_sum": 462,
+                "known_count": 20,
+                "missing_count": 0,
+                "mean": 23.1,
+                "max": 36
+              },
+              "json_wrapper_chars": {
+                "known_sum": 6769,
+                "known_count": 20,
+                "missing_count": 0,
+                "mean": 338.45,
+                "max": 378
+              },
+              "compact_json_chars": {
+                "known_sum": 554719,
+                "known_count": 20,
+                "missing_count": 0,
+                "mean": 27735.95,
+                "max": 31771
+              }
+            },
+            "orphan_response_numbers": [],
+            "orphan_accounting_numbers": [],
+            "positions": {
+              "first_write": {
+                "request": 18,
+                "seq": 302,
+                "path": "deepinfer/environ.py",
+                "file_hash": "e6763ac3f03673b05c866b5cd6942e6e6f47725513e456b70f4fc88847181151"
+              },
+              "last_write": {
+                "request": 19,
+                "seq": 335,
+                "path": "deepinfer/engine/stats_logger.py",
+                "file_hash": "554e54ac42df2277016bff89f7ab3deb6cc62af0dc6a89945312751606af5481"
+              },
+              "last_test": {
+                "request": 20,
+                "seq": 353,
+                "rc": 0,
+                "timed_out": false
+              },
+              "finish": [],
+              "last_request": 20
+            }
+          }
+        },
+        {
+          "sample": "source-02",
+          "task": "source",
+          "number": 2,
+          "sample_json_present": false,
+          "status": "not_recorded",
+          "passed": null,
+          "score": null,
+          "sample_metadata": {},
+          "log_present": false
+        },
+        {
+          "sample": "source-03",
+          "task": "source",
+          "number": 3,
+          "sample_json_present": false,
+          "status": "not_recorded",
+          "passed": null,
+          "score": null,
+          "sample_metadata": {},
+          "log_present": false
+        }
+      ],
+      "known_tokens": {
+        "prompt_tokens": 176764,
+        "completion_tokens": 27773,
+        "total_tokens": 204537,
+        "prompt_cache_hit_tokens": 81664,
+        "prompt_cache_miss_tokens": 95100
+      },
+      "token_field_missing_requests": {
+        "prompt_tokens": 0,
+        "completion_tokens": 0,
+        "total_tokens": 0,
+        "prompt_cache_hit_tokens": 0,
+        "prompt_cache_miss_tokens": 0
+      },
+      "requests": 20,
+      "requests_with_complete_usage": 20,
+      "missing_logs": 5,
+      "context_aggregate": {
+        "core": {
+          "known_sum": 29140,
+          "known_count": 20,
+          "missing_count": 0,
+          "mean": 1457.0,
+          "max": 1457
+        },
+        "tool": {
+          "known_sum": 74680,
+          "known_count": 20,
+          "missing_count": 0,
+          "mean": 3734.0,
+          "max": 3734
+        },
+        "task": {
+          "known_sum": 134080,
+          "known_count": 20,
+          "missing_count": 0,
+          "mean": 6704.0,
+          "max": 6704
+        },
+        "status": {
+          "known_sum": 25126,
+          "known_count": 20,
+          "missing_count": 0,
+          "mean": 1256.3,
+          "max": 2512
+        },
+        "plan": {
+          "known_sum": 7296,
+          "known_count": 20,
+          "missing_count": 0,
+          "mean": 364.8,
+          "max": 384
+        },
+        "recent": {
+          "known_sum": 34863,
+          "known_count": 20,
+          "missing_count": 0,
+          "mean": 1743.15,
+          "max": 4375
+        },
+        "notes": {
+          "known_sum": 0,
+          "known_count": 20,
+          "missing_count": 0,
+          "mean": 0.0,
+          "max": 0
+        },
+        "evidence": {
+          "known_sum": 242303,
+          "known_count": 20,
+          "missing_count": 0,
+          "mean": 12115.15,
+          "max": 16754
+        },
+        "other": {
+          "known_sum": 462,
+          "known_count": 20,
+          "missing_count": 0,
+          "mean": 23.1,
+          "max": 36
+        },
+        "json_wrapper_chars": {
+          "known_sum": 6769,
+          "known_count": 20,
+          "missing_count": 0,
+          "mean": 338.45,
+          "max": 378
+        },
+        "compact_json_chars": {
+          "known_sum": 554719,
+          "known_count": 20,
+          "missing_count": 0,
+          "mean": 27735.95,
+          "max": 31771
+        }
+      },
+      "errors": {
+        "protocol_errors": 4,
+        "tool_errors": 1,
+        "infrastructure_errors": 0
+      }
+    },
+    "static": {
+      "tasks": {
+        "paper": {
+          "expected_or_observed": 3,
+          "finished": 0,
+          "passed": 0,
+          "success_rate": null,
+          "pending": 3
+        },
+        "source": {
+          "expected_or_observed": 3,
+          "finished": 0,
+          "passed": 0,
+          "success_rate": null,
+          "pending": 3
+        }
+      },
+      "samples": [
+        {
+          "sample": "paper-01",
+          "task": "paper",
+          "number": 1,
+          "sample_json_present": false,
+          "status": "not_recorded",
+          "passed": null,
+          "score": null,
+          "sample_metadata": {},
+          "log_present": false
+        },
+        {
+          "sample": "paper-02",
+          "task": "paper",
+          "number": 2,
+          "sample_json_present": false,
+          "status": "not_recorded",
+          "passed": null,
+          "score": null,
+          "sample_metadata": {},
+          "log_present": false
+        },
+        {
+          "sample": "paper-03",
+          "task": "paper",
+          "number": 3,
+          "sample_json_present": false,
+          "status": "not_recorded",
+          "passed": null,
+          "score": null,
+          "sample_metadata": {},
+          "log_present": false
+        },
+        {
+          "sample": "source-01",
+          "task": "source",
+          "number": 1,
+          "sample_json_present": true,
+          "status": "running",
+          "passed": null,
+          "score": null,
+          "sample_metadata": {
+            "arm": "static",
+            "task": "source",
+            "number": 1,
+            "status": "running",
+            "native": "/home/ventsdenye/.local/state/code-agent/evaluations/context-static-source-_oazdtxo"
+          },
+          "log_present": false
+        },
+        {
+          "sample": "source-02",
+          "task": "source",
+          "number": 2,
+          "sample_json_present": false,
+          "status": "not_recorded",
+          "passed": null,
+          "score": null,
+          "sample_metadata": {},
+          "log_present": false
+        },
+        {
+          "sample": "source-03",
+          "task": "source",
+          "number": 3,
+          "sample_json_present": false,
+          "status": "not_recorded",
+          "passed": null,
+          "score": null,
+          "sample_metadata": {},
+          "log_present": false
+        }
+      ],
+      "known_tokens": {
+        "prompt_tokens": 0,
+        "completion_tokens": 0,
+        "total_tokens": 0,
+        "prompt_cache_hit_tokens": 0,
+        "prompt_cache_miss_tokens": 0
+      },
+      "token_field_missing_requests": {
+        "prompt_tokens": 0,
+        "completion_tokens": 0,
+        "total_tokens": 0,
+        "prompt_cache_hit_tokens": 0,
+        "prompt_cache_miss_tokens": 0
+      },
+      "requests": 0,
+      "requests_with_complete_usage": 0,
+      "missing_logs": 6,
+      "context_aggregate": {
+        "core": {
+          "known_sum": 0,
+          "known_count": 0,
+          "missing_count": 0,
+          "mean": null,
+          "max": null
+        },
+        "tool": {
+          "known_sum": 0,
+          "known_count": 0,
+          "missing_count": 0,
+          "mean": null,
+          "max": null
+        },
+        "task": {
+          "known_sum": 0,
+          "known_count": 0,
+          "missing_count": 0,
+          "mean": null,
+          "max": null
+        },
+        "status": {
+          "known_sum": 0,
+          "known_count": 0,
+          "missing_count": 0,
+          "mean": null,
+          "max": null
+        },
+        "plan": {
+          "known_sum": 0,
+          "known_count": 0,
+          "missing_count": 0,
+          "mean": null,
+          "max": null
+        },
+        "recent": {
+          "known_sum": 0,
+          "known_count": 0,
+          "missing_count": 0,
+          "mean": null,
+          "max": null
+        },
+        "notes": {
+          "known_sum": 0,
+          "known_count": 0,
+          "missing_count": 0,
+          "mean": null,
+          "max": null
+        },
+        "evidence": {
+          "known_sum": 0,
+          "known_count": 0,
+          "missing_count": 0,
+          "mean": null,
+          "max": null
+        },
+        "other": {
+          "known_sum": 0,
+          "known_count": 0,
+          "missing_count": 0,
+          "mean": null,
+          "max": null
+        },
+        "json_wrapper_chars": {
+          "known_sum": 0,
+          "known_count": 0,
+          "missing_count": 0,
+          "mean": null,
+          "max": null
+        },
+        "compact_json_chars": {
+          "known_sum": 0,
+          "known_count": 0,
+          "missing_count": 0,
+          "mean": null,
+          "max": null
+        }
+      },
+      "errors": {
+        "protocol_errors": 0,
+        "tool_errors": 0,
+        "infrastructure_errors": 0
+      }
+    }
+  },
+  "configuration": {
+    "available": {
+      "baseline": true,
+      "static": true
+    },
+    "differences": {
+      "static_context_compact": {
+        "baseline": false,
+        "static": true
+      }
+    },
+    "only_static_context_compact_differs": true,
+    "context_accounting_enabled": {
+      "baseline": true,
+      "static": true
+    },
+    "accounting_default_note": "Absent context_accounting uses RequestAudit default True; actual records are counted separately."
+  },
+  "known_tokens": {
+    "prompt_tokens": 176764,
+    "completion_tokens": 27773,
+    "total_tokens": 204537,
+    "prompt_cache_hit_tokens": 81664,
+    "prompt_cache_miss_tokens": 95100
+  }
+}

@@ -1,0 +1,13 @@
+{
+  "status": "paused_by_user",
+  "date_local": "2026-11-05",
+  "timezone": "Asia/Shanghai",
+  "planned_samples": 12,
+  "completed_evaluations": 3,
+  "paused_during_preflight": "baseline/paper-01",
+  "paused_sample_requests": 0,
+  "not_started_samples": 8,
+  "total_model_requests": 79,
+  "resumption": "Do not resume without user instruction. Preserve this paused sample and inspect the pause record before any further scheduling.",
+  "stop_evidence": "Scheduler received SIGINT, archived the preflight with protocol.status=interrupted and archive-status.status=copied, and exited with code 2. Process list checked: no comparison, evaluator, or model agent remained."
+}
