@@ -45,9 +45,10 @@ before the first edit. Source notes are OPTIONAL; current source blocks can be u
 When progress says phase=edit, the initial reading and baseline are satisfied. Apply a scoped edit and verify.
 A note may replace original text only after its mechanisms were exposed. Do not repeat full reads to register them again.
 '''
-PAPER_WORKFLOW = '''Paper workflow: Plan, baseline pytest, read report.json and paper.json, then call read_pdf once for the full range. Read the delivered batches; they advance automatically after successful actions. On error use the retained batch. Do not print all pages or reread just to advance.
-Incrementally write_note for each topic, citing delivered evidence ids. Each final note must contain both answers, page numbers and continuous exact quotations supporting every answer item, within 1500 characters. Preserve earlier facts when updating.
-Save each answer via save_answer(section, question_id, answer={'value': ...}, evidence_id, page, quote); save prose via save_section. Choose answers and citations yourself: exact matching proves provenance, not semantic support. Support every array item. After all pages and all five latest notes have appeared together in a later request, call submit_report(overview, expected_hash), then final_answer.
+PAPER_WORKFLOW = '''Paper: Plan, baseline pytest, read report.json and paper.json, then read_pdf once for the full range. Batches advance automatically; queued pages await delivery. On error an eligible batch may return once, without renewal. Do not print all pages or reread to advance.
+Save answers as soon as evidence suffices: save_answer(section, question_id, answer={'value': ...}, evidence_id, page, quote). Include complete exact supporting quotes for every item; matching proves provenance, not semantic support. Save prose with save_section.
+Use write_note with delivered evidence IDs for conclusions, pages, method distinctions, limitations and open questions; preserve important facts without repeating long quotes. Recall registered pages with recall_pages(pages=[...]) or evidence IDs with recall. If a later tool fails, keep successful actions and repair only the failure.
+After all pages are read and five latest notes appear together in a later request, call submit_report(overview, expected_hash), then final_answer.
 Multi-agent collaboration and training are future suggestions, not implemented features.
 '''
 
@@ -132,6 +133,10 @@ class CourseSession:
         for name, (description, properties, required) in EXTRA_TOOLS.items():
             result.append(CourseTool(self, name, description, properties, required))
         if self.contract.profile == 'paper':
+            result.append(CourseTool(self, 'recall_pages',
+                                     'Queue registered paper pages for original text; delivery is bounded and may remain pending.',
+                                     {'pages': {'type': 'array', 'items': {'type': 'integer'},
+                                                'description': 'List of registered page numbers.'}}, ['pages']))
             specs = {
                 'save_answer': ('Save an answer with exact cited page text.', {'section': {'type':'string'}, 'question_id': {'type':'string'}, 'answer': {'type':'object', 'description':"{'value': string, integer or list of strings}"}, 'evidence_id': {'type':'string'}, 'page': {'type':'integer'}, 'quote': {'type':'string'}}),
                 'save_section': ('Save section prose.', {'section': {'type':'string'}, 'summary': {'type':'string'}, 'application': {'type':'string'}}),
@@ -342,6 +347,8 @@ class CourseSession:
                 result = self.invoke('write_file', {'path': 'report.json', 'content': content, 'expected_hash': args['expected_hash']})
             elif name == 'recall':
                 result = self.evidence.recall(args['evidence_ids'])
+            elif name == 'recall_pages' and self.contract.profile == 'paper':
+                result = self.evidence.recall_pages(args['pages'])
             elif name == 'task_status':
                 result = self.status()
             else:

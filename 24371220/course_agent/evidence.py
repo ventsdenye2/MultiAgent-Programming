@@ -64,6 +64,7 @@ class EvidenceStore:
         self.request_number = 0
         self.received_ranges = {}
         self.recall_ranges = {}
+        self.confirmed_anchor = {}
         self.offered = []
 
     def _add(self, source, version, locator, text, required=False, page=None, atomic=False):
@@ -176,6 +177,7 @@ class EvidenceStore:
             self.items[eid].valid = False
             self.received_ranges.pop(eid, None)
             self.recall_ranges.pop(eid, None)
+            self.confirmed_anchor.pop(eid, None)
         self.exposed -= invalid
         self.current -= invalid
         self.required.get(source, set()).difference_update(invalid)
@@ -276,6 +278,8 @@ class EvidenceStore:
 
     def mark_exposed(self, body, response, number):
         self.refresh()
+        previously_exposed = set(self.exposed)
+        previously_pending = set(self.pending)
         self.current = {eid for eid, item in self.items.items() if item.valid and item.text
                         and contains(body, item.text) and (len(item.text) >= 80 or contains(body, item.version))}
         delivered = []
@@ -298,11 +302,21 @@ class EvidenceStore:
                               if note['valid'] and contains(body, note['content'])}
         self.pending = [eid for eid in self.pending if eid not in self.current
                         and self.recall_ranges.get(eid) != [[0, len(self.items[eid].text)]]]
+        completed = (self.exposed - previously_exposed) | (previously_pending - set(self.pending))
+        for eid in completed:
+            self.confirmed_anchor[eid] = number
         self.last_response, self.request_number = response, number
         self.log('context_exposure', request=number, evidence_ids=sorted(self.current),
                  note_ids=sorted(self.current_notes), delivered_ranges=delivered,
                  fully_exposed_ids=sorted(self.exposed))
         self.offered = []
+
+    def eligible_auto(self, eid, request_number):
+        """An actual confirmation at N permits automatic reuse only at N+1."""
+        item = self.items.get(eid)
+        anchor = self.confirmed_anchor.get(eid)
+        return bool(item and item.valid and type(request_number) is int
+                    and anchor is not None and request_number == anchor + 1)
 
     def write_note(self, title, content, evidence_ids, section=None):
         paper = self.contract.profile == 'paper'
@@ -384,6 +398,19 @@ class EvidenceStore:
                             'locator': self.items[eid].locator} for eid in self.pending[:8]],
                 'requested_count': len(requested), 'queued_count': len(self.pending),
                 'message': 'Queued, not delivered; the selector chooses the actual next batch.'}
+
+    def recall_pages(self, pages):
+        """Queue already extracted pages, after validating the entire request."""
+        if type(pages) is not list or not pages or any(type(page) is not int for page in pages):
+            raise ValueError('pages must be a nonempty array of integers')
+        version = self.workspace.current_hash('paper.pdf')
+        by_page = {item.page: eid for eid, item in self.items.items()
+                   if item.valid and item.source == 'paper.pdf' and item.version == version
+                   and item.page is not None}
+        unique = list(dict.fromkeys(pages))
+        if any(page not in by_page for page in unique):
+            raise ValueError('Requested page is missing or stale')
+        return self.recall([by_page[page] for page in unique])
 
     def source_reused(self, source):
         needed = self.required.get(source, set())

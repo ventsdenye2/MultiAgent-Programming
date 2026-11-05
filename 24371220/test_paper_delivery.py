@@ -88,7 +88,7 @@ def test_failed_http_batch_recovers_then_success_advances(paper_runtime, failed_
         assert ids[0] in snapshots[1]['pending']
         assert ids[0] not in snapshots[1]['exposed']
     else:
-        assert ids[0] in snapshots[1]['pending'], 'Recovery requeues a demand without undoing exposure'
+        assert ids[0] not in snapshots[1]['pending'], 'Automatic recovery must not create another explicit demand'
         assert ids[0] in snapshots[1]['exposed']
     assert ids[0] not in snapshots[2]['pending']
     assert not session.evidence.notes

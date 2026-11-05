@@ -56,12 +56,20 @@ class EvidenceContext:
             for entry in self.store.recent_results[-(1 if limits[1] < 700 else 4):]:
                 result = entry['result']
                 fields = ('path', 'changed', 'file_hash', 'rc', 'timed_out', 'stdout', 'stderr',
-                          'note_id', 'sources', 'chars', 'requested', 'queued', 'requested_count', 'queued_count')
+                          'note_id', 'sources', 'chars', 'requested', 'queued', 'requested_count', 'queued_count',
+                          'section', 'question_id', 'saved')
                 compact_result = {key: (clip(value, budget) if key in {'stdout', 'stderr', 'delivery'} and isinstance(value, str) else value)
                                   for key, value in result.items() if key in fields}
                 for key in ('requested', 'queued'):
                     if key in compact_result:
                         compact_result[key] = compact_result[key][:3]
+                if self.session.contract.profile == 'paper':
+                    # The reserved receipt owns the current queue projection.
+                    # Preserve the tool's requested locators/counts without
+                    # repeating evidence ids, source paths and an older queue.
+                    compact_result.pop('queued', None)
+                    if 'requested' in compact_result:
+                        compact_result['requested'] = [value['locator'] for value in compact_result['requested']]
                 facts.append({'tool': entry['tool'], 'arguments': entry.get('arguments', {}), 'result': compact_result})
             feedback += '\nRecent project tool results:\n' + json.dumps(
                 facts, ensure_ascii=False, separators=(',', ':'))
@@ -92,7 +100,9 @@ class EvidenceContext:
         if self.session.contract.profile in {'source', 'paper'}:
             data.update({'first_write_reading_required': not bool(self.session.writes),
                          'full_reads_registered': dict(self.store.full_reads),
-                         'evidence_delivery': 'Registered full reads are logged tool reads; Evidence headers show selected ranges, whose delivery requires HTTP confirmation.'})
+                         'evidence_delivery': ('Registered reads are not delivery; HTTP confirms selected Evidence ranges.'
+                                               if self.session.contract.profile == 'paper' else
+                                               'Registered full reads are logged tool reads; Evidence headers show selected ranges, whose delivery requires HTTP confirmation.')})
             if self.session.writes:
                 data['reading_after_write'] = 'First-write prerequisites satisfied; changed-source evidence may be invalidated.'
                 data['current_versions'] = self.session.versions()
@@ -104,20 +114,47 @@ class EvidenceContext:
             data['required_mechanisms_exposed'] = {source: {'exposed': len(ids & self.store.exposed), 'registered': len(ids)}
                                                    for source, ids in self.store.required.items()}
         if self.session.contract.profile == 'paper':
+            from .evidence import PAPER_QUESTIONS
+            # Counts and missing identifiers fully describe saved-delivery
+            # progress; answer source metadata remains in evidence.json.
+            data.pop('requests_left', None)  # Same value as requests_after_response.
+            if data['next_requirement'].startswith('PDF pages not yet sent:'):
+                data['next_requirement'] = 'Deliver missing required PDF pages below.'
             pages = {self.store.items[eid].page for eid in self.store.exposed if self.store.items[eid].valid}
             data['pdf_pages_missing'] = sorted(set(self.session.contract.paper_pages) - pages)
-            if self.store.answers:
-                data['saved_answers'] = {section: {question: [value['evidence_id'], value['page'], self.store.items[value['evidence_id']].valid] for question, value in answers.items()} for section, answers in self.store.answers.items()}
-                from .evidence import PAPER_QUESTIONS
-                data['missing_answers'] = {section: sorted(set(questions) - set(self.store.answers.get(section, {}))) for section, questions in PAPER_QUESTIONS.items() if set(questions) - set(self.store.answers.get(section, {}))}
-            if self.store.section_text:
-                data['saved_sections'] = list(self.store.section_text)
+            valid_answers = {section: {question for question, value in answers.items()
+                                      if value['evidence_id'] in self.store.items
+                                      and self.store.items[value['evidence_id']].valid}
+                             for section, answers in self.store.answers.items()}
+            data['saved_answers_count'] = f'{sum(len(values) for values in valid_answers.values())}/10'
+            data['missing_answers'] = {section: sorted(set(questions) - valid_answers.get(section, set()))
+                                       for section, questions in PAPER_QUESTIONS.items()
+                                       if set(questions) - valid_answers.get(section, set())}
+            data['saved_sections_count'] = f'{len(self.store.section_text)}/5'
+            data['missing_sections'] = [section for section in self.session.contract.topics if section not in self.store.section_text]
         if self.session.audit and self.session.audit.last_classification not in {None, 'ok'}:
             data['last_response_classification'] = self.session.audit.last_classification
         # Required workflow facts remain intact; never clip JSON in the middle
         # or omit proof of changes/tests merely to make the projection shorter.
         return message('Course progress before this request (evidence offered below may satisfy pending items after delivery):\n' +
                        json.dumps(data, ensure_ascii=False, separators=(',', ':')))
+
+    def _paper_receipt(self, selected):
+        selected_set = set(selected)
+        pages = [self.store.items[eid].page for eid in selected if self.store.items[eid].page is not None]
+        waiting_ids = [eid for eid in self.store.pending
+                       if eid not in selected_set and self.store.items[eid].valid
+                       and self.store.items[eid].page is not None]
+        coverage = [eid for eid in waiting_ids if eid not in self.store.exposed
+                    and self.store.items[eid].page in self.session.contract.paper_pages]
+        explicit = [self.store.items[eid].page for eid in waiting_ids if eid not in coverage]
+        waiting = [self.store.items[eid].page for eid in waiting_ids]
+        return message('Paper read receipt (selected, not HTTP-confirmed):\n' +
+                       json.dumps({'selected_pages': pages[:4], 'selected_count': len(pages),
+                                   'pending_pages': waiting[:4], 'pending_count': len(waiting),
+                                   'pending_coverage_count': len(coverage),
+                                   'pending_explicit_pages': explicit[:4], 'pending_explicit_count': len(explicit),
+                                   'waiting': bool(waiting)}, separators=(',', ':')))
 
     def _part(self, eid, messages, model):
         """Fit an ordinary-file range; PDF pages and source mechanisms stay whole."""
@@ -163,6 +200,14 @@ class EvidenceContext:
                    else (250, 700, 1200))
         prefix, recent = fixed + [self._status(progress)], self._recent(memory, minimum)
         categories[id(prefix[-1])] = 'status'
+        receipt_index = None
+        if self.session.contract.profile == 'paper':
+            # Reserve the complete bounded receipt before admitting originals.
+            # Padding is replaced with factual selections before anything is sent.
+            page_digits = max((len(str(item.page)) for item in self.store.items.values()
+                               if item.valid and item.page is not None), default=1)
+            receipt_index = len(prefix)
+            prefix.append(message(' ' * (336 + 12 * page_digits)))
         base = prefix + recent
         if not self.fits(base, model):
             size = model.measure(base)
@@ -198,7 +243,10 @@ class EvidenceContext:
             priorities = self.store.covering_first(priorities)
         recovery = []
         carry = []
+        selection_kind = {}
+        phase = {}
         if self.session.contract.profile == 'paper':
+            request_number = self.session.audit.calls + 1 if self.session.audit else self.store.request_number + 1
             actions = [step for step in memory.steps if isinstance(step, ActionStep)]
             failed = bool(actions and actions[-1].error)
             if self.session.audit and self.session.audit.last_classification in {'empty', 'truncated', 'truncated_empty'}:
@@ -206,34 +254,43 @@ class EvidenceContext:
             if failed:
                 recovery = [eid for eid, _, _ in self.last_manifest.get('delivered_parts', [])
                             if eid in self.store.items and self.store.items[eid].valid
-                            and self.store.items[eid].page is not None]
-                # Exposure is an HTTP fact, not proof that the failed action
-                # processed its input. Queue a fresh demand without undoing it.
-                self.store.request_originals(recovery)
+                            and self.store.items[eid].page is not None
+                            and self.store.eligible_auto(eid, request_number)]
             ordinary = [eid for eid in priorities if self.store.items[eid].page is None]
-            pages = sorted((eid for eid in priorities if self.store.items[eid].page is not None),
-                           key=lambda eid: self.store.items[eid].page)
+            coverage = sorted((eid for eid in required_unseen if self.store.items[eid].page is not None),
+                              key=lambda eid: self.store.items[eid].page)
+            explicit = [eid for eid in self.store.pending if self.store.items[eid].valid
+                        and self.store.items[eid].page is not None and eid not in coverage]
             exposed_pages = {self.store.items[eid].page for eid in self.store.exposed
                              if self.store.items[eid].valid and self.store.items[eid].page is not None}
             all_pages_exposed = set(self.session.contract.paper_pages).issubset(exposed_pages)
-            if all_pages_exposed:
-                # After initial coverage, explicit recalls retain queue order.
-                queued = [eid for eid in self.store.pending if eid in pages]
-                pages = list(dict.fromkeys(queued + pages))
             if not recovery and all_pages_exposed:
                 carry = [eid for eid in self.last_manifest.get('evidence_ids', [])
-                         if eid in self.store.current and eid not in pages
-                         and self.store.items[eid].valid and self.store.items[eid].page is not None]
+                         if eid in self.store.current and eid not in explicit
+                         and self.store.items[eid].valid and self.store.items[eid].page is not None
+                         and self.store.eligible_auto(eid, request_number)]
             if recovery:
-                priorities = recovery + ordinary
-            elif carry:
-                priorities = list(dict.fromkeys(pages + ordinary + carry))
+                groups = [('auto_recovery', recovery), ('ordinary', ordinary)]
             else:
-                priorities = ordinary + pages
+                # Each stage has its own page blocking boundary. An oversized
+                # next coverage page cannot prevent a smaller FIFO recall.
+                groups = [('ordinary', ordinary), ('first_coverage', coverage),
+                          ('explicit', explicit), ('auto_carry', carry)]
+            priorities = []
+            for kind, ids in groups:
+                for eid in ids:
+                    if eid not in selection_kind:
+                        priorities.append(eid)
+                        selection_kind[eid] = kind
+                        phase[eid] = kind
         selected, deferred, offered = [], [], []
         original_payload = []
         page_blocked = False
+        previous_phase = None
         for eid in priorities:
+            if phase.get(eid) != previous_phase:
+                page_blocked = False
+                previous_phase = phase.get(eid)
             item = self.store.items[eid]
             if not item.valid:
                 continue
@@ -242,7 +299,7 @@ class EvidenceContext:
                 continue
             represented = any(item.source in self.store.notes[k]['sources'] and
                               eid in self.store.notes[k]['evidence_ids'] for k in selected_notes)
-            if represented and eid not in unseen and eid not in self.store.pending and eid not in recovery and eid not in carry:
+            if represented and eid not in unseen and eid not in self.store.pending and eid not in recovery:
                 continue
             if self.session.contract.profile == 'source':
                 # A complete surrounding range may replace already selected
@@ -298,6 +355,13 @@ class EvidenceContext:
             if self.fits(base + payload + [candidate], model):
                 payload.append(candidate)
                 selected_notes.append(key)
+        if receipt_index is not None:
+            reserved = prefix[receipt_index]
+            receipt = self._paper_receipt(selected)
+            if len(receipt.content[0]['text']) > len(reserved.content[0]['text']):
+                raise ValueError('CONTEXT_RECEIPT_OVERFLOW: bounded receipt exceeds its reservation')
+            prefix[receipt_index] = receipt
+            categories[id(receipt)] = 'status'
         # Expansion happens only after sources needed for progress are reserved.
         for limits in ((1800, 2200, 4000), (800, 900, 2000), minimum):
             candidate = self._recent(memory, limits)
@@ -327,6 +391,13 @@ class EvidenceContext:
                                                'minimum_frame': model.measure(base)['chars'],
                                                'payload_text': sum(len(s) for m in payload for s in strings(m.content))},
                               'reason': 'reserve required evidence before expanding recent feedback'}
+        if self.session.contract.profile == 'paper':
+            bodies = self.session.audit.bodies if self.session.audit else []
+            self.last_manifest['selection_reasons'] = [
+                {'id': eid, 'primary': ('first_coverage' if eid in required_unseen else
+                                       'explicit' if eid in self.store.pending else selection_kind[eid]),
+                 'previously_sent': any(contains(body, self.store.items[eid].text) for body in bodies)}
+                for eid in selected if self.store.items[eid].page is not None]
         categories.update((id(m), 'recent') for m in recent)
         categories.update((id(m), 'notes') for m in payload)
         categories.update((id(m), 'evidence') for m in original_payload)
